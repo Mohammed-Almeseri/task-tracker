@@ -2290,6 +2290,13 @@ body {
 .toast-container {
     position: fixed;
     bottom: 24px;
+    right: 24px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 10px;
+    pointer-events: none;
+}
 .subtask-input {
     flex: 1;
     padding: 6px 10px !important;
