@@ -8,11 +8,11 @@
     align-items: flex-start;
 }
 
-.greeting-title {
-    font-size: 28px;
-    font-weight: 800;
-    letter-spacing: -0.6px;
-    color: var(--text-primary);
+/* NOTE: greeting-title is an ID on the h2, not a class.
+   Real styles are in .greeting-text h2 in style.css.
+   This block intentionally left minimal to avoid overriding gradients. */
+#greeting-title {
+    /* no color override — let style.css gradient apply */
 }
 
 .dashboard-stats-grid {
