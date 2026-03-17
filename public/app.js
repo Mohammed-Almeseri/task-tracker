@@ -1597,15 +1597,73 @@ async function loadDashboard() {
     }
 }
 
+let completionTrendChartInstance = null;
+
 function renderCompletionTrend(trend) {
     const container = document.getElementById('completion-trend-chart');
     if (!container) return;
-    if (!trend || trend.length === 0) { container.innerHTML = '<div class="empty-state-small">No data yet</div>'; return; }
-    const maxCount = Math.max(...trend.map(t => t.count), 1);
-    container.innerHTML = trend.map(t => {
-        const h = Math.max(2, (t.count / maxCount) * 120);
-        return `<div class="chart-bar ${t.count > 0 ? 'has-value' : ''}" style="height:${h}px" title="${t.date}: ${t.count} tasks"></div>`;
-    }).join('');
+
+    // Ensure a canvas exists inside the container
+    let canvas = container.querySelector('canvas#completion-trend-canvas');
+    if (!canvas) {
+        container.innerHTML = '<canvas id="completion-trend-canvas"></canvas>';
+        canvas = container.querySelector('canvas#completion-trend-canvas');
+    }
+
+    if (!trend || trend.length === 0) {
+        container.innerHTML = '<div class="empty-state-small">No data yet</div>';
+        return;
+    }
+
+    if (completionTrendChartInstance) {
+        completionTrendChartInstance.destroy();
+        completionTrendChartInstance = null;
+    }
+
+    if (!window.Chart) return;
+
+    const labels = trend.map(t => {
+        const d = new Date(t.date);
+        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    });
+    const data = trend.map(t => t.count);
+
+    Chart.defaults.color = '#8b8b9e';
+    Chart.defaults.font.family = 'Inter';
+
+    completionTrendChartInstance = new Chart(canvas.getContext('2d'), {
+        type: 'line',
+        data: {
+            labels,
+            datasets: [{
+                label: 'Tasks Completed',
+                data,
+                borderColor: '#10b981',
+                backgroundColor: 'rgba(16, 185, 129, 0.12)',
+                borderWidth: 2,
+                pointRadius: 3,
+                pointBackgroundColor: '#10b981',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { stepSize: 1, precision: 0 },
+                    grid: { color: 'rgba(255,255,255,0.05)' }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { maxTicksLimit: 7, maxRotation: 0 }
+                }
+            }
+        }
+    });
 }
 
 
@@ -1741,17 +1799,40 @@ function renderUpNext(tasks) {
         }
     }
 
+    // Calculate subtask progress for visual bar
+    const subtasks = task.subtasks || [];
+    const subtaskDone = subtasks.filter(s => s.done).length;
+    const progressPct = subtasks.length > 0 ? Math.round((subtaskDone / subtasks.length) * 100) : 0;
+    const showProgress = subtasks.length > 0;
+
+    // Format a simple time window label
+    const now = new Date();
+    const startStr = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+    const endDate = new Date(now.getTime() + 25 * 60 * 1000);
+    const endStr = endDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+
     container.innerHTML = `
         <div class="focus-task-item">
             <span class="focus-task-status-badge">${statusLabel}</span>
             <div class="focus-task-title-text">${escHtml(task.title)}</div>
             <div class="focus-task-subtitle">${escHtml(goalName)}</div>
+            ${showProgress ? `
+            <div class="focus-task-progress-wrap">
+                <div class="focus-task-progress-track">
+                    <div class="focus-task-progress-fill" style="width: ${progressPct}%"></div>
+                </div>
+                <div class="focus-task-time-row">
+                    <span>Start ${startStr}</span>
+                    <span>End ${endStr}</span>
+                </div>
+            </div>` : ''}
             <div class="focus-task-actions-row">
-                <button class="btn btn-primary" onclick="quickStartTimer('${task.id}')">
-                    ${ICONS.timer} Start
+                <button class="btn btn-secondary" onclick="event.stopPropagation(); openEditTask('${task.id}')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
                 </button>
-                <button class="btn btn-secondary" onclick="completeTaskFromDashboard('${task.id}')">
-                    ${ICONS.checkCircle} Done
+                <button class="btn btn-primary" onclick="quickStartTimer('${task.id}')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    Start
                 </button>
             </div>
         </div>
@@ -1834,24 +1915,49 @@ function renderProductivityPulse(sessions) {
         Chart.defaults.color = '#8b8b9e';
         Chart.defaults.font.family = 'Inter';
         productivityChartInstance = new Chart(ctx, {
-            type: 'bar',
+            type: 'line',
             data: {
                 labels: last7Days,
                 datasets: [{
                     label: 'Minutes Focused',
                     data: dataPoints,
-                    backgroundColor: 'rgba(139, 92, 246, 0.8)',
                     borderColor: '#8b5cf6',
-                    borderWidth: 1,
-                    borderRadius: 4
+                    backgroundColor: (context) => {
+                        const chart = context.chart;
+                        const { ctx: c, chartArea } = chart;
+                        if (!chartArea) return 'rgba(139, 92, 246, 0.15)';
+                        const gradient = c.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+                        gradient.addColorStop(0, 'rgba(139, 92, 246, 0.35)');
+                        gradient.addColorStop(1, 'rgba(139, 92, 246, 0.02)');
+                        return gradient;
+                    },
+                    borderWidth: 2.5,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#8b5cf6',
+                    pointBorderColor: '#1a1a2e',
+                    pointBorderWidth: 2,
+                    pointHoverRadius: 6,
+                    tension: 0.45,
+                    fill: true
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => ` ${ctx.parsed.y} min focused`
+                        }
+                    }
+                },
                 scales: {
-                    y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } },
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(255,255,255,0.05)' },
+                        ticks: { maxTicksLimit: 5 }
+                    },
                     x: { grid: { display: false } }
                 }
             }
@@ -2395,11 +2501,25 @@ function saveSystemLogs(logs) {
     localStorage.setItem('systemLogs', JSON.stringify(logs));
 }
 
+// ---- Logs filter state ----
+let logsTypeFilter = 'all';
+
+function getLogEventType(message) {
+    const msg = message.toLowerCase();
+    if (msg.includes('task')) return 'task';
+    if (msg.includes('goal')) return 'goal';
+    if (msg.includes('note')) return 'note';
+    if (msg.includes('session') || msg.includes('timer') || msg.includes('focus') || msg.includes('pomodoro') || msg.includes('stopwatch') || msg.includes('countdown')) return 'timer';
+    if (msg.includes('backup') || msg.includes('restore') || msg.includes('export') || msg.includes('import')) return 'backup';
+    return 'other';
+}
+
 function logSystemEvent(message) {
     const logs = getSystemLogs();
     const entry = {
         message,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        type: getLogEventType(message)
     };
     logs.unshift(entry);
     
@@ -2419,7 +2539,8 @@ function logSystemEvent(message) {
 
 function initLogsView() {
     const btnClearLogs = document.getElementById('btn-clear-logs');
-    if (btnClearLogs) {
+    if (btnClearLogs && !btnClearLogs._logsInitialized) {
+        btnClearLogs._logsInitialized = true;
         btnClearLogs.addEventListener('click', () => {
             showConfirmModal('Are you sure you want to permanently delete all system logs?', () => {
                 localStorage.removeItem('systemLogs');
@@ -2430,17 +2551,50 @@ function initLogsView() {
         });
     }
 
-    // Render logs initially if we're on the logs view
+    // Wire up type filter pills
+    const filterPills = document.querySelectorAll('#logs-type-filters .filter-pill');
+    filterPills.forEach(pill => {
+        if (!pill._logsFilterInitialized) {
+            pill._logsFilterInitialized = true;
+            pill.addEventListener('click', () => {
+                filterPills.forEach(p => p.classList.remove('active'));
+                pill.classList.add('active');
+                logsTypeFilter = pill.dataset.logType || 'all';
+                renderSystemLogs();
+            });
+        }
+    });
+
+    // Render logs initially
     renderSystemLogs();
 
     // Add click listener for the nav button to render logs when switching to the view
     const navLogs = document.getElementById('nav-logs');
-    if (navLogs) {
+    if (navLogs && !navLogs._logsNavInitialized) {
+        navLogs._logsNavInitialized = true;
         navLogs.addEventListener('click', () => {
             renderSystemLogs();
         });
     }
 }
+
+const LOG_TYPE_COLORS = {
+    task: '#8b5cf6',
+    goal: '#3b82f6',
+    note: '#fbbf24',
+    timer: '#10b981',
+    backup: '#f59e0b',
+    other: '#8b8b9e'
+};
+
+const LOG_TYPE_LABELS = {
+    task: 'Task',
+    goal: 'Goal',
+    note: 'Note',
+    timer: 'Timer',
+    backup: 'Backup',
+    other: 'System'
+};
 
 function renderSystemLogs() {
     const logsList = document.getElementById('system-logs-list');
@@ -2448,9 +2602,18 @@ function renderSystemLogs() {
     
     if (!logsList || !emptyState) return;
     
-    const logs = getSystemLogs();
+    let logs = getSystemLogs();
+
+    // Backfill type for old logs without type
+    logs = logs.map(log => ({
+        ...log,
+        type: log.type || getLogEventType(log.message)
+    }));
+
+    // Apply type filter
+    const filtered = logsTypeFilter === 'all' ? logs : logs.filter(log => log.type === logsTypeFilter);
     
-    if (logs.length === 0) {
+    if (filtered.length === 0) {
         logsList.style.display = 'none';
         emptyState.style.display = 'flex';
         return;
@@ -2460,16 +2623,21 @@ function renderSystemLogs() {
     logsList.style.display = 'flex';
     logsList.innerHTML = '';
     
-    logs.forEach(log => {
+    filtered.forEach(log => {
         const li = document.createElement('li');
         li.className = 'log-entry';
         
         const dateObj = new Date(log.timestamp);
         const dateStr = dateObj.toLocaleDateString();
         const timeStr = dateObj.toLocaleTimeString();
+        const typeColor = LOG_TYPE_COLORS[log.type] || LOG_TYPE_COLORS.other;
+        const typeLabel = LOG_TYPE_LABELS[log.type] || 'System';
         
         li.innerHTML = `
-            <div class="log-message">${escHtml(log.message)}</div>
+            <div class="log-message">
+                <span class="log-type-badge" style="background:${typeColor}22; color:${typeColor}; border:1px solid ${typeColor}44;">${typeLabel}</span>
+                ${escHtml(log.message)}
+            </div>
             <div class="log-time">${dateStr} ${timeStr}</div>
         `;
         logsList.appendChild(li);

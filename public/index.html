@@ -779,10 +779,21 @@
                     <h1>System Logs</h1>
                     <p class="view-subtitle">Review recent system operations and events</p>
                 </div>
-                <button class="btn btn-secondary btn-glow" id="btn-clear-logs" style="margin-right: 1rem;">
+                <button class="btn btn-secondary btn-glow" id="btn-clear-logs">
                     Clear Logs
                 </button>
             </header>
+            <div class="logs-filter-bar" id="logs-filter-bar">
+                <div class="filter-pills" id="logs-type-filters">
+                    <button class="filter-pill active" data-log-type="all">All Events</button>
+                    <button class="filter-pill" data-log-type="task">Tasks</button>
+                    <button class="filter-pill" data-log-type="goal">Goals</button>
+                    <button class="filter-pill" data-log-type="note">Notes</button>
+                    <button class="filter-pill" data-log-type="timer">Timer</button>
+                    <button class="filter-pill" data-log-type="backup">Backup</button>
+                    <button class="filter-pill" data-log-type="other">Other</button>
+                </div>
+            </div>
             <div class="logs-container" id="logs-container">
                 <div class="empty-state" id="empty-logs">
                     <div class="empty-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none"
