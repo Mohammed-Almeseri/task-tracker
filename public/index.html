@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskTracker — Personal Productivity</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="new_styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jerosoler/Drawflow/dist/drawflow.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/jerosoler/Drawflow/dist/drawflow.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css" />
+    <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/theme/toastui-editor-dark.min.css" />
+    <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
+</head>
+
+<body>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <span class="logo-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                    </svg></span>
+                <span class="logo-text">TaskTracker</span>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <button class="nav-btn active" data-view="dashboard" id="nav-dashboard" aria-label="Dashboard"
+                aria-current="page">
+                <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7" rx="1" />
+                        <rect x="14" y="3" width="7" height="7" rx="1" />
+                        <rect x="3" y="14" width="7" height="7" rx="1" />
+                        <rect x="14" y="14" width="7" height="7" rx="1" />
+                    </svg></span>
+                <span class="nav-label">Dashboard</span>
+            </button>
+            <button class="nav-btn" data-view="goals" id="nav-goals" aria-label="Goals">
+                <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <circle cx="12" cy="12" r="6" />
+                        <circle cx="12" cy="12" r="2" />
+                    </svg></span>
+                <span class="nav-label">Goals</span>
+            </button>
+            <button class="nav-btn" data-view="manage" id="nav-manage" aria-label="Tasks Management">
+                <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                        <path d="M2 17l10 5 10-5" />
+                        <path d="M2 12l10 5 10-5" />
+                    </svg></span>
+                <span class="nav-label">Tasks</span>
+            </button>
+            <button class="nav-btn" data-view="kanban" id="nav-kanban" aria-label="Kanban Board">
+                <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="5" height="18" rx="1" />
+                        <rect x="10" y="3" width="5" height="12" rx="1" />
+                        <rect x="17" y="3" width="5" height="7" rx="1" />
+                    </svg></span>
+                <span class="nav-label">Kanban</span>
+            </button>
+            <button class="nav-btn" data-view="timer" id="nav-timer" aria-label="Focus Timer">
+                <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12 6 12 12 16 14" />
+                    </svg></span>
+                <span class="nav-label">Timer</span>
+            </button>
+            <button class="nav-btn" data-view="notes" id="nav-notes" aria-label="Notes">
+                <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+                        <polyline points="14 2 14 8 20 8" />
+                        <line x1="16" y1="13" x2="8" y2="13" />
+                        <line x1="16" y1="17" x2="8" y2="17" />
+                    </svg></span>
+                <span class="nav-label">Notes</span>
+            </button>
+            <button class="nav-btn" data-view="settings" id="nav-settings" aria-label="Settings">
+                <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3" />
+                        <path
+                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33 1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1-1.51 1.65 1.65 0 0 0 1.82-.33l.06.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82 1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                    </svg></span>
+                <span class="nav-label">Settings</span>
+            </button>
+            <button class="nav-btn" data-view="logs" id="nav-logs" aria-label="System Logs">
+                <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg></span>
+                <span class="nav-label">System Logs</span>
+            </button>
+        </nav>
+        <div class="sidebar-footer">
+            <button class="btn btn-secondary btn-small btn-export" id="btn-export-data" title="Export data"
+                aria-label="Export data">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+                Export
+            </button>
+            <div class="sidebar-info">
+                <span class="info-dot"></span>
+                <span>Local Only</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <!-- ==================== DASHBOARD VIEW ==================== -->
+        <section class="view active" id="view-dashboard">
+            <!-- Ambient Background Effects -->
+            <div class="ambient-orb"></div>
+
+            <!-- Greeting Banner -->
+            <div class="greeting-banner" id="greeting-banner">
+                <div class="greeting-text">
+                    <h2 id="greeting-title">Good morning</h2>
+                    <p id="greeting-subtitle">Rise and grind — let's make today count</p>
+                </div>
+                <div class="greeting-date" id="greeting-date"></div>
+            </div>
+
+            <!-- ROW 1: 4 Stat Cards -->
+            <div class="dashboard-stats-grid mb-8">
+                <div class="bento-card bento-sm stat-card-goals">
+                    <div class="bento-card-inner">
+                        <div class="stat-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10" />
+                                <circle cx="12" cy="12" r="6" />
+                                <circle cx="12" cy="12" r="2" />
+                            </svg></div>
+                        <div class="stat-value" id="stat-goals">0</div>
+                        <div class="stat-label">Goals</div>
+                    </div>
+                </div>
+                <div class="bento-card bento-sm stat-card-tasks">
+                    <div class="bento-card-inner">
+                        <div class="stat-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="18" height="18" rx="2" />
+                                <path d="M8 7h8" />
+                                <path d="M8 11h8" />
+                                <path d="M8 15h5" />
+                            </svg></div>
+                        <div class="stat-value" id="stat-tasks">0</div>
+                        <div class="stat-label">Tasks</div>
+                    </div>
+                </div>
+                <div class="bento-card bento-sm stat-card-done">
+                    <div class="bento-card-inner">
+                        <div class="stat-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                <polyline points="22 4 12 14.01 9 11.01" />
+                            </svg></div>
+                        <div class="stat-value" id="stat-done">0</div>
+                        <div class="stat-label">Completed</div>
+                    </div>
+                </div>
+                <div class="bento-card bento-sm stat-card-time">
+                    <div class="bento-card-inner">
+                        <div class="stat-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10" />
+                                <polyline points="12 6 12 12 16 14" />
+                            </svg></div>
+                        <div class="stat-value" id="stat-time">0h</div>
+                        <div class="stat-label">Time Tracked</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ROW 2: 3-Column Trio (Focus Task | Daily Checklist | Priority Breakdown) -->
+            <div class="dashboard-trio-grid mb-8">
+                <!-- Focus Task -->
+                <div class="bento-card focus-task-card" id="focus-task-card">
+                    <div class="bento-card-header flex-between">
+                        <h3>Focus Task</h3>
+                        <span class="pulse-dot"></span>
+                    </div>
+                    <div id="up-next-container" class="focus-task-content">
+                        <div class="empty-state-small text-muted">No pending tasks!</div>
+                    </div>
+                </div>
+
+                <!-- Daily Checklist -->
+                <div class="bento-card">
+                    <div class="bento-card-header">
+                        <h3>Daily Checklist</h3>
+                    </div>
+                    <div id="daily-plan-container" class="daily-plan-list">
+                        <div class="empty-state-small text-muted">All clear for today!</div>
+                    </div>
+                </div>
+
+                <!-- Priority Breakdown (Donut Chart) -->
+                <div class="bento-card">
+                    <div class="bento-card-header">
+                        <h3>Priority Breakdown</h3>
+                    </div>
+                    <div id="priority-breakdown" class="priority-breakdown-donut">
+                        <div class="empty-state-small">No data yet</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ROW 3: Full-Width Productivity Pulse -->
+            <div class="dashboard-full-row mb-8">
+                <div class="bento-card">
+                    <div class="bento-card-header">
+                        <h3>Productivity Pulse</h3>
+                        <span class="bento-badge">Weekly Productivity</span>
+                    </div>
+                    <div class="chart-container" style="height: 200px; position: relative;">
+                        <canvas id="productivity-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ROW 4: Full-Width Tasks by Status -->
+            <div class="dashboard-full-row mb-8">
+                <div class="bento-card">
+                    <div class="bento-card-header">
+                        <h3>Tasks by Status</h3>
+                    </div>
+                    <div class="status-bars" id="status-bars">
+                        <div class="status-bar-row">
+                            <span class="status-bar-label">To Do</span>
+                            <div class="status-bar-track">
+                                <div class="status-bar-fill todo" id="bar-todo" style="width:0%"></div>
+                            </div>
+                            <span class="status-bar-count" id="count-todo">0</span>
+                        </div>
+                        <div class="status-bar-row">
+                            <span class="status-bar-label">In Progress</span>
+                            <div class="status-bar-track">
+                                <div class="status-bar-fill in-progress" id="bar-in-progress" style="width:0%"></div>
+                            </div>
+                            <span class="status-bar-count" id="count-in-progress">0</span>
+                        </div>
+                        <div class="status-bar-row">
+                            <span class="status-bar-label">Blocked</span>
+                            <div class="status-bar-track">
+                                <div class="status-bar-fill blocked" id="bar-blocked" style="width:0%"></div>
+                            </div>
+                            <span class="status-bar-count" id="count-blocked">0</span>
+                        </div>
+                        <div class="status-bar-row">
+                            <span class="status-bar-label">Review</span>
+                            <div class="status-bar-track">
+                                <div class="status-bar-fill review" id="bar-review" style="width:0%"></div>
+                            </div>
+                            <span class="status-bar-count" id="count-review">0</span>
+                        </div>
+                        <div class="status-bar-row">
+                            <span class="status-bar-label">Done</span>
+                            <div class="status-bar-track">
+                                <div class="status-bar-fill done" id="bar-done" style="width:0%"></div>
+                            </div>
+                            <span class="status-bar-count" id="count-done">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ROW 5: Full-Width Activity Heatmap -->
+            <div class="dashboard-full-row mb-8">
+                <div class="bento-card">
+                    <div class="bento-card-header">
+                        <h3>Activity Heatmap</h3>
+                        <span class="bento-badge">Past year</span>
+                    </div>
+                    <div class="heatmap-container" id="heatmap-container"></div>
+                </div>
+            </div>
+
+            <!-- ROW 6: Extra Features (2-column) -->
+            <div class="dashboard-extras-grid">
+                <div class="bento-card">
+                    <div class="bento-card-header">
+                        <h3>Goals Progress</h3>
+                    </div>
+                    <div id="goals-progress-list" class="goals-progress-list">
+                        <div class="empty-state-small">No goals yet</div>
+                    </div>
+                </div>
+                <div class="bento-card">
+                    <div class="bento-card-header">
+                        <h3>Time Distribution</h3>
+                    </div>
+                    <div id="time-distribution" class="time-distribution">
+                        <div class="empty-state-small">Track time to see distribution</div>
+                    </div>
+                </div>
+                <div class="bento-card">
+                    <div class="bento-card-header">
+                        <h3>Completion Trend</h3>
+                        <span class="bento-badge">Last 14 days</span>
+                    </div>
+                    <div id="completion-trend-chart" class="completion-trend-chart"></div>
+                </div>
+                <div class="bento-card">
+                    <div class="bento-card-header">
+                        <h3>Recent Sessions</h3>
+                    </div>
+                    <div id="recent-sessions" class="recent-sessions">
+                        <div class="empty-state-small">No sessions yet</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== GOALS VIEW ==================== -->
+        <section class="view" id="view-goals">
+            <header class="view-header">
+                <div>
+                    <h1>Goals</h1>
+                    <p class="view-subtitle">Set objectives and track your progress</p>
+                </div>
+                <button class="btn btn-primary btn-glow" id="btn-add-goal">
+                    <span>+</span> New Goal
+                </button>
+            </header>
+            <div class="goals-container" id="goals-container">
+                <div class="empty-state" id="empty-goals">
+                    <div class="empty-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10" />
+                            <circle cx="12" cy="12" r="6" />
+                            <circle cx="12" cy="12" r="2" />
+                        </svg></div>
+                    <h3>No goals yet</h3>
+                    <p>Create your first goal to start tracking progress</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TASKS MANAGEMENT VIEW ==================== -->
+        <section class="view" id="view-manage">
+            <header class="view-header">
+                <div>
+                    <h1>Tasks</h1>
+                    <p class="view-subtitle">Create, manage, and filter all your tasks</p>
+                </div>
+                <button class="btn btn-primary btn-glow" id="btn-add-task-manage">
+                    <span>+</span> New Task
+                </button>
+            </header>
+            <div class="manage-toolbar">
+                <div class="search-box">
+                    <span class="search-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8" />
+                            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                        </svg></span>
+                    <input type="text" id="task-search" placeholder="Search tasks..." autocomplete="off">
+                </div>
+                <div class="filter-group">
+                    <div class="filter-pills" id="status-filters">
+                        <button class="filter-pill active" data-status="all">All</button>
+                        <button class="filter-pill" data-status="todo">To Do</button>
+                        <button class="filter-pill" data-status="in-progress">In Progress</button>
+                        <button class="filter-pill" data-status="blocked">Blocked</button>
+                        <button class="filter-pill" data-status="review">Review</button>
+                        <button class="filter-pill" data-status="done">Done</button>
+                    </div>
+                    <div class="filter-pills" id="importance-filters">
+                        <button class="filter-pill active" data-importance="all">Any Priority</button>
+                        <button class="filter-pill" data-importance="urgent"><span class="priority-dot urgent"></span>
+                            Urgent</button>
+                        <button class="filter-pill" data-importance="high"><span class="priority-dot high"></span>
+                            High</button>
+                        <button class="filter-pill" data-importance="medium"><span class="priority-dot medium"></span>
+                            Medium</button>
+                        <button class="filter-pill" data-importance="low"><span class="priority-dot low"></span>
+                            Low</button>
+                    </div>
+                </div>
+            </div>
+            <div class="task-summary-bar" id="task-summary-bar">
+                <span id="filtered-count">0 tasks</span>
+            </div>
+            <div class="manage-tasks-list" id="manage-tasks-list">
+                <div class="empty-state" id="empty-manage-tasks">
+                    <div class="empty-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2" />
+                            <path d="M8 7h8" />
+                            <path d="M8 11h8" />
+                            <path d="M8 15h5" />
+                        </svg></div>
+                    <h3>No tasks found</h3>
+                    <p>Create a task or adjust your filters</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== KANBAN VIEW ==================== -->
+        <section class="view" id="view-kanban">
+            <header class="view-header">
+                <div>
+                    <h1>Kanban Board</h1>
+                    <p class="view-subtitle">Drag and drop to update task status</p>
+                </div>
+                <div class="kanban-goal-selector">
+                    <select id="kanban-goal-select">
+                        <option value="">— All Goals —</option>
+                    </select>
+                </div>
+            </header>
+            <div class="kanban-board" id="kanban-board">
+                <div class="kanban-column" data-status="todo">
+                    <div class="kanban-column-header">
+                        <span class="kanban-dot todo"></span>
+                        <h3>To Do</h3>
+                        <span class="kanban-count" id="kanban-count-todo">0</span>
+                    </div>
+                    <div class="kanban-cards" id="kanban-todo"></div>
+                </div>
+                <div class="kanban-column" data-status="in-progress">
+                    <div class="kanban-column-header">
+                        <span class="kanban-dot in-progress"></span>
+                        <h3>In Progress</h3>
+                        <span class="kanban-count" id="kanban-count-in-progress">0</span>
+                    </div>
+                    <div class="kanban-cards" id="kanban-in-progress"></div>
+                </div>
+                <div class="kanban-column" data-status="done">
+                    <div class="kanban-column-header">
+                        <span class="kanban-dot done"></span>
+                        <h3>Done</h3>
+                        <span class="kanban-count" id="kanban-count-done">0</span>
+                    </div>
+                    <div class="kanban-cards" id="kanban-done"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TIMER VIEW ==================== -->
+        <section class="view" id="view-timer">
+            <header class="view-header">
+                <div>
+                    <h1>Timer</h1>
+                    <p class="view-subtitle">Stay focused and track your time</p>
+                </div>
+            </header>
+            <div class="timer-tabs">
+                <button class="timer-tab active" data-mode="pomodoro" id="tab-pomodoro"><svg width="14" height="14"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <line x1="10" y1="2" x2="14" y2="2" />
+                        <line x1="12" y1="14" x2="12" y2="8" />
+                        <circle cx="12" cy="14" r="8" />
+                    </svg> Pomodoro</button>
+                <button class="timer-tab" data-mode="stopwatch" id="tab-stopwatch"><svg width="14" height="14"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12 6 12 12 16 14" />
+                    </svg> Stopwatch</button>
+                <button class="timer-tab" data-mode="countdown" id="tab-countdown"><svg width="14" height="14"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M5 22h14" />
+                        <path d="M5 2h14" />
+                        <path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22" />
+                        <path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2" />
+                    </svg> Countdown</button>
+            </div>
+            <div class="timer-task-selector">
+                <label for="timer-task-select">Link to task (optional):</label>
+                <select id="timer-task-select">
+                    <option value="">— No task —</option>
+                </select>
+            </div>
+            <div class="timer-display-container">
+                <div class="timer-ring">
+                    <svg viewBox="0 0 200 200" class="timer-svg">
+                        <circle cx="100" cy="100" r="90" class="timer-ring-bg"></circle>
+                        <circle cx="100" cy="100" r="90" class="timer-ring-progress" id="timer-ring-progress"></circle>
+                    </svg>
+                    <div class="timer-time" id="timer-display">25:00</div>
+                    <div class="timer-label" id="timer-label">FOCUS</div>
+                </div>
+            </div>
+            <div class="countdown-input" id="countdown-input" style="display:none;">
+                <label for="countdown-minutes">Set minutes:</label>
+                <input type="number" id="countdown-minutes" value="30" min="1" max="999">
+            </div>
+            <div class="timer-controls">
+                <button class="btn btn-secondary" id="timer-reset">Reset</button>
+                <button class="btn btn-primary btn-large btn-glow" id="timer-start">Start</button>
+                <button class="btn btn-secondary" id="timer-lap" style="display:none;">Lap</button>
+            </div>
+            <div class="laps-container" id="laps-container" style="display:none;">
+                <h3>Laps</h3>
+                <ul id="laps-list"></ul>
+            </div>
+            <div class="pomodoro-info" id="pomodoro-info">
+                <span id="pomodoro-count">Session 1 of 4</span>
+                <span class="pomodoro-dots" id="pomodoro-dots">○ ○ ○ ○</span>
+            </div>
+        </section>
+
+        <!-- ==================== NOTES VIEW ==================== -->
+        <section class="view" id="view-notes">
+            <header class="view-header">
+                <div>
+                    <h1>Notes & Journal</h1>
+                    <p class="view-subtitle">Daily reflections and free-form notes</p>
+                </div>
+                <button class="btn btn-primary btn-glow" id="btn-add-note">
+                    <span>+</span> New Note
+                </button>
+            </header>
+            <div class="notes-container" id="notes-container">
+                <div class="empty-state" id="empty-notes">
+                    <div class="empty-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+                            <polyline points="14 2 14 8 20 8" />
+                            <line x1="16" y1="13" x2="8" y2="13" />
+                            <line x1="16" y1="17" x2="8" y2="17" />
+                        </svg></div>
+                    <h3>No notes yet</h3>
+                    <p>Start journaling or jot down quick thoughts</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== WORKSPACES VIEW ==================== -->
+        <section class="view" id="view-workspaces">
+            <header class="view-header">
+                <div>
+                    <h1>Workspaces</h1>
+                    <p class="view-subtitle">Draw flowcharts, sequences, and logic chains</p>
+                </div>
+                <button class="btn btn-primary btn-glow" id="btn-add-workspace">
+                    <span>+</span> New Board
+                </button>
+            </header>
+
+            <!-- Dynamic Horizontal Tabs -->
+            <div class="workspace-tabs" id="workspace-tabs-container"></div>
+
+            <div class="workspace-content" id="workspace-content" style="display:none;">
+                <div class="drawflow-toolbar">
+                    <p>Logic Flow</p>
+                    <div class="drag-drawflow" draggable="true" ondragstart="dragNode(event)" data-node="start">
+                        <span class="icon">◎</span> Start
+                    </div>
+                    <div class="drag-drawflow" draggable="true" ondragstart="dragNode(event)" data-node="end">
+                        <span class="icon">▥</span> End
+                    </div>
+                    <div class="drag-drawflow" draggable="true" ondragstart="dragNode(event)" data-node="delay">
+                        <span class="icon">⌛</span> Delay
+                    </div>
+
+                    <p>Information Nodes</p>
+                    <div class="drag-drawflow" draggable="true" ondragstart="dragNode(event)" data-node="task">
+                        <span class="icon">■</span> Task Node
+                    </div>
+                    <div class="drag-drawflow" draggable="true" ondragstart="dragNode(event)" data-node="decision">
+                        <span class="icon">◆</span> Decision
+                    </div>
+                    <div class="drag-drawflow" draggable="true" ondragstart="dragNode(event)" data-node="command">
+                        <span class="icon">▶</span> Command
+                    </div>
+                    <div class="drag-drawflow" draggable="true" ondragstart="dragNode(event)" data-node="note">
+                        <span class="icon">📄</span> Note
+                    </div>
+
+                    <button class="btn btn-secondary btn-small" id="btn-workspace-download"
+                        style="margin-top:auto">Download Board</button>
+                    <button class="btn btn-secondary btn-small" id="btn-workspace-clear">Clear Board</button>
+                </div>
+                <div id="drawflow"></div>
+            </div>
+
+            <div class="empty-state" id="empty-workspaces">
+                <div class="empty-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                        <line x1="9" y1="3" x2="9" y2="21" />
+                    </svg></div>
+                <h3>No workspaces yet</h3>
+                <p>Create a board to start drawing flowcharts</p>
+            </div>
+        </section>
+
+        <!-- ==================== SETTINGS VIEW ==================== -->
+        <section class="view" id="view-settings">
+            <header class="view-header">
+                <div>
+                    <h1>Settings</h1>
+                    <p class="view-subtitle">Manage preferences and manual logs</p>
+                </div>
+            </header>
+
+            <div class="settings-container max-w-4xl mx-auto" style="display: flex; flex-direction: column; gap: 2rem;">
+                <!-- Manual Time Tracking Card -->
+                <div class="settings-card card">
+                    <div class="card-header">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span class="nav-icon" style="color: var(--accent); opacity: 0.8;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <polyline points="12 6 12 12 16 14" />
+                                </svg>
+                            </span>
+                            <h3>Manual Time Tracking</h3>
+                        </div>
+                        <p class="text-sm opacity-60">Log time for work done outside the app</p>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group" style="margin-top: 1rem;">
+                            <label for="manual-task-select">Select Task</label>
+                            <select id="manual-task-select" class="form-control">
+                                <option value="">— Select a task —</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-top: 1rem;">
+                            <label for="manual-duration-input">Duration (minutes)</label>
+                            <input type="number" id="manual-duration-input" class="form-control" placeholder="e.g. 60"
+                                min="1">
+                        </div>
+                        <div class="settings-actions" style="margin-top: 1.5rem;">
+                            <button class="btn btn-primary btn-glow" id="btn-log-manual-time" style="width: 100%;">
+                                Log Time
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Customization Card -->
+                <div class="settings-card card">
+                    <div class="card-header">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span class="nav-icon" style="color: var(--accent); opacity: 0.8;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                    <circle cx="12" cy="7" r="4" />
+                                </svg>
+                            </span>
+                            <h3>Profile Settings</h3>
+                        </div>
+                        <p class="text-sm opacity-60">Personalize your experience</p>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group" style="margin-top: 1rem;">
+                            <label for="user-name-input">Profile Name</label>
+                            <input type="text" id="user-name-input" class="form-control" placeholder="Enter your name">
+                        </div>
+                        <div class="form-group" style="margin-top: 1rem;">
+                            <label>Accent Color</label>
+                            <div class="color-presets" style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                                <button class="btn-color-preset" onclick="setAccentColor('purple')"
+                                    style="background: #8b5cf6;" title="Purple" aria-label="Purple accent"></button>
+                                <button class="btn-color-preset" onclick="setAccentColor('blue')"
+                                    style="background: #3b82f6;" title="Blue" aria-label="Blue accent"></button>
+                                <button class="btn-color-preset" onclick="setAccentColor('green')"
+                                    style="background: #10b981;" title="Green" aria-label="Green accent"></button>
+                                <button class="btn-color-preset" onclick="setAccentColor('orange')"
+                                    style="background: #f59e0b;" title="Orange" aria-label="Orange accent"></button>
+                                <button class="btn-color-preset" onclick="setAccentColor('rose')"
+                                    style="background: #f43f5e;" title="Rose" aria-label="Rose accent"></button>
+                            </div>
+                        </div>
+                        <div class="settings-actions" style="margin-top: 1.5rem;">
+                            <button class="btn btn-secondary" id="btn-save-profile" style="width: 100%;">
+                                Save Profile
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Data Management Card -->
+                <div class="settings-card card">
+                    <div class="card-header">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span class="nav-icon" style="color: var(--accent); opacity: 0.8;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                    <polyline points="17 8 12 3 7 8" />
+                                    <line x1="12" y1="3" x2="12" y2="15" />
+                                </svg>
+                            </span>
+                            <h3>Data Management</h3>
+                        </div>
+                        <p class="text-sm opacity-60">Maintain your productivity data</p>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-sm" style="margin-top: 1rem; color: var(--text-muted); line-height: 1.4;">
+                            Create a secure copy of your current goals, tasks, and settings to a local backup file.</p>
+                        <div class="settings-actions" style="margin-top: 1.5rem;">
+                            <button class="btn btn-secondary btn-glow" id="btn-create-backup" style="width: 100%;">
+                                Create Local Backup
+                            </button>
+                        </div>
+                        <hr style="border: none; border-top: 1px solid var(--border); margin: 1.25rem 0;">
+                        <p class="text-sm" style="color: var(--text-muted); line-height: 1.4;">
+                            Upload a previously saved backup file to restore your data.</p>
+                        <input type="file" id="restore-file-input" accept=".json" style="display: none;">
+                        <div class="settings-actions" style="margin-top: 1rem;">
+                            <button class="btn btn-secondary" id="btn-restore-backup" style="width: 100%;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                    style="vertical-align: -2px; margin-right: 6px;">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                    <polyline points="7 10 12 15 17 10" />
+                                    <line x1="12" y1="15" x2="12" y2="3" />
+                                </svg>
+                                Restore from Backup
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Danger Zone Card -->
+                <div class="settings-card card">
+                    <div class="card-header">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span class="nav-icon" style="color: var(--urgent); opacity: 0.8;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path
+                                        d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                                    <line x1="12" y1="9" x2="12" y2="13" />
+                                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                                </svg>
+                            </span>
+                            <h3 style="color: var(--urgent);">Danger Zone</h3>
+                        </div>
+                        <p class="text-sm opacity-60">Irreversible actions</p>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-sm" style="margin-top: 1rem; color: var(--text-muted); line-height: 1.4;">
+                            Permanently delete all workspace boards, goals, tasks, and notes.</p>
+                        <div class="settings-actions" style="margin-top: 1.5rem;">
+                            <button class="btn btn-danger" id="btn-reset-data" style="width: 100%;">
+                                Reset All Data
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== SYSTEM LOGS VIEW ==================== -->
+        <section class="view" id="view-logs">
+            <header class="view-header">
+                <div>
+                    <h1>System Logs</h1>
+                    <p class="view-subtitle">Review recent system operations and events</p>
+                </div>
+                <button class="btn btn-secondary btn-glow" id="btn-clear-logs" style="margin-right: 1rem;">
+                    Clear Logs
+                </button>
+            </header>
+            <div class="logs-container" id="logs-container">
+                <div class="empty-state" id="empty-logs">
+                    <div class="empty-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg></div>
+                    <h3>No system logs</h3>
+                    <p>System events will be recorded here.</p>
+                </div>
+                <ul class="system-logs-list" id="system-logs-list">
+                    <!-- Logs will be dynamically injected here -->
+                </ul>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ==================== MODALS ==================== -->
+
+    <!-- Workspace Modal -->
+    <div class="modal-overlay" id="modal-workspace">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modal-workspace-title">New Workspace</h2>
+                <button class="modal-close" id="modal-workspace-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="workspace-title-input">Board Name</label>
+                    <input type="text" id="workspace-title-input" placeholder="e.g. Server Migration Diagram">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="modal-workspace-cancel">Cancel</button>
+                <button class="btn btn-primary btn-glow" id="modal-workspace-save">Create Board</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Goal Modal -->
+    <div class="modal-overlay" id="modal-goal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modal-goal-title">New Goal</h2>
+                <button class="modal-close" id="modal-goal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="goal-title-input">Goal Title</label>
+                    <input type="text" id="goal-title-input" placeholder="e.g., Become a Full Stack Developer">
+                </div>
+                <div class="form-group">
+                    <label for="goal-desc-input">Description (optional)</label>
+                    <textarea id="goal-desc-input" rows="3"
+                        placeholder="What does this goal look like when achieved?"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="modal-goal-cancel">Cancel</button>
+                <button class="btn btn-primary btn-glow" id="modal-goal-save">Save Goal</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Modal -->
+    <div class="modal-overlay" id="modal-task">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modal-task-title">New Task</h2>
+                <button class="modal-close" id="modal-task-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group" id="task-goal-selector-group" style="display:none;">
+                    <label for="task-goal-select">Assign to Goal</label>
+                    <select id="task-goal-select">
+                        <option value="">— Select a goal —</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="task-title-input">Task Title</label>
+                    <input type="text" id="task-title-input" placeholder="e.g., Learn HTML & CSS">
+                </div>
+                <div class="form-group">
+                    <label for="task-desc-input">Notes / Description</label>
+                    <textarea id="task-desc-input" rows="3" placeholder="Any notes for this task..."></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="task-importance-input">Importance</label>
+                        <select id="task-importance-input">
+                            <option value="low">● Low</option>
+                            <option value="medium">● Medium</option>
+                            <option value="high">● High</option>
+                            <option value="urgent">● Urgent</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="task-status-input">Status</label>
+                        <select id="task-status-input">
+                            <option value="todo">To Do</option>
+                            <option value="in-progress">In Progress</option>
+                            <option value="blocked">Blocked</option>
+                            <option value="review">Review</option>
+                            <option value="done">Done</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="task-duedate-input">Due Date (optional)</label>
+                        <input type="date" id="task-duedate-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="task-tags-input">Tags (comma-separated)</label>
+                        <input type="text" id="task-tags-input" placeholder="e.g., coding, web">
+                    </div>
+                </div>
+                <!-- Subtasks -->
+                <div class="form-group">
+                    <label>Subtasks / Checklist</label>
+                    <div class="subtasks-editor" id="subtasks-editor">
+                        <div class="subtasks-list" id="subtasks-list"></div>
+                        <div class="subtask-add-row">
+                            <input type="text" id="subtask-input" placeholder="Add a subtask..." class="subtask-input">
+                            <button class="btn btn-secondary btn-small" id="btn-add-subtask" type="button">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="modal-task-cancel">Cancel</button>
+                <button class="btn btn-primary btn-glow" id="modal-task-save">Save Task</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Note Modal -->
+    <div class="modal-overlay" id="modal-note">
+        <div class="modal modal-lg">
+            <div class="modal-header">
+                <h2 id="modal-note-title">New Note</h2>
+                <button class="modal-close" id="modal-note-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="note-title-input">Title</label>
+                    <input type="text" id="note-title-input" placeholder="e.g., Daily Reflection">
+                </div>
+                <div class="form-group">
+                    <label style="margin-bottom: 8px; display: block;">Content</label>
+                    <div id="note-editor-container" class="toastui-editor-dark"
+                        style="border-radius: 8px; overflow: hidden; background: var(--bg-secondary);"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="modal-note-cancel">Cancel</button>
+                <button class="btn btn-primary btn-glow" id="modal-note-save">Save Note</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Modal -->
+    <div class="modal-overlay" id="modal-confirm">
+        <div class="modal" style="width:380px;">
+            <div class="modal-header">
+                <h2>Confirm</h2>
+                <button class="modal-close" onclick="closeConfirmModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="confirm-message" style="font-size:15px;color:var(--text-secondary);line-height:1.5;">Are you
+                    sure?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="confirm-no">Cancel</button>
+                <button class="btn btn-danger" id="confirm-yes">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Modal -->
+    <div class="modal-overlay" id="modal-export">
+        <div class="modal" style="width:380px;">
+            <div class="modal-header">
+                <h2>Export Data</h2>
+                <button class="modal-close" id="modal-export-close">&times;</button>
+            </div>
+            <div class="modal-body export-options">
+                <button class="btn btn-secondary btn-export-option" id="export-json">
+                    <span class="export-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+                            <polyline points="14 2 14 8 20 8" />
+                        </svg></span>
+                    <div>
+                        <strong>JSON</strong>
+                        <small>Full data backup</small>
+                    </div>
+                </button>
+                <button class="btn btn-secondary btn-export-option" id="export-csv">
+                    <span class="export-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="20" x2="18" y2="10" />
+                            <line x1="12" y1="20" x2="12" y2="4" />
+                            <line x1="6" y1="20" x2="6" y2="14" />
+                        </svg></span>
+                    <div>
+                        <strong>CSV</strong>
+                        <small>Spreadsheet-compatible</small>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3D Corner Mascot -->
+    <div id="mascot-container"></div>
+
+    <!-- 3D Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div id="loading-canvas-container"></div>
+        <div class="loading-text">Loading...</div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

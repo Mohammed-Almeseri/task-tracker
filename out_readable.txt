@@ -1,0 +1,11 @@
+﻿Launching browser...
+PAGE LOG: Failed to load resource: the server responded with a status of 404 (Not Found)
+GOALS CONTAINER HTML: 
+      <div class="goal-card" data-goal-id="5a2e9366-880d-4749-af29-e57f79aedcb3">
+        <div class="goal-header" onclick="toggleGoal('5a2e9366-880d-4749-af29-e57f79aedcb3')">
+          <span class="goal-chevron open" id="chevron-5a2e9366-880d-4749-af29-e57f79aedcb3">Γû╝</span>
+          <div class=
+MANAGE TASKS HTML: 
+                <div class="empty-state" id="empty-manage-tasks">
+                    <div class="empty-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" 
