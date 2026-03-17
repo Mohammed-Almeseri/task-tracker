@@ -189,12 +189,16 @@ function showView(name) {
     // Show loading overlay
     const overlay = document.getElementById('loading-overlay');
     overlay.classList.add('active');
+    // Update loading label
+    const loadingLabel = document.getElementById('loading-text');
+    const viewNames = { dashboard: 'Dashboard', goals: 'Goals', manage: 'Tasks', kanban: 'Kanban', timer: 'Timer', notes: 'Notes', settings: 'Settings', logs: 'System Logs' };
+    if (loadingLabel) loadingLabel.textContent = viewNames[name] || name;
     startLoadingAnimation();
 
     setTimeout(() => {
         performViewSwitch(name);
         overlay.classList.remove('active');
-    }, 1500);
+    }, 1400);
 }
 
 function performViewSwitch(name) {
@@ -2124,372 +2128,6 @@ function closeConfirmModal() {
 }
 
 // ==========================================
-// 3D CORNER MASCOT — Funny Bouncing Robot
-// ==========================================
-
-(function initMascot3D() {
-    const container = document.getElementById('mascot-container');
-    if (!container || typeof THREE === 'undefined') return;
-
-    const W = 120, H = 140;
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(50, W / H, 0.1, 100);
-    camera.position.set(0, 0.5, 4);
-
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-    renderer.setSize(W, H);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setClearColor(0x000000, 0);
-    container.appendChild(renderer.domElement);
-
-    // Lighting
-    const ambient = new THREE.AmbientLight(0x8b5cf6, 0.5);
-    scene.add(ambient);
-    const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-    dirLight.position.set(2, 3, 4);
-    scene.add(dirLight);
-    const pointLight = new THREE.PointLight(0xa78bfa, 0.6, 10);
-    pointLight.position.set(-1, 2, 2);
-    scene.add(pointLight);
-
-    // Robot group
-    const robot = new THREE.Group();
-    scene.add(robot);
-
-    // Body
-    const bodyGeo = new THREE.BoxGeometry(1, 1.2, 0.8);
-    bodyGeo.translate(0, 0, 0);
-    const bodyMat = new THREE.MeshPhongMaterial({
-        color: 0x8b5cf6,
-        emissive: 0x4c1d95,
-        emissiveIntensity: 0.15,
-        shininess: 80
-    });
-    const body = new THREE.Mesh(bodyGeo, bodyMat);
-    body.position.y = 0;
-    robot.add(body);
-
-    // Face plate
-    const faceGeo = new THREE.PlaneGeometry(0.8, 0.6);
-    const faceMat = new THREE.MeshPhongMaterial({
-        color: 0x1a1a2e,
-        emissive: 0x0f0f1a,
-        emissiveIntensity: 0.3,
-        shininess: 120
-    });
-    const face = new THREE.Mesh(faceGeo, faceMat);
-    face.position.set(0, 0.15, 0.41);
-    robot.add(face);
-
-    // Eyes
-    const eyeGeo = new THREE.SphereGeometry(0.1, 16, 16);
-    const eyeMat = new THREE.MeshPhongMaterial({
-        color: 0x38bdf8,
-        emissive: 0x38bdf8,
-        emissiveIntensity: 0.6,
-        shininess: 100
-    });
-    const leftEye = new THREE.Mesh(eyeGeo, eyeMat);
-    leftEye.position.set(-0.18, 0.22, 0.42);
-    robot.add(leftEye);
-    const rightEye = new THREE.Mesh(eyeGeo, eyeMat.clone());
-    rightEye.position.set(0.18, 0.22, 0.42);
-    robot.add(rightEye);
-
-    // Pupils
-    const pupilGeo = new THREE.SphereGeometry(0.045, 12, 12);
-    const pupilMat = new THREE.MeshBasicMaterial({ color: 0x09090b });
-    const leftPupil = new THREE.Mesh(pupilGeo, pupilMat);
-    leftPupil.position.set(-0.18, 0.22, 0.52);
-    robot.add(leftPupil);
-    const rightPupil = new THREE.Mesh(pupilGeo, pupilMat.clone());
-    rightPupil.position.set(0.18, 0.22, 0.52);
-    robot.add(rightPupil);
-
-    // Mouth (happy smile arc)
-    const smileShape = new THREE.Shape();
-    smileShape.moveTo(-0.15, 0);
-    smileShape.quadraticCurveTo(0, -0.12, 0.15, 0);
-    const smileGeo = new THREE.ShapeGeometry(smileShape);
-    const smileMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, side: THREE.DoubleSide });
-    const smile = new THREE.Mesh(smileGeo, smileMat);
-    smile.position.set(0, -0.02, 0.42);
-    robot.add(smile);
-
-    // Antenna
-    const antennaGeo = new THREE.CylinderGeometry(0.03, 0.03, 0.4, 8);
-    const antennaMat = new THREE.MeshPhongMaterial({ color: 0xa78bfa });
-    const antenna = new THREE.Mesh(antennaGeo, antennaMat);
-    antenna.position.set(0, 0.8, 0);
-    robot.add(antenna);
-
-    // Antenna ball (glow)
-    const antBallGeo = new THREE.SphereGeometry(0.08, 16, 16);
-    const antBallMat = new THREE.MeshPhongMaterial({
-        color: 0xfbbf24,
-        emissive: 0xfbbf24,
-        emissiveIntensity: 0.8,
-        shininess: 100
-    });
-    const antBall = new THREE.Mesh(antBallGeo, antBallMat);
-    antBall.position.set(0, 1.02, 0);
-    robot.add(antBall);
-
-    // Left arm
-    const armGeo = new THREE.BoxGeometry(0.15, 0.5, 0.15);
-    const armMat = new THREE.MeshPhongMaterial({ color: 0x7c3aed });
-    const leftArm = new THREE.Mesh(armGeo, armMat);
-    leftArm.position.set(-0.7, -0.05, 0);
-    robot.add(leftArm);
-
-    // Right arm
-    const rightArm = new THREE.Mesh(armGeo, armMat.clone());
-    rightArm.position.set(0.7, -0.05, 0);
-    robot.add(rightArm);
-
-    // Legs
-    const legGeo = new THREE.BoxGeometry(0.2, 0.4, 0.2);
-    const legMat = new THREE.MeshPhongMaterial({ color: 0x6d28d9 });
-    const leftLeg = new THREE.Mesh(legGeo, legMat);
-    leftLeg.position.set(-0.25, -0.8, 0);
-    robot.add(leftLeg);
-    const rightLeg = new THREE.Mesh(legGeo, legMat.clone());
-    rightLeg.position.set(0.25, -0.8, 0);
-    robot.add(rightLeg);
-
-    // Feet
-    const footGeo = new THREE.BoxGeometry(0.28, 0.1, 0.35);
-    const footMat = new THREE.MeshPhongMaterial({ color: 0x4c1d95 });
-    const leftFoot = new THREE.Mesh(footGeo, footMat);
-    leftFoot.position.set(-0.25, -1.02, 0.05);
-    robot.add(leftFoot);
-    const rightFoot = new THREE.Mesh(footGeo, footMat.clone());
-    rightFoot.position.set(0.25, -1.02, 0.05);
-    robot.add(rightFoot);
-
-    // State
-    let isHovered = false;
-    let isSpinning = false;
-    let spinProgress = 0;
-    let blinkTimer = 0;
-    let nextBlink = Math.random() * 3 + 2;
-    let isBlinking = false;
-    let blinkDuration = 0;
-    let wavePhase = 0;
-    let lookTarget = { x: 0, y: 0 };
-    let lookTimer = 0;
-    let nextLookChange = Math.random() * 2 + 1;
-
-    // Mouse events
-    container.addEventListener('mouseenter', () => { isHovered = true; });
-    container.addEventListener('mouseleave', () => { isHovered = false; });
-    container.addEventListener('click', () => {
-        if (!isSpinning) { isSpinning = true; spinProgress = 0; }
-    });
-
-    // Animation clock
-    const clock = new THREE.Clock();
-
-    function animateMascot() {
-        requestAnimationFrame(animateMascot);
-        const dt = clock.getDelta();
-        const t = clock.getElapsedTime();
-
-        // Idle bounce
-        const bounceSpeed = isHovered ? 4 : 2;
-        const bounceHeight = isHovered ? 0.15 : 0.06;
-        robot.position.y = Math.sin(t * bounceSpeed) * bounceHeight;
-
-        // Gentle sway
-        robot.rotation.z = Math.sin(t * 1.2) * 0.04;
-
-        // Spin on click
-        if (isSpinning) {
-            spinProgress += dt * 4;
-            robot.rotation.y = spinProgress * Math.PI * 2;
-            if (spinProgress >= 1) {
-                isSpinning = false;
-                robot.rotation.y = 0;
-            }
-        } else {
-            robot.rotation.y = Math.sin(t * 0.5) * 0.15;
-        }
-
-        // Arm wave
-        wavePhase += dt * (isHovered ? 6 : 2.5);
-        leftArm.rotation.z = Math.sin(wavePhase) * (isHovered ? 0.8 : 0.2) + 0.1;
-        rightArm.rotation.z = Math.sin(wavePhase + Math.PI) * (isHovered ? 0.8 : 0.2) - 0.1;
-
-        // Eye blinks
-        blinkTimer += dt;
-        if (!isBlinking && blinkTimer > nextBlink) {
-            isBlinking = true;
-            blinkDuration = 0;
-            blinkTimer = 0;
-            nextBlink = Math.random() * 3 + 2;
-        }
-        if (isBlinking) {
-            blinkDuration += dt;
-            const blinkPhase = blinkDuration / 0.15;
-            const scaleY = blinkPhase < 0.5
-                ? 1 - blinkPhase * 2
-                : (blinkPhase - 0.5) * 2;
-            leftEye.scale.y = Math.max(0.05, scaleY);
-            rightEye.scale.y = Math.max(0.05, scaleY);
-            if (blinkDuration > 0.15) { isBlinking = false; leftEye.scale.y = 1; rightEye.scale.y = 1; }
-        }
-
-        // Eye look around
-        lookTimer += dt;
-        if (lookTimer > nextLookChange) {
-            lookTarget.x = (Math.random() - 0.5) * 0.06;
-            lookTarget.y = (Math.random() - 0.5) * 0.04;
-            lookTimer = 0;
-            nextLookChange = Math.random() * 2 + 1;
-        }
-        leftPupil.position.x = -0.18 + lookTarget.x;
-        leftPupil.position.y = 0.22 + lookTarget.y;
-        rightPupil.position.x = 0.18 + lookTarget.x;
-        rightPupil.position.y = 0.22 + lookTarget.y;
-
-        // Antenna glow pulse
-        const glowPulse = 0.5 + Math.sin(t * 3) * 0.4;
-        antBallMat.emissiveIntensity = glowPulse;
-        antBall.scale.setScalar(0.9 + Math.sin(t * 3) * 0.15);
-
-        // Hover excitement — body jiggles faster
-        if (isHovered) {
-            body.scale.x = 1 + Math.sin(t * 10) * 0.03;
-            body.scale.y = 1 + Math.sin(t * 12) * 0.02;
-        } else {
-            body.scale.x = 1;
-            body.scale.y = 1;
-        }
-
-        renderer.render(scene, camera);
-    }
-
-    animateMascot();
-})();
-
-
-// ==========================================
-// 3D LOADING OVERLAY — Cube Grid Wave
-// ==========================================
-
-let loadingScene, loadingCamera, loadingRenderer, loadingCubes;
-let loadingAnimationId = null;
-let loadingInitialized = false;
-
-function initLoadingScene() {
-    if (loadingInitialized) return;
-    loadingInitialized = true;
-
-    const container = document.getElementById('loading-canvas-container');
-    if (!container || typeof THREE === 'undefined') return;
-
-    const W = 200, H = 200;
-    loadingScene = new THREE.Scene();
-    loadingCamera = new THREE.PerspectiveCamera(50, W / H, 0.1, 100);
-    loadingCamera.position.set(0, 2, 6);
-    loadingCamera.lookAt(0, 0, 0);
-
-    loadingRenderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-    loadingRenderer.setSize(W, H);
-    loadingRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    loadingRenderer.setClearColor(0x000000, 0);
-    container.appendChild(loadingRenderer.domElement);
-
-    // Lighting
-    const amb = new THREE.AmbientLight(0x8b5cf6, 0.4);
-    loadingScene.add(amb);
-    const dir = new THREE.DirectionalLight(0xffffff, 0.6);
-    dir.position.set(3, 5, 4);
-    loadingScene.add(dir);
-    const pt = new THREE.PointLight(0xa78bfa, 1.2, 15);
-    pt.position.set(0, 2, 3);
-    loadingScene.add(pt);
-
-    // 3x3 Cube grid
-    loadingCubes = [];
-    const cubeGeo = new THREE.BoxGeometry(0.6, 0.6, 0.6);
-    for (let row = 0; row < 3; row++) {
-        for (let col = 0; col < 3; col++) {
-            const mat = new THREE.MeshPhongMaterial({
-                color: 0x8b5cf6,
-                emissive: 0x4c1d95,
-                emissiveIntensity: 0.3,
-                transparent: true,
-                opacity: 0.85,
-                shininess: 100
-            });
-            const cube = new THREE.Mesh(cubeGeo, mat);
-            cube.position.set(
-                (col - 1) * 1.0,
-                0,
-                (row - 1) * 1.0
-            );
-            cube.userData.baseX = cube.position.x;
-            cube.userData.baseZ = cube.position.z;
-            cube.userData.delay = (row + col) * 0.15;
-            loadingScene.add(cube);
-            loadingCubes.push(cube);
-        }
-    }
-}
-
-function startLoadingAnimation() {
-    initLoadingScene();
-    if (!loadingRenderer) return;
-
-    const startTime = performance.now();
-
-    function animateLoading() {
-        loadingAnimationId = requestAnimationFrame(animateLoading);
-        const elapsed = (performance.now() - startTime) / 1000;
-
-        loadingCubes.forEach(cube => {
-            const d = cube.userData.delay;
-            const t = Math.max(0, elapsed - d);
-
-            // Bounce up and down in a wave
-            cube.position.y = Math.sin(t * 4) * 0.8;
-
-            // Rotate each cube
-            cube.rotation.x = t * 2;
-            cube.rotation.y = t * 1.5;
-
-            // Scale pulse
-            const s = 0.8 + Math.sin(t * 3 + d * 2) * 0.2;
-            cube.scale.setScalar(s);
-
-            // Color shift
-            const hue = (0.72 + Math.sin(t * 2 + d) * 0.08);
-            cube.material.color.setHSL(hue, 0.7, 0.55);
-            cube.material.emissive.setHSL(hue, 0.8, 0.2);
-            cube.material.emissiveIntensity = 0.3 + Math.sin(t * 4) * 0.2;
-        });
-
-        // Slowly rotate the whole view
-        loadingCamera.position.x = Math.sin(elapsed * 0.8) * 1.5;
-        loadingCamera.position.z = 6 + Math.cos(elapsed * 0.8) * 0.5;
-        loadingCamera.lookAt(0, 0, 0);
-
-        loadingRenderer.render(loadingScene, loadingCamera);
-    }
-
-    animateLoading();
-
-    // Auto-stop after 2 seconds
-    setTimeout(() => {
-        if (loadingAnimationId) {
-            cancelAnimationFrame(loadingAnimationId);
-            loadingAnimationId = null;
-        }
-    }, 2000);
-}
-
-// ==========================================
 // SYSTEM LOGS
 // ==========================================
 
@@ -2643,4 +2281,475 @@ function renderSystemLogs() {
         logsList.appendChild(li);
     });
 }
+// ==========================================
+// 3D CORNER MASCOT — Upgraded Sleek Robot
+// ==========================================
+
+(function initMascot3D() {
+    const container = document.getElementById('mascot-container');
+    if (!container || typeof THREE === 'undefined') return;
+
+    const W = 120, H = 140;
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(50, W / H, 0.1, 100);
+    camera.position.set(0, 0.4, 3.8);
+
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    renderer.setSize(W, H);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setClearColor(0x000000, 0);
+    renderer.shadowMap.enabled = true;
+    container.appendChild(renderer.domElement);
+
+    // Lighting — 3-point studio setup
+    const ambient = new THREE.AmbientLight(0x6d28d9, 0.4);
+    scene.add(ambient);
+    const keyLight = new THREE.DirectionalLight(0xffffff, 1.0);
+    keyLight.position.set(2, 4, 3);
+    scene.add(keyLight);
+    const fillLight = new THREE.PointLight(0xa78bfa, 1.4, 12);
+    fillLight.position.set(-2, 1, 2);
+    scene.add(fillLight);
+    const rimLight = new THREE.PointLight(0x38bdf8, 0.8, 10);
+    rimLight.position.set(0, -1, -2);
+    scene.add(rimLight);
+
+    const robot = new THREE.Group();
+    scene.add(robot);
+
+    // Materials
+    const chromeMat = (color, emissive = 0x000000) => new THREE.MeshPhongMaterial({
+        color, emissive, emissiveIntensity: 0.2, shininess: 160, specular: 0xffffff
+    });
+
+    // Body — rounded box with gradient-like shading
+    const bodyGeo = new THREE.BoxGeometry(1.0, 1.1, 0.72, 2, 2, 2);
+    const body = new THREE.Mesh(bodyGeo, chromeMat(0x7c3aed, 0x3b0764));
+    body.position.y = 0.05;
+    robot.add(body);
+
+    // Chest panel glow
+    const chestGeo = new THREE.BoxGeometry(0.62, 0.38, 0.05);
+    const chestMat = new THREE.MeshPhongMaterial({
+        color: 0x0f0f1a, emissive: 0x8b5cf6, emissiveIntensity: 0.6, shininess: 200
+    });
+    const chest = new THREE.Mesh(chestGeo, chestMat);
+    chest.position.set(0, 0.08, 0.37);
+    robot.add(chest);
+
+    // Chest grid lines
+    for (let i = 0; i < 3; i++) {
+        const lineGeo = new THREE.BoxGeometry(0.58, 0.015, 0.01);
+        const lineMat = new THREE.MeshBasicMaterial({ color: 0x8b5cf6 });
+        const line = new THREE.Mesh(lineGeo, lineMat);
+        line.position.set(0, -0.06 + i * 0.1, 0.4);
+        robot.add(line);
+    }
+
+    // Head — sleeker, slightly smaller
+    const headGeo = new THREE.BoxGeometry(0.88, 0.76, 0.68);
+    const head = new THREE.Mesh(headGeo, chromeMat(0x6d28d9, 0x2e1065));
+    head.position.y = 0.96;
+    robot.add(head);
+
+    // Face screen (dark glossy)
+    const screenGeo = new THREE.BoxGeometry(0.7, 0.5, 0.04);
+    const screenMat = new THREE.MeshPhongMaterial({
+        color: 0x080810, emissive: 0x1e1b4b, emissiveIntensity: 0.5, shininess: 300
+    });
+    const screen = new THREE.Mesh(screenGeo, screenMat);
+    screen.position.set(0, 0.96, 0.36);
+    robot.add(screen);
+
+    // Eyes — larger, glowing
+    const eyeGeo = new THREE.SphereGeometry(0.11, 20, 20);
+    const leftEyeMat = new THREE.MeshPhongMaterial({
+        color: 0x38bdf8, emissive: 0x38bdf8, emissiveIntensity: 0.9, shininess: 200
+    });
+    const rightEyeMat = leftEyeMat.clone();
+    const leftEye = new THREE.Mesh(eyeGeo, leftEyeMat);
+    leftEye.position.set(-0.17, 1.02, 0.38);
+    robot.add(leftEye);
+    const rightEye = new THREE.Mesh(eyeGeo, rightEyeMat);
+    rightEye.position.set(0.17, 1.02, 0.38);
+    robot.add(rightEye);
+
+    // Eye rings
+    [leftEye, rightEye].forEach((eye, i) => {
+        const ringGeo = new THREE.TorusGeometry(0.13, 0.02, 8, 24);
+        const ringMat = new THREE.MeshBasicMaterial({ color: 0xa78bfa });
+        const ring = new THREE.Mesh(ringGeo, ringMat);
+        ring.position.copy(eye.position);
+        ring.position.z -= 0.01;
+        robot.add(ring);
+    });
+
+    // Pupils
+    const pupilGeo = new THREE.SphereGeometry(0.05, 12, 12);
+    const pupilMat = new THREE.MeshBasicMaterial({ color: 0x020408 });
+    const leftPupil = new THREE.Mesh(pupilGeo, pupilMat);
+    leftPupil.position.set(-0.17, 1.02, 0.48);
+    robot.add(leftPupil);
+    const rightPupil = new THREE.Mesh(pupilGeo, pupilMat.clone());
+    rightPupil.position.set(0.17, 1.02, 0.48);
+    robot.add(rightPupil);
+
+    // Antenna — tapered
+    const antennaGeo = new THREE.CylinderGeometry(0.018, 0.03, 0.42, 10);
+    const antenna = new THREE.Mesh(antennaGeo, chromeMat(0xa78bfa));
+    antenna.position.set(0, 1.58, 0);
+    robot.add(antenna);
+
+    // Antenna orb — glowing
+    const orbGeo = new THREE.SphereGeometry(0.09, 20, 20);
+    const orbMat = new THREE.MeshPhongMaterial({
+        color: 0xfbbf24, emissive: 0xf59e0b, emissiveIntensity: 1.0, shininess: 200
+    });
+    const antOrb = new THREE.Mesh(orbGeo, orbMat);
+    antOrb.position.set(0, 1.82, 0);
+    robot.add(antOrb);
+
+    // Shoulder pads
+    const shoulderGeo = new THREE.BoxGeometry(0.22, 0.18, 0.22);
+    const shoulderMat = chromeMat(0x5b21b6);
+    [-0.62, 0.62].forEach(x => {
+        const s = new THREE.Mesh(shoulderGeo, shoulderMat);
+        s.position.set(x, 0.48, 0);
+        robot.add(s);
+    });
+
+    // Arms — tapered, slightly bent look
+    const armGeo = new THREE.CylinderGeometry(0.08, 0.06, 0.52, 10);
+    const armMat = chromeMat(0x6d28d9);
+    const leftArmMesh = new THREE.Mesh(armGeo, armMat);
+    leftArmMesh.position.set(-0.65, 0.1, 0);
+    robot.add(leftArmMesh);
+    const rightArmMesh = new THREE.Mesh(armGeo, armMat.clone());
+    rightArmMesh.position.set(0.65, 0.1, 0);
+    robot.add(rightArmMesh);
+
+    // Hands — small spheres
+    const handGeo = new THREE.SphereGeometry(0.1, 14, 14);
+    const handMat = chromeMat(0x4c1d95);
+    const leftHand = new THREE.Mesh(handGeo, handMat);
+    leftHand.position.set(-0.65, -0.2, 0);
+    robot.add(leftHand);
+    const rightHand = new THREE.Mesh(handGeo, handMat.clone());
+    rightHand.position.set(0.65, -0.2, 0);
+    robot.add(rightHand);
+
+    // Legs — smoother
+    const legGeo = new THREE.CylinderGeometry(0.1, 0.09, 0.44, 10);
+    const legMat = chromeMat(0x5b21b6);
+    const leftLeg = new THREE.Mesh(legGeo, legMat);
+    leftLeg.position.set(-0.24, -0.78, 0);
+    robot.add(leftLeg);
+    const rightLeg = new THREE.Mesh(legGeo, legMat.clone());
+    rightLeg.position.set(0.24, -0.78, 0);
+    robot.add(rightLeg);
+
+    // Feet
+    const footGeo = new THREE.BoxGeometry(0.26, 0.1, 0.32);
+    const footMat = chromeMat(0x3b0764);
+    const leftFoot = new THREE.Mesh(footGeo, footMat);
+    leftFoot.position.set(-0.24, -1.04, 0.04);
+    robot.add(leftFoot);
+    const rightFoot = new THREE.Mesh(footGeo, footMat.clone());
+    rightFoot.position.set(0.24, -1.04, 0.04);
+    robot.add(rightFoot);
+
+    // State
+    let isHovered = false, isSpinning = false, spinProgress = 0;
+    let blinkTimer = 0, nextBlink = 2.5 + Math.random() * 2;
+    let isBlinking = false, blinkDuration = 0;
+    let wavePhase = 0;
+    let lookTarget = { x: 0, y: 0 }, lookTimer = 0, nextLook = 1.5;
+    let screenPulse = 0;
+
+    container.addEventListener('mouseenter', () => { isHovered = true; });
+    container.addEventListener('mouseleave', () => { isHovered = false; });
+    container.addEventListener('click', () => { if (!isSpinning) { isSpinning = true; spinProgress = 0; } });
+
+    const clock = new THREE.Clock();
+
+    function animateMascot() {
+        requestAnimationFrame(animateMascot);
+        const dt = clock.getDelta();
+        const t = clock.getElapsedTime();
+
+        // Idle float
+        const bounceAmp = isHovered ? 0.12 : 0.055;
+        const bounceFreq = isHovered ? 4.5 : 1.8;
+        robot.position.y = Math.sin(t * bounceFreq) * bounceAmp - 0.1;
+
+        // Gentle sway
+        robot.rotation.z = Math.sin(t * 0.9) * 0.03;
+
+        // Spin on click
+        if (isSpinning) {
+            spinProgress += dt * 5;
+            robot.rotation.y = spinProgress * Math.PI * 2;
+            if (spinProgress >= 1) { isSpinning = false; robot.rotation.y = 0; }
+        } else {
+            robot.rotation.y = Math.sin(t * 0.6) * 0.18;
+        }
+
+        // Arm wave
+        wavePhase += dt * (isHovered ? 7 : 2);
+        leftArmMesh.rotation.z = Math.sin(wavePhase) * (isHovered ? 0.9 : 0.22) + 0.15;
+        rightArmMesh.rotation.z = -Math.sin(wavePhase + Math.PI * 0.5) * (isHovered ? 0.9 : 0.22) - 0.15;
+        leftHand.position.x = -0.65 + Math.sin(wavePhase) * (isHovered ? 0.12 : 0.03);
+        rightHand.position.x = 0.65 - Math.sin(wavePhase + Math.PI * 0.5) * (isHovered ? 0.12 : 0.03);
+
+        // Blink
+        blinkTimer += dt;
+        if (!isBlinking && blinkTimer > nextBlink) {
+            isBlinking = true; blinkDuration = 0;
+            blinkTimer = 0; nextBlink = 2 + Math.random() * 3;
+        }
+        if (isBlinking) {
+            blinkDuration += dt;
+            const bp = blinkDuration / 0.12;
+            const sy = bp < 0.5 ? 1 - bp * 2 : (bp - 0.5) * 2;
+            leftEye.scale.y = rightEye.scale.y = Math.max(0.05, sy);
+            if (blinkDuration > 0.12) { isBlinking = false; leftEye.scale.y = rightEye.scale.y = 1; }
+        }
+
+        // Eye glow on hover
+        const eyeGlow = isHovered ? 1.2 : 0.9;
+        leftEyeMat.emissiveIntensity = eyeGlow + Math.sin(t * 3) * 0.15;
+        rightEyeMat.emissiveIntensity = eyeGlow + Math.sin(t * 3 + 0.3) * 0.15;
+
+        // Pupil wander
+        lookTimer += dt;
+        if (lookTimer > nextLook) {
+            lookTarget.x = (Math.random() - 0.5) * 0.07;
+            lookTarget.y = (Math.random() - 0.5) * 0.05;
+            lookTimer = 0; nextLook = 1 + Math.random() * 2;
+        }
+        leftPupil.position.x = -0.17 + lookTarget.x;
+        leftPupil.position.y = 1.02 + lookTarget.y;
+        rightPupil.position.x = 0.17 + lookTarget.x;
+        rightPupil.position.y = 1.02 + lookTarget.y;
+
+        // Antenna orb pulse
+        orbMat.emissiveIntensity = 0.6 + Math.sin(t * 4) * 0.4;
+        antOrb.scale.setScalar(0.88 + Math.sin(t * 4) * 0.14);
+
+        // Chest screen pulse
+        screenPulse += dt * 2;
+        chestMat.emissiveIntensity = 0.4 + Math.sin(screenPulse) * 0.3;
+
+        // Fill light color shift
+        fillLight.color.setHSL(0.72 + Math.sin(t * 0.4) * 0.05, 0.7, 0.6);
+
+        renderer.render(scene, camera);
+    }
+
+    animateMascot();
+})();
+
+
+// ==========================================
+// 3D LOADING OVERLAY — Cinematic DNA Helix
+// ==========================================
+
+let loadingScene, loadingCamera, loadingRenderer;
+let loadingAnimationId = null;
+let loadingInitialized = false;
+
+function initLoadingScene() {
+    if (loadingInitialized) return;
+    loadingInitialized = true;
+
+    const container = document.getElementById('loading-canvas-container');
+    if (!container || typeof THREE === 'undefined') return;
+
+    const W = 280, H = 280;
+    loadingScene = new THREE.Scene();
+    loadingCamera = new THREE.PerspectiveCamera(55, W / H, 0.1, 100);
+    loadingCamera.position.set(0, 0, 5.5);
+
+    loadingRenderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    loadingRenderer.setSize(W, H);
+    loadingRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    loadingRenderer.setClearColor(0x000000, 0);
+    container.appendChild(loadingRenderer.domElement);
+
+    // Lights
+    loadingScene.add(new THREE.AmbientLight(0x6d28d9, 0.5));
+    const pt1 = new THREE.PointLight(0xa78bfa, 2.5, 20);
+    pt1.position.set(0, 0, 4);
+    loadingScene.add(pt1);
+    const pt2 = new THREE.PointLight(0x38bdf8, 1.5, 20);
+    pt2.position.set(2, 2, 2);
+    loadingScene.add(pt2);
+    const pt3 = new THREE.PointLight(0xf59e0b, 1.0, 15);
+    pt3.position.set(-2, -2, 3);
+    loadingScene.add(pt3);
+}
+
+function startLoadingAnimation() {
+    initLoadingScene();
+    if (!loadingRenderer) return;
+
+    // Clear previous objects except lights
+    while (loadingScene.children.length > 3) {
+        loadingScene.remove(loadingScene.children[loadingScene.children.length - 1]);
+    }
+
+    const helixGroup = new THREE.Group();
+    loadingScene.add(helixGroup);
+
+    // Build double-helix strands
+    const strandA = [], strandB = [];
+    const nodeCount = 24;
+    const helixRadius = 1.4;
+    const helixHeight = 4.0;
+
+    const sphereGeo = new THREE.SphereGeometry(0.12, 14, 14);
+
+    for (let i = 0; i < nodeCount; i++) {
+        const t = i / (nodeCount - 1);
+        const angle = t * Math.PI * 4; // 2 full rotations
+        const y = (t - 0.5) * helixHeight;
+
+        // Strand A — purple
+        const matA = new THREE.MeshPhongMaterial({
+            color: 0x8b5cf6,
+            emissive: 0x6d28d9,
+            emissiveIntensity: 0.5,
+            shininess: 150,
+            transparent: true,
+            opacity: 0.9
+        });
+        const nodeA = new THREE.Mesh(sphereGeo, matA);
+        nodeA.position.set(
+            Math.cos(angle) * helixRadius,
+            y,
+            Math.sin(angle) * helixRadius
+        );
+        nodeA.userData = { t, angle, baseColor: 0x8b5cf6 };
+        helixGroup.add(nodeA);
+        strandA.push(nodeA);
+
+        // Strand B — cyan (offset by PI)
+        const matB = new THREE.MeshPhongMaterial({
+            color: 0x38bdf8,
+            emissive: 0x0ea5e9,
+            emissiveIntensity: 0.5,
+            shininess: 150,
+            transparent: true,
+            opacity: 0.9
+        });
+        const nodeB = new THREE.Mesh(sphereGeo, matB);
+        nodeB.position.set(
+            Math.cos(angle + Math.PI) * helixRadius,
+            y,
+            Math.sin(angle + Math.PI) * helixRadius
+        );
+        nodeB.userData = { t, angle: angle + Math.PI, baseColor: 0x38bdf8 };
+        helixGroup.add(nodeB);
+        strandB.push(nodeB);
+    }
+
+    // Cross-links (rungs) between strands
+    const rungMat = new THREE.MeshBasicMaterial({
+        color: 0xfbbf24, transparent: true, opacity: 0.35
+    });
+    for (let i = 0; i < nodeCount; i += 3) {
+        const rungGeo = new THREE.CylinderGeometry(0.025, 0.025, 1, 6);
+        const rung = new THREE.Mesh(rungGeo, rungMat.clone());
+        const posA = strandA[i].position;
+        const posB = strandB[i].position;
+        const mid = new THREE.Vector3().addVectors(posA, posB).multiplyScalar(0.5);
+        rung.position.copy(mid);
+        const dir = new THREE.Vector3().subVectors(posB, posA);
+        const length = dir.length();
+        rung.scale.y = length;
+        rung.quaternion.setFromUnitVectors(
+            new THREE.Vector3(0, 1, 0),
+            dir.normalize()
+        );
+        helixGroup.add(rung);
+    }
+
+    // Tube backbones for each strand
+    function buildTube(nodes, color) {
+        const points = nodes.map(n => n.position.clone());
+        const curve = new THREE.CatmullRomCurve3(points);
+        const tubeGeo = new THREE.TubeGeometry(curve, 60, 0.04, 8, false);
+        const tubeMat = new THREE.MeshPhongMaterial({
+            color, emissive: color, emissiveIntensity: 0.3,
+            transparent: true, opacity: 0.5, shininess: 100
+        });
+        return new THREE.Mesh(tubeGeo, tubeMat);
+    }
+    helixGroup.add(buildTube(strandA, 0x8b5cf6));
+    helixGroup.add(buildTube(strandB, 0x38bdf8));
+
+    // Orbiting glow ring
+    const ringGeo = new THREE.TorusGeometry(2.2, 0.04, 8, 80);
+    const ringMat = new THREE.MeshBasicMaterial({ color: 0xa78bfa, transparent: true, opacity: 0.4 });
+    const ring = new THREE.Mesh(ringGeo, ringMat);
+    ring.rotation.x = Math.PI / 2.5;
+    loadingScene.add(ring);
+
+    // Particle field
+    const particleCount = 120;
+    const pGeo = new THREE.BufferGeometry();
+    const pPositions = new Float32Array(particleCount * 3);
+    for (let i = 0; i < particleCount; i++) {
+        pPositions[i * 3]     = (Math.random() - 0.5) * 9;
+        pPositions[i * 3 + 1] = (Math.random() - 0.5) * 9;
+        pPositions[i * 3 + 2] = (Math.random() - 0.5) * 4;
+    }
+    pGeo.setAttribute('position', new THREE.BufferAttribute(pPositions, 3));
+    const pMat = new THREE.PointsMaterial({ color: 0x8b5cf6, size: 0.06, transparent: true, opacity: 0.5 });
+    loadingScene.add(new THREE.Points(pGeo, pMat));
+
+    const startTime = performance.now();
+
+    function animateLoading() {
+        loadingAnimationId = requestAnimationFrame(animateLoading);
+        const elapsed = (performance.now() - startTime) / 1000;
+
+        // Rotate the whole helix
+        helixGroup.rotation.y = elapsed * 1.2;
+        helixGroup.rotation.x = Math.sin(elapsed * 0.4) * 0.15;
+
+        // Pulse each node with a wave travelling up the helix
+        const allNodes = [...strandA, ...strandB];
+        allNodes.forEach(node => {
+            const wave = Math.sin(elapsed * 5 - node.userData.t * Math.PI * 3) * 0.5 + 0.5;
+            node.scale.setScalar(0.7 + wave * 0.7);
+            node.material.emissiveIntensity = 0.3 + wave * 0.9;
+            node.material.opacity = 0.6 + wave * 0.35;
+        });
+
+        // Ring orbit tilt
+        ring.rotation.z = elapsed * 0.6;
+        ringMat.opacity = 0.25 + Math.sin(elapsed * 2) * 0.18;
+
+        // Particle drift
+        pMat.opacity = 0.3 + Math.sin(elapsed * 1.5) * 0.2;
+
+        // Camera gentle sway
+        loadingCamera.position.x = Math.sin(elapsed * 0.5) * 0.4;
+        loadingCamera.position.y = Math.cos(elapsed * 0.3) * 0.3;
+        loadingCamera.lookAt(0, 0, 0);
+
+        loadingRenderer.render(loadingScene, loadingCamera);
+    }
+
+    animateLoading();
+
+    setTimeout(() => {
+        if (loadingAnimationId) {
+            cancelAnimationFrame(loadingAnimationId);
+            loadingAnimationId = null;
+        }
+    }, 2000);
+}
+
 
