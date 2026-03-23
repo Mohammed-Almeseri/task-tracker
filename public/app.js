@@ -889,13 +889,13 @@ async function loadNotes() {
 function parseRichText(text, noteId = null) {
     if (!text) return '';
     let parsed = escHtml(text);
-    
+
     // Remove ToastUI's backslash escapes for literal markdown characters
     parsed = parsed.replace(/\\([*~\[\]\-_`])/g, '$1');
 
     parsed = parsed.replace(/\*\*([\s\S]*?)\*\*/g, '<strong>$1</strong>');
     parsed = parsed.replace(/~~([\s\S]*?)~~/g, '<del>$1</del>');
-    
+
     let chkIdx = 0;
     parsed = parsed.replace(/^[-*] \[( |x|X)\] (.*)$/gm, (match, p1, p2) => {
         const isChecked = p1.toLowerCase() === 'x';
@@ -915,10 +915,10 @@ function parseRichText(text, noteId = null) {
     return parsed;
 }
 
-window.toggleNoteCheckbox = async function(noteId, index, isChecked) {
+window.toggleNoteCheckbox = async function (noteId, index, isChecked) {
     const note = notes.find(n => n.id === noteId);
     if (!note) return;
-    
+
     let currIdx = 0;
     const newContent = note.content.replace(/^[-*] \[( |x|X)\] (.*)$/gm, (match, p1, p2) => {
         if (currIdx === index) {
@@ -929,13 +929,13 @@ window.toggleNoteCheckbox = async function(noteId, index, isChecked) {
         currIdx++;
         return match;
     });
-    
+
     if (newContent !== note.content) {
         note.content = newContent;
         renderNotes(); // Update UI immediately
         try {
             await apiPut(`/api/notes/${noteId}`, { title: note.title, content: newContent });
-        } catch(err) {
+        } catch (err) {
             console.error('Failed to update checkbox', err);
         }
     }
@@ -1793,7 +1793,7 @@ function renderUpNext(tasks) {
     const task = validTasks[0];
     const statusLabels = { 'todo': 'TO DO', 'in-progress': 'IN PROGRESS', 'blocked': 'BLOCKED', 'review': 'REVIEW' };
     const statusLabel = statusLabels[task.status] || task.status.toUpperCase();
-    
+
     // Find the goal name for context
     let goalName = 'No Goal';
     for (const g of goals) {
@@ -2160,14 +2160,14 @@ function logSystemEvent(message) {
         type: getLogEventType(message)
     };
     logs.unshift(entry);
-    
+
     // Keep max 100 logs
     if (logs.length > 100) {
         logs.pop();
     }
-    
+
     saveSystemLogs(logs);
-    
+
     // If we're currently looking at the logs view, update it
     const logsView = document.getElementById('view-logs');
     if (logsView && logsView.classList.contains('active')) {
@@ -2237,9 +2237,9 @@ const LOG_TYPE_LABELS = {
 function renderSystemLogs() {
     const logsList = document.getElementById('system-logs-list');
     const emptyState = document.getElementById('empty-logs');
-    
+
     if (!logsList || !emptyState) return;
-    
+
     let logs = getSystemLogs();
 
     // Backfill type for old logs without type
@@ -2250,27 +2250,27 @@ function renderSystemLogs() {
 
     // Apply type filter
     const filtered = logsTypeFilter === 'all' ? logs : logs.filter(log => log.type === logsTypeFilter);
-    
+
     if (filtered.length === 0) {
         logsList.style.display = 'none';
         emptyState.style.display = 'flex';
         return;
     }
-    
+
     emptyState.style.display = 'none';
     logsList.style.display = 'flex';
     logsList.innerHTML = '';
-    
+
     filtered.forEach(log => {
         const li = document.createElement('li');
         li.className = 'log-entry';
-        
+
         const dateObj = new Date(log.timestamp);
         const dateStr = dateObj.toLocaleDateString();
         const timeStr = dateObj.toLocaleTimeString();
         const typeColor = LOG_TYPE_COLORS[log.type] || LOG_TYPE_COLORS.other;
         const typeLabel = LOG_TYPE_LABELS[log.type] || 'System';
-        
+
         li.innerHTML = `
             <div class="log-message">
                 <span class="log-type-badge" style="background:${typeColor}22; color:${typeColor}; border:1px solid ${typeColor}44;">${typeLabel}</span>
@@ -2700,7 +2700,7 @@ function startLoadingAnimation() {
     const pGeo = new THREE.BufferGeometry();
     const pPositions = new Float32Array(particleCount * 3);
     for (let i = 0; i < particleCount; i++) {
-        pPositions[i * 3]     = (Math.random() - 0.5) * 9;
+        pPositions[i * 3] = (Math.random() - 0.5) * 9;
         pPositions[i * 3 + 1] = (Math.random() - 0.5) * 9;
         pPositions[i * 3 + 2] = (Math.random() - 0.5) * 4;
     }

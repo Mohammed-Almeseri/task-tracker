@@ -60,12 +60,12 @@
           "dueDate": "2026-03-23",
           "subtasks": [],
           "timeSpent": 29136,
-          "updatedAt": "2026-03-15T03:12:58.945Z"
+          "updatedAt": "2026-03-17T03:34:41.681Z"
         },
         {
           "id": "b3e9a123-4567-89ab-cdef-0123456789ab",
           "title": "Learn Physics II",
-          "status": "todo",
+          "status": "in-progress",
           "importance": "high",
           "tags": [
             "University",
@@ -73,21 +73,22 @@
           ],
           "dueDate": "2026-03-23",
           "subtasks": [],
-          "updatedAt": "2026-03-14T16:28:04.681Z"
+          "updatedAt": "2026-03-22T22:29:49.182Z",
+          "timeSpent": 13611
         },
         {
           "id": "ae50b3f8-8b35-4560-9bc3-ee518ab865b8",
           "goalId": "d7211e4a-4c8d-4e92-bc12-f17a8db29a3a",
           "title": "Study Database",
           "description": "",
-          "status": "todo",
+          "status": "in-progress",
           "importance": "high",
           "tags": [],
           "dueDate": null,
           "subtasks": [],
-          "timeSpent": 0,
+          "timeSpent": 2844,
           "createdAt": "2026-03-11T08:07:21.707Z",
-          "updatedAt": "2026-03-11T08:07:21.707Z",
+          "updatedAt": "2026-03-22T22:58:38.130Z",
           "completedAt": null
         }
       ]
@@ -184,7 +185,7 @@
           "subtasks": [],
           "timeSpent": 0,
           "createdAt": "2026-03-11T08:09:32.339Z",
-          "updatedAt": "2026-03-11T08:10:26.053Z",
+          "updatedAt": "2026-03-17T03:06:13.835Z",
           "completedAt": null
         },
         {
@@ -192,15 +193,15 @@
           "goalId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
           "title": "Finish Building the Future Assignment",
           "description": "",
-          "status": "todo",
+          "status": "done",
           "importance": "medium",
           "tags": [],
           "dueDate": "2026-03-16",
           "subtasks": [],
           "timeSpent": 0,
           "createdAt": "2026-03-11T08:10:07.526Z",
-          "updatedAt": "2026-03-11T08:10:07.526Z",
-          "completedAt": null
+          "updatedAt": "2026-03-17T01:51:43.098Z",
+          "completedAt": "2026-03-17T01:51:43.098Z"
         },
         {
           "id": "90d29574-bb62-4456-b7d7-2643724d13a1",
@@ -222,15 +223,15 @@
           "goalId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
           "title": "Finish Physics Homework",
           "description": "",
-          "status": "todo",
+          "status": "done",
           "importance": "high",
           "tags": [],
           "dueDate": "2026-03-18",
           "subtasks": [],
           "timeSpent": 0,
           "createdAt": "2026-03-16T23:27:39.471Z",
-          "updatedAt": "2026-03-16T23:27:39.471Z",
-          "completedAt": null
+          "updatedAt": "2026-03-17T03:06:10.067Z",
+          "completedAt": "2026-03-17T03:06:10.067Z"
         }
       ]
     },
@@ -254,6 +255,66 @@
           "createdAt": "2026-03-14T04:11:06.345Z",
           "updatedAt": "2026-03-14T04:11:14.309Z",
           "completedAt": "2026-03-14T04:11:14.309Z"
+        },
+        {
+          "id": "59479329-dc07-4c83-b2ac-9cb14fb41f5e",
+          "goalId": "75c3e982-b56b-4a41-9c43-f61289421fa5",
+          "title": "Update the app",
+          "description": "Fix the dashboard and Settings issues",
+          "status": "done",
+          "importance": "medium",
+          "tags": [],
+          "dueDate": null,
+          "subtasks": [],
+          "timeSpent": 0,
+          "createdAt": "2026-03-17T01:57:42.187Z",
+          "updatedAt": "2026-03-17T01:58:34.170Z",
+          "completedAt": "2026-03-17T01:58:34.170Z"
+        },
+        {
+          "id": "cf796621-7fab-4a6f-8a33-257f21b94abe",
+          "goalId": "75c3e982-b56b-4a41-9c43-f61289421fa5",
+          "title": "Add the SKILL.md skills to perplexity for unlimited uses",
+          "description": "",
+          "status": "done",
+          "importance": "high",
+          "tags": [],
+          "dueDate": null,
+          "subtasks": [],
+          "timeSpent": 3600,
+          "createdAt": "2026-03-17T01:58:07.041Z",
+          "updatedAt": "2026-03-17T01:59:38.645Z",
+          "completedAt": "2026-03-17T01:59:38.645Z"
+        },
+        {
+          "id": "cd57c92a-8bc1-4079-9fa7-527e298f5421",
+          "goalId": "75c3e982-b56b-4a41-9c43-f61289421fa5",
+          "title": "Log the wasted time while upgrading the app",
+          "description": "",
+          "status": "done",
+          "importance": "medium",
+          "tags": [],
+          "dueDate": null,
+          "subtasks": [],
+          "timeSpent": 10800,
+          "createdAt": "2026-03-17T02:21:29.949Z",
+          "updatedAt": "2026-03-17T02:21:48.263Z",
+          "completedAt": "2026-03-17T02:21:48.263Z"
+        },
+        {
+          "id": "e6d4727d-ee7d-40f7-bd74-0f55616c7b51",
+          "goalId": "75c3e982-b56b-4a41-9c43-f61289421fa5",
+          "title": "Add ASCII",
+          "description": "Update the app to add the ASCII tap",
+          "status": "todo",
+          "importance": "high",
+          "tags": [],
+          "dueDate": null,
+          "subtasks": [],
+          "timeSpent": 0,
+          "createdAt": "2026-03-20T22:42:29.157Z",
+          "updatedAt": "2026-03-20T22:42:29.157Z",
+          "completedAt": null
         }
       ]
     }
@@ -398,6 +459,104 @@
       "type": "manual",
       "duration": 10200,
       "completedAt": "2026-03-15T03:12:58.945Z"
+    },
+    {
+      "id": "470d647b-8381-4e52-8a0c-a4c17446912f",
+      "taskId": "cf796621-7fab-4a6f-8a33-257f21b94abe",
+      "type": "manual",
+      "duration": 3600,
+      "completedAt": "2026-03-17T01:59:33.526Z"
+    },
+    {
+      "id": "31f1f555-4018-492d-9fda-46f92b09ffd4",
+      "taskId": "cd57c92a-8bc1-4079-9fa7-527e298f5421",
+      "type": "manual",
+      "duration": 10800,
+      "completedAt": "2026-03-17T02:21:43.118Z"
+    },
+    {
+      "id": "20a1eac1-7559-4fc3-a36d-0824431179d3",
+      "taskId": "ae50b3f8-8b35-4560-9bc3-ee518ab865b8",
+      "type": "stopwatch",
+      "duration": 773,
+      "completedAt": "2026-03-17T03:33:42.067Z"
+    },
+    {
+      "id": "fd4cc686-bc7f-4e92-9e5d-4acd6ce16b94",
+      "taskId": "ae50b3f8-8b35-4560-9bc3-ee518ab865b8",
+      "type": "manual",
+      "duration": 720,
+      "completedAt": "2026-03-17T03:34:07.719Z"
+    },
+    {
+      "id": "ef2244db-05f7-456c-bd4b-d26e5518cfad",
+      "taskId": "b3e9a123-4567-89ab-cdef-0123456789ab",
+      "type": "stopwatch",
+      "duration": 711,
+      "completedAt": "2026-03-21T23:48:56.271Z"
+    },
+    {
+      "id": "c3b10ba6-aeed-4a7b-b2ea-024bb083768d",
+      "taskId": "b3e9a123-4567-89ab-cdef-0123456789ab",
+      "type": "pomodoro",
+      "duration": 1500,
+      "completedAt": "2026-03-22T00:24:51.461Z"
+    },
+    {
+      "id": "d65d1c5a-5ad0-47cb-b29d-feb3a6737046",
+      "taskId": "b3e9a123-4567-89ab-cdef-0123456789ab",
+      "type": "pomodoro",
+      "duration": 300,
+      "completedAt": "2026-03-22T00:30:01.849Z"
+    },
+    {
+      "id": "0386edb6-19d9-4a49-adce-bd0aa248f30b",
+      "taskId": "b3e9a123-4567-89ab-cdef-0123456789ab",
+      "type": "pomodoro",
+      "duration": 1500,
+      "completedAt": "2026-03-22T01:01:52.345Z"
+    },
+    {
+      "id": "b898e060-0dbb-47d1-9838-85742d206638",
+      "taskId": "b3e9a123-4567-89ab-cdef-0123456789ab",
+      "type": "pomodoro",
+      "duration": 300,
+      "completedAt": "2026-03-22T01:07:55.357Z"
+    },
+    {
+      "id": "5f73fae2-0141-49e1-8c86-9d66136c1a33",
+      "taskId": "b3e9a123-4567-89ab-cdef-0123456789ab",
+      "type": "pomodoro",
+      "duration": 1500,
+      "completedAt": "2026-03-22T02:38:55.836Z"
+    },
+    {
+      "id": "2ab73915-e91c-4313-a587-c4f277683f53",
+      "taskId": "b3e9a123-4567-89ab-cdef-0123456789ab",
+      "type": "pomodoro",
+      "duration": 300,
+      "completedAt": "2026-03-22T02:50:24.056Z"
+    },
+    {
+      "id": "8759e000-dc38-4d83-8ccd-abb50bb3d8c2",
+      "taskId": "b3e9a123-4567-89ab-cdef-0123456789ab",
+      "type": "pomodoro",
+      "duration": 1500,
+      "completedAt": "2026-03-22T03:38:14.730Z"
+    },
+    {
+      "id": "df9dc953-b391-4ae9-81ee-786ef3545a23",
+      "taskId": "b3e9a123-4567-89ab-cdef-0123456789ab",
+      "type": "manual",
+      "duration": 6000,
+      "completedAt": "2026-03-22T03:39:38.680Z"
+    },
+    {
+      "id": "49a89cc0-c95e-4984-9654-661641407947",
+      "taskId": "ae50b3f8-8b35-4560-9bc3-ee518ab865b8",
+      "type": "stopwatch",
+      "duration": 1351,
+      "completedAt": "2026-03-22T22:58:38.130Z"
     }
   ],
   "notes": [
@@ -421,6 +580,13 @@
       "content": "# Dashboard Fixes Round 2\n\n* Fix greeting banner (\"Good Morning\") styling\n* Fix Focus Task card — larger buttons matching the screenshot\n* Fix Productivity Pulse — use line/area chart instead of bar squares\n* Fix Completion Trend chart — broken display\n* Fix modal z-index — backup popup overlapped by sidebar\n* Add System Logs filter by event type",
       "createdAt": "2026-03-16T03:03:34.034Z",
       "updatedAt": "2026-03-16T03:37:18.460Z"
+    },
+    {
+      "id": "170c6d30-a3e2-4ef1-883f-d1f98042193b",
+      "title": "App update",
+      "content": "### 1. **UI/UX & Aesthetics**\n\n* **`ui-ux-pro-max`** (![]()c:\\\\Users\\\\moamm\\\\OneDrive\\\\Desktop\\\\Test.agents\\\\skills\\\\ui-ux-pro-max\\\\SKILL.md)\n    * **Why**: It provides 50+ design styles and 21 palettes. It is essential for achieving that \"polished, premium Figma-inspired\" look and handling the complex layout of a design tool.\n* **`frontend-ui-dark-ts`** (![]()c:\\\\Users\\\\moamm\\\\OneDrive\\\\Desktop\\\\Test.agents\\\\skills\\\\frontend-ui-dark-ts\\\\SKILL.md)\n    * **Why**: Specifically focused on building high-end dark-themed interfaces with glassmorphism and smooth animations, perfect for the requested UI style.\n* **`frontend-design`** (![]()c:\\\\Users\\\\moamm\\\\OneDrive\\\\Desktop\\\\Test.agents\\\\skills\\\\frontend-design\\\\SKILL.md)\n    * **Why**: Ensures the interface has \"intentional aesthetics\" and a non-generic visual identity, moving away from standard HTML/CSS defaults.\n\n### 2. **Core Component & Interaction Logic**\n\n* **`web-artifacts-builder`** (![]()c:\\\\Users\\\\moamm\\\\OneDrive\\\\Desktop\\\\Test.agents\\\\skills\\\\web-artifacts-builder\\\\SKILL.md)\n    * **Why**: Designed for creating elaborate, multi-component React/Tailwind/shadcn/ui artifacts. This is perfect for building a standalone, complex web tool like an ASCII editor.\n* **`modern-javascript-patterns`** (![]()c:\\\\Users\\\\moamm\\\\OneDrive\\\\Desktop\\\\Test.agents\\\\skills\\\\modern-javascript-patterns\\\\SKILL.md)\n    * **Why**: Crucial for implementing the complex JS event listeners (`mousedown`, `mousemove`, `e.preventDefault()`), undo/redo state management, and the exact character-width calculations required for the ASCII grid.\n* **`javascript-mastery`** (![]()c:\\\\Users\\\\moamm\\\\OneDrive\\\\Desktop\\\\Test.agents\\\\skills\\\\javascript-mastery\\\\SKILL.md)\n    * **Why**: Provides deep knowledge on closures and async patterns which are vital for a performant \"Freehand\" tool and smooth performance while dragging.\n\n### 3. **Canvas & Rendering Specialized**\n\n* **`canvas-design`** (![]()c:\\\\Users\\\\moamm\\\\OneDrive\\\\Desktop\\\\Test.agents\\\\skills\\\\canvas-design\\\\SKILL.md)\n    * **Why**: Although it focuses on static art, its underlying knowledge of canvas API interactions is highly relevant for the rendering engine you need.\n* **`react-flow-node-ts`** (![]()c:\\\\Users\\\\moamm\\\\OneDrive\\\\Desktop\\\\Test.agents\\\\skills\\\\react-flow-node-ts\\\\SKILL.md)\n    * **Why**: Useful if you decide to implement the editor using a node-based architecture for its state, particularly for the \"Select/Move\" and \"Select/Move\" logic.",
+      "createdAt": "2026-03-20T22:41:46.684Z",
+      "updatedAt": "2026-03-20T22:41:46.684Z"
     }
   ],
   "workspaces": [
