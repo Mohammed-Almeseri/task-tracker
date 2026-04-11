@@ -46,14 +46,16 @@
 
 .priority-breakdown-donut {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 20px;
+    gap: 30px;
     min-height: 120px;
+    padding-top: 10px;
 }
 
 .donut-ring {
-    width: 100px;
-    height: 100px;
+    width: 140px;
+    height: 140px;
     border-radius: 50%;
     position: relative;
     flex-shrink: 0;
@@ -61,7 +63,7 @@
 
 .donut-ring-inner {
     position: absolute;
-    inset: 22px;
+    inset: 20px;
     border-radius: 50%;
     background: var(--bg-card);
 }
@@ -69,16 +71,22 @@
 .donut-legend {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    flex: 1;
+    gap: 12px;
+    width: 100%;
 }
 
 .donut-legend-item {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 12px;
+    justify-content: space-between;
+    font-size: 13px;
     color: var(--text-secondary);
+}
+
+.legend-dot-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .donut-legend-item .legend-dot {
@@ -86,10 +94,6 @@
     height: 8px;
     border-radius: 50%;
     flex-shrink: 0;
-}
-
-.donut-legend-item .legend-label {
-    flex: 1;
 }
 
 .donut-legend-item .legend-count {
@@ -205,9 +209,24 @@
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 6px;
+    gap: 12px;
     width: 100%;
-    padding: 4px 0;
+    padding: 16px;
+    background: rgba(30, 30, 46, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-md, 12px);
+}
+
+.focus-task-header-row {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.focus-task-sparkle {
+    color: #fb923c;
+    font-size: 16px;
 }
 
 .focus-task-status-badge {
@@ -218,62 +237,50 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.8px;
-    padding: 4px 12px;
-    border-radius: 20px;
-    background: rgba(59, 130, 246, 0.15);
-    color: #3b82f6;
-    border: 1px solid rgba(59, 130, 246, 0.25);
+    padding: 4px 10px;
+    border-radius: 12px;
+    background: rgba(139, 92, 246, 0.15);
+    color: #a78bfa;
+    border: none;
 }
 
 .focus-task-title-text {
-    font-size: 18px;
-    font-weight: 800;
-    color: var(--text-primary);
-    margin: 4px 0 2px;
+    font-size: 20px;
+    font-weight: 700;
+    color: #fb923c;
+    margin: 4px 0 0;
     line-height: 1.3;
     letter-spacing: -0.3px;
 }
 
 .focus-task-subtitle {
-    font-size: 12px;
+    font-size: 13px;
     color: var(--text-muted);
-    margin-bottom: 6px;
     display: flex;
     align-items: center;
     gap: 6px;
 }
 
-.focus-task-subtitle::before {
-    content: '';
-    display: inline-block;
-    width: 12px;
-    height: 12px;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238b8b9e' stroke-width='2'%3E%3Crect x='3' y='4' width='18' height='18' rx='2'/%3E%3Cline x1='16' y1='2' x2='16' y2='6'/%3E%3Cline x1='8' y1='2' x2='8' y2='6'/%3E%3Cline x1='3' y1='10' x2='21' y2='10'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    flex-shrink: 0;
-    opacity: 0.7;
-}
-
 .focus-task-progress-wrap {
     width: 100%;
+    margin-top: 8px;
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    margin-bottom: 4px;
+    gap: 8px;
 }
 
 .focus-task-progress-track {
-    height: 5px;
-    background: rgba(255, 255, 255, 0.08);
-    border-radius: 3px;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
     overflow: hidden;
     width: 100%;
 }
 
 .focus-task-progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, #8b5cf6, #3b82f6);
-    border-radius: 3px;
+    background: #fb923c;
+    border-radius: 4px;
     transition: width 0.6s ease;
 }
 
@@ -287,43 +294,150 @@
 
 .focus-task-actions-row {
     display: flex;
-    gap: 10px;
-    margin-top: 10px;
+    gap: 12px;
+    margin-top: 8px;
     width: 100%;
 }
 
 .focus-task-actions-row .btn {
-    flex: 1;
-    font-size: 13px;
-    padding: 10px 16px;
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
     font-weight: 600;
-    justify-content: center;
     display: flex;
     align-items: center;
-    gap: 6px;
+    justify-content: center;
+    font-size: 14px;
 }
 
-.focus-task-actions-row .btn-primary {
-    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-    border: 1px solid rgba(139, 92, 246, 0.4);
-    box-shadow: 0 4px 14px rgba(139, 92, 246, 0.35);
+.btn-options {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.08);
+    color: white;
 }
-
-.focus-task-actions-row .btn-primary:hover {
-    background: linear-gradient(135deg, #7c3aed, #6d28d9);
-    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
-    transform: translateY(-1px);
-}
-
-.focus-task-actions-row .btn-secondary {
-    background: rgba(255, 255, 255, 0.07);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-}
-
-.focus-task-actions-row .btn-secondary:hover {
+.btn-options:hover {
     background: rgba(255, 255, 255, 0.12);
-    transform: translateY(-1px);
 }
+
+.btn-pause {
+    flex: 1.5;
+    background: #f43f5e;
+    color: white;
+}
+.btn-pause:hover {
+    background: #e11d48;
+}
+
+/* ==========================================
+   DAILY CHECKLIST REDESIGN
+   ========================================== */
+
+.daily-plan-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.hobby-add-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.hobby-add-row input {
+    flex: 1;
+    background: rgba(30, 30, 46, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: var(--text-primary);
+    border-radius: 8px;
+    padding: 10px 12px;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hobby-add-row input:focus {
+    border-color: rgba(139, 92, 246, 0.8);
+    box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.22);
+}
+
+.daily-action-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    background: rgba(30,30,46,0.5);
+    border-radius: var(--radius-md, 10px);
+    transition: background 0.2s;
+}
+
+.daily-action-item:hover {
+    background: rgba(40,40,56,0.6);
+}
+
+.daily-action-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.daily-action-check {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    border: 1px solid rgba(255,255,255,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+}
+
+.daily-action-item.done .daily-action-check {
+    background: #8b5cf6;
+    border-color: #8b5cf6;
+}
+
+.daily-action-item.done .daily-action-check::after {
+    content: '';
+    width: 4px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    margin-top: -2px;
+}
+
+.daily-action-title {
+    font-size: 14px;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.daily-action-done-badge {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: rgba(255, 255, 255, 0.78);
+    min-width: 44px;
+    text-align: right;
+}
+
+.daily-action-item.done .daily-action-title {
+    text-decoration: line-through;
+    color: var(--text-muted);
+    opacity: 0.6;
+}
+
+.task-importance-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+.task-importance-dot.urgent { background: #f43f5e; }
+.task-importance-dot.high { background: #fb923c; }
+.task-importance-dot.medium { background: #8b5cf6; }
+.task-importance-dot.low { background: #2dd4bf; }
+
 
 /* ==========================================
    COMPLETION TREND CHART FIX

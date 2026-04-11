@@ -28,7 +28,7 @@ beforeEach(() => {
 
     // Mock global functions from app.js that are out of scope for these tests
     window.animateValue = jest.fn();
-    window.formatDuration = jest.fn((val) => \`\${val}s\`);
+    window.formatDuration = jest.fn((val) => `${val}s`);
     window.escHtml = jest.fn((str) => str);
     window.findTaskName = jest.fn(() => 'Mock Task Name');
     window.apiGet = jest.fn();
@@ -42,7 +42,7 @@ beforeEach(() => {
         const maxCount = Math.max(...trend.map(t => t.count), 1);
         container.innerHTML = trend.map(t => {
             const h = Math.max(2, (t.count / maxCount) * 120);
-            return \`<div class="chart-bar \${t.count > 0 ? 'has-value' : ''}" style="height:\${h}px" title="\${t.date}: \${t.count} tasks"></div>\`;
+            return `<div class="chart-bar ${t.count > 0 ? 'has-value' : ''}" style="height:${h}px" title="${t.date}: ${t.count} tasks"></div>`;
         }).join('');
     };
 
@@ -56,14 +56,14 @@ beforeEach(() => {
             { label: 'Medium', color: 'var(--medium)', count: byImportance.medium },
             { label: 'Low', color: 'var(--low)', count: byImportance.low },
         ];
-        container.innerHTML = items.map(i => \`
+        container.innerHTML = items.map(i => `
             <div class="priority-row">
-                <span class="priority-dot" style="background:\${i.color}"></span>
-                <span class="priority-label">\${i.label}</span>
-                <div class="priority-bar-track"><div class="priority-bar-fill" style="width:\${(i.count / t) * 100}%;background:\${i.color}"></div></div>
-                <span class="priority-count">\${i.count}</span>
+                <span class="priority-dot" style="background:${i.color}"></span>
+                <span class="priority-label">${i.label}</span>
+                <div class="priority-bar-track"><div class="priority-bar-fill" style="width:${(i.count / t) * 100}%;background:${i.color}"></div></div>
+                <span class="priority-count">${i.count}</span>
             </div>
-        \`).join('');
+        `).join('');
     };
 
     window.renderTimeDistribution = function(timeByGoal) {
@@ -79,21 +79,21 @@ beforeEach(() => {
             cumPercent += pct;
             return { ...g, pct, start, color: colors[i % colors.length] };
         });
-        const gradientParts = segments.map(s => \`\${s.color} \${s.start}% \${s.start + s.pct}%\`).join(', ');
-        container.innerHTML = \`
-            <div class="donut-svg" style="border-radius:50%;background:conic-gradient(\${gradientParts});width:100px;height:100px;position:relative;">
+        const gradientParts = segments.map(s => `${s.color} ${s.start}% ${s.start + s.pct}%`).join(', ');
+        container.innerHTML = `
+            <div class="donut-svg" style="border-radius:50%;background:conic-gradient(${gradientParts});width:100px;height:100px;position:relative;">
                 <div style="position:absolute;inset:25px;border-radius:50%;background:var(--bg-card)"></div>
             </div>
             <div class="donut-legend">
-                \${segments.map(s => \`
+                ${segments.map(s => `
                     <div class="donut-legend-item">
-                        <span class="legend-dot" style="background:\${s.color}"></span>
-                        <span>\${escHtml(s.title)}</span>
-                        <span class="legend-time">\${formatDuration(s.time)}</span>
+                        <span class="legend-dot" style="background:${s.color}"></span>
+                        <span>${escHtml(s.title)}</span>
+                        <span class="legend-time">${formatDuration(s.time)}</span>
                     </div>
-                \`).join('')}
+                `).join('')}
             </div>
-        \`;
+        `;
     };
 
     window.renderHeatmap = function(heatmapData) {
@@ -112,7 +112,7 @@ beforeEach(() => {
                 else if (ratio <= 0.75) level = 'level-3';
                 else level = 'level-4';
             }
-            return \`<div class="heatmap-cell \${level}" title="\${date}: \${count} completed"></div>\`;
+            return `<div class="heatmap-cell ${level}" title="${date}: ${count} completed"></div>`;
         }).join('');
     };
 });

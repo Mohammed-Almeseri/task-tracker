@@ -1,0 +1,958 @@
+﻿node.exe : FAIL 
+./test_dashboard.test.js
+At line:1 char:1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
+    + CategoryInfo          
+    : NotSpecified: (FAIL   
+  ./test_dashboard.test.j   
+ s:String) [], RemoteExc    
+eption
+    + FullyQualifiedErrorId 
+    : NativeCommandError
+ 
+  ΓùÅ Test suite failed to 
+run
+
+    ΓùÅ Validation Error:
+
+      Test environment 
+jest-environment-jsdom 
+cannot be found. Make sure 
+the testEnvironment 
+configuration option points 
+to an existing node module.
+
+      Configuration 
+Documentation:
+      https://jestjs.io/docs
+/configuration
+
+
+    As of Jest 28 
+"jest-environment-jsdom" is 
+no longer shipped by 
+default, make sure to 
+install it separately.
+
+        Test environment 
+jest-environment-jsdom 
+cannot be found. Make sure 
+the testEnvironment 
+configuration option points 
+to an existing node module.
+        Configuration 
+Documentation:
+        https://jestjs.io/do
+cs/configuration
+      As of Jest 28 
+"jest-environment-jsdom" is 
+no longer shipped by 
+default, make sure to 
+install it separately.
+
+  console.log
+    [dotenv@17.3.1] injecting env (2) from .env -- tip: ΓÜÖ∩╕Å  enable debug logging with { debug: true }
+
+      at _log (node_modules/dotenv/lib/main.js:139:11)
+
+  console.log
+      Γ£à POST /api/goals ΓåÆ 201 (22ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      ΓÜá∩╕Å POST /api/goals ΓåÆ 400 (5ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      ΓÜá∩╕Å POST /api/goals ΓåÆ 400 (2ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à POST /api/goals ΓåÆ 201 (5ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à POST /api/goals ΓåÆ 201 (3ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à GET /api/goals ΓåÆ 200 (2ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à POST /api/goals ΓåÆ 201 (5ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à GET /api/goals/bd9e73e1-1532-4c51-9dfb-f4dad609f650 ΓåÆ 200 (1ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      ΓÜá∩╕Å GET /api/goals/nonexistent-id ΓåÆ 404 (6ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à POST /api/goals ΓåÆ 201 (10ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à PUT /api/goals/ae3594c2-8cef-4352-b932-83b234c95455 ΓåÆ 200 (5ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      ΓÜá∩╕Å PUT /api/goals/fake-id ΓåÆ 404 (7ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à POST /api/goals ΓåÆ 201 (13ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à DELETE /api/goals/20db0df9-1794-4ade-817a-95b652d0a532 ΓåÆ 204 (16ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à GET /api/goals ΓåÆ 200 (0ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      ΓÜá∩╕Å DELETE /api/goals/nonexistent ΓåÆ 404 (2ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à POST /api/goals ΓåÆ 201 (11ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à POST /api/goals/a2fb38cb-aa1b-48ba-bb8c-12c6d0109151/tasks ΓåÆ 201 (9ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à POST /api/goals ΓåÆ 201 (27ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      ΓÜá∩╕Å POST /api/goals/d3f1a139-90bf-4b36-a6c3-a74bda965c12/tasks ΓåÆ 400 (2ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à POST /api/goals ΓåÆ 201 (4ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      ΓÜá∩╕Å POST /api/goals/fake-goal-id/tasks ΓåÆ 404 (2ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à POST /api/goals ΓåÆ 201 (3ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à POST /api/goals/20d15b3f-fa53-4c3d-b92b-fcdd6a9e315e/tasks ΓåÆ 201 (12ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à POST /api/goals ΓåÆ 201 (3ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à POST /api/goals/863b9366-9211-4178-a2ca-8fb51d5872a7/tasks ΓåÆ 201 (8ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.error
+      Γ¥î Data file write error: EPERM: operation not permitted, rename 'C:\Users\moamm\OneDrive\Desktop\Test\task-tracker\data.test.json.tmp' -> 'C:\Users\moamm\OneDrive\Desktop\Test\task-tracker\data.test.json'
+
+    [0m [90m  96 |[39m         fs[33m.[39mrenameSync(tempFile[33m,[39m config[33m.[39mdataFile)[33m;[39m
+     [90m  97 |[39m     } [36mcatch[39m (err) {
+    [31m[1m>[22m[39m[90m  98 |[39m         console[33m.[39merror([32m'  Γ¥î Data file write error:'[39m[33m,[39m err[33m.[39mmessage)[33m;[39m
+     [90m     |[39m                 [31m[1m^[22m[39m
+     [90m  99 |[39m         [36mthrow[39m [36mnew[39m [33mAppError[39m([32m'Failed to save data'[39m[33m,[39m [35m500[39m)[33m;[39m
+     [90m 100 |[39m     }
+     [90m 101 |[39m }[0m
+
+      at error (server.js:98:17)
+      at Object.writeData [as update] (server.js:335:9)
+      at update (server.js:576:83)
+      at fn (server.js:134:25)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at next (node_modules/express/lib/router/route.js:149:13)
+      at Route.dispatch (node_modules/express/lib/router/route.js:119:3)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at node_modules/express/lib/router/index.js:284:15
+      at param (node_modules/express/lib/router/index.js:365:14)
+      at param (node_modules/express/lib/router/index.js:376:14)
+      at Function.process_params (node_modules/express/lib/router/index.js:421:3)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at next (server.js:70:5)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (node_modules/express/lib/router/index.js:328:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at next (server.js:58:5)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (node_modules/express/lib/router/index.js:328:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at serveStatic (node_modules/serve-static/index.js:75:16)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (node_modules/express/lib/router/index.js:328:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at node_modules/body-parser/lib/read.js:137:5
+      at invokeCallback (node_modules/raw-body/index.js:238:16)
+      at done (node_modules/raw-body/index.js:227:7)
+      at IncomingMessage.onEnd (node_modules/raw-body/index.js:287:7)
+
+  console.log
+      ΓÜá∩╕Å PUT /api/tasks/aed5b0a8-afc9-4032-a1f0-5120d0483ba0 ΓåÆ 500 (101ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à POST /api/goals ΓåÆ 201 (5ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à POST /api/goals/d66bfa07-5630-4681-9845-961b12cab9b8/tasks ΓåÆ 201 (43ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à PUT /api/tasks/7b9a1643-c68e-464e-8e62-68367b5a468d ΓåÆ 200 (14ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à POST /api/goals ΓåÆ 201 (7ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à POST /api/goals/99344bb6-4158-49f2-b5c7-4a1e0abf30de/tasks ΓåÆ 201 (5ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à PUT /api/tasks/f35b41a1-2f1e-4a69-a269-8a0c67383f30 ΓåÆ 200 (32ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à PUT /api/tasks/f35b41a1-2f1e-4a69-a269-8a0c67383f30 ΓåÆ 200 (4ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à POST /api/goals ΓåÆ 201 (19ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à POST /api/goals/2ab616f1-f128-4400-8cfd-6032547bba06/tasks ΓåÆ 201 (17ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      ΓÜá∩╕Å PUT /api/tasks/8e20667b-004d-414b-bc6e-fa86514ee050 ΓåÆ 400 (7ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à POST /api/goals ΓåÆ 201 (5ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      ΓÜá∩╕Å PUT /api/tasks/no-such-task ΓåÆ 404 (4ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à POST /api/goals ΓåÆ 201 (11ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à POST /api/goals/8e702e49-e5f8-4f0c-93a5-d60829a427d5/tasks ΓåÆ 201 (6ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à DELETE /api/tasks/c69a6a19-89c6-41c5-a2ed-ca0bd8c23f91 ΓåÆ 204 (5ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à GET /api/goals/8e702e49-e5f8-4f0c-93a5-d60829a427d5 ΓåÆ 200 (1ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à POST /api/goals ΓåÆ 201 (4ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      ΓÜá∩╕Å DELETE /api/tasks/nonexistent ΓåÆ 404 (5ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à POST /api/notes ΓåÆ 201 (13ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      ΓÜá∩╕Å POST /api/notes ΓåÆ 400 (1ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à POST /api/notes ΓåÆ 201 (10ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à POST /api/notes ΓåÆ 201 (20ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à GET /api/notes ΓåÆ 200 (2ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à POST /api/notes ΓåÆ 201 (9ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à PUT /api/notes/8ba10b68-f742-4e6d-bc58-1962f36b77aa ΓåÆ 200 (37ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à POST /api/notes ΓåÆ 201 (3ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à DELETE /api/notes/85ea4344-1f09-4add-9cdc-2cedf410a87f ΓåÆ 204 (7ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à GET /api/notes ΓåÆ 200 (2ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      ΓÜá∩╕Å DELETE /api/notes/nonexistent ΓåÆ 404 (1ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à POST /api/timer-sessions ΓåÆ 201 (4ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à POST /api/goals ΓåÆ 201 (5ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à POST /api/goals/ebed5b3d-c759-42af-901c-f58ad1731489/tasks ΓåÆ 201 (25ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à POST /api/timer-sessions ΓåÆ 201 (16ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à GET /api/goals/ebed5b3d-c759-42af-901c-f58ad1731489 ΓåÆ 200 (1ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à POST /api/timer-sessions ΓåÆ 201 (6ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à POST /api/timer-sessions ΓåÆ 201 (4ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à GET /api/timer-sessions ΓåÆ 200 (1ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à GET /api/stats ΓåÆ 200 (13ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à POST /api/goals ΓåÆ 201 (6ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à POST /api/goals/719b193e-c47c-4ac3-9ac4-95a297257e3b/tasks ΓåÆ 201 (4ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.error
+      Γ¥î Data file write error: EPERM: operation not permitted, rename 'C:\Users\moamm\OneDrive\Desktop\Test\task-tracker\data.test.json.tmp' -> 'C:\Users\moamm\OneDrive\Desktop\Test\task-tracker\data.test.json'
+
+    [0m [90m  96 |[39m         fs[33m.[39mrenameSync(tempFile[33m,[39m config[33m.[39mdataFile)[33m;[39m
+     [90m  97 |[39m     } [36mcatch[39m (err) {
+    [31m[1m>[22m[39m[90m  98 |[39m         console[33m.[39merror([32m'  Γ¥î Data file write error:'[39m[33m,[39m err[33m.[39mmessage)[33m;[39m
+     [90m     |[39m                 [31m[1m^[22m[39m
+     [90m  99 |[39m         [36mthrow[39m [36mnew[39m [33mAppError[39m([32m'Failed to save data'[39m[33m,[39m [35m500[39m)[33m;[39m
+     [90m 100 |[39m     }
+     [90m 101 |[39m }[0m
+
+      at error (server.js:98:17)
+      at Object.writeData [as create] (server.js:301:9)
+      at create (server.js:575:102)
+      at fn (server.js:134:25)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at next (node_modules/express/lib/router/route.js:149:13)
+      at Route.dispatch (node_modules/express/lib/router/route.js:119:3)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at node_modules/express/lib/router/index.js:284:15
+      at param (node_modules/express/lib/router/index.js:365:14)
+      at param (node_modules/express/lib/router/index.js:376:14)
+      at Function.process_params (node_modules/express/lib/router/index.js:421:3)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at next (server.js:70:5)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (node_modules/express/lib/router/index.js:328:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at next (server.js:58:5)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (node_modules/express/lib/router/index.js:328:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at serveStatic (node_modules/serve-static/index.js:75:16)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (node_modules/express/lib/router/index.js:328:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at node_modules/body-parser/lib/read.js:137:5
+      at invokeCallback (node_modules/raw-body/index.js:238:16)
+      at done (node_modules/raw-body/index.js:227:7)
+      at IncomingMessage.onEnd (node_modules/raw-body/index.js:287:7)
+
+  console.log
+      ΓÜá∩╕Å POST /api/goals/719b193e-c47c-4ac3-9ac4-95a297257e3b/tasks ΓåÆ 500 (71ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à POST /api/timer-sessions ΓåÆ 201 (12ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à GET /api/stats ΓåÆ 200 (22ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à GET /api/stats ΓåÆ 200 (5ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à POST /api/goals ΓåÆ 201 (8ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à POST /api/goals/5e39756e-af4a-4aaa-a8a5-5b5e81b6f25e/tasks ΓåÆ 201 (20ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à GET /api/export/json ΓåÆ 200 (5ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à POST /api/goals ΓåÆ 201 (496ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à POST /api/goals/1e14095f-e44f-4781-bd40-cd47a7b83845/tasks ΓåÆ 201 (6ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à GET /api/export/csv ΓåÆ 200 (1ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à POST /api/goals ΓåÆ 201 (4ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à POST /api/goals/f6a1b5ab-1cf9-4a64-b993-da50bb04d771/tasks ΓåÆ 201 (66ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à GET /api/export/csv ΓåÆ 200 (5ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      ΓÜá∩╕Å GET / ΓåÆ 404 (1ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.error
+      Γ¥î Unhandled error: SyntaxError: Expected property name or '}' in JSON at position 2 (line 1 column 3)
+        at JSON.parse (<anonymous>)
+        at parse (C:\Users\moamm\OneDrive\Desktop\Test\task-tracker\node_modules\body-parser\lib\types\json.js:92:19)
+        at C:\Users\moamm\OneDrive\Desktop\Test\task-tracker\node_modules\body-parser\lib\read.js:128:18
+        at AsyncResource.runInAsyncScope (node:async_hooks:214:14)
+        at invokeCallback (C:\Users\moamm\OneDrive\Desktop\Test\task-tracker\node_modules\raw-body\index.js:238:16)
+        at done (C:\Users\moamm\OneDrive\Desktop\Test\task-tracker\node_modules\raw-body\index.js:227:7)
+        at IncomingMessage.onEnd (C:\Users\moamm\OneDrive\Desktop\Test\task-tracker\node_modules\raw-body\index.js:287:7)
+        at IncomingMessage.emit (node:events:519:28)
+        at endReadableNT (node:internal/streams/readable:1698:12)
+        at processTicksAndRejections (node:internal/process/task_queues:90:21)
+
+    [0m [90m 703 |[39m     [36mconst[39m statusCode [33m=[39m err[33m.[39mstatusCode [33m||[39m [35m500[39m[33m;[39m
+     [90m 704 |[39m     [36mconst[39m message [33m=[39m err[33m.[39misOperational [33m?[39m err[33m.[39mmessage [33m:[39m [32m'Internal server error'[39m[33m;[39m
+    [31m[1m>[22m[39m[90m 705 |[39m     [36mif[39m ([33m![39merr[33m.[39misOperational) console[33m.[39merror([32m'  Γ¥î Unhandled error:'[39m[33m,[39m err[33m.[39mstack [33m||[39m err[33m.[39mmessage)[33m;[39m
+     [90m     |[39m                                     [31m[1m^[22m[39m
+     [90m 706 |[39m     res[33m.[39mstatus(statusCode)[33m.[39mjson({ error[33m:[39m message[33m,[39m [33m...[39m(err[33m.[39mdetails [33m&&[39m { details[33m:[39m err[33m.[39mdetails }) })[33m;[39m
+     [90m 707 |[39m })[33m;[39m
+     [90m 708 |[39m[0m
+
+      at error (server.js:705:37)
+      at Layer.handle_error (node_modules/express/lib/router/layer.js:71:5)
+      at trim_prefix (node_modules/express/lib/router/index.js:326:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at Layer.handle_error (node_modules/express/lib/router/layer.js:67:12)
+      at trim_prefix (node_modules/express/lib/router/index.js:326:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at param (node_modules/express/lib/router/index.js:365:14)
+      at param (node_modules/express/lib/router/index.js:376:14)
+      at Function.process_params (node_modules/express/lib/router/index.js:421:3)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at Layer.handle_error (node_modules/express/lib/router/layer.js:67:12)
+      at trim_prefix (node_modules/express/lib/router/index.js:326:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at Layer.handle_error (node_modules/express/lib/router/layer.js:67:12)
+      at trim_prefix (node_modules/express/lib/router/index.js:326:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at Layer.handle_error (node_modules/express/lib/router/layer.js:67:12)
+      at trim_prefix (node_modules/express/lib/router/index.js:326:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at node_modules/body-parser/lib/read.js:130:7
+      at invokeCallback (node_modules/raw-body/index.js:238:16)
+      at done (node_modules/raw-body/index.js:227:7)
+      at IncomingMessage.onEnd (node_modules/raw-body/index.js:287:7)
+
+  console.log
+      ΓÜá∩╕Å POST /api/goals ΓåÆ 400 (1ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à POST /api/goals ΓåÆ 201 (8ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à POST /api/restore ΓåÆ 200 (9ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à GET /api/goals ΓåÆ 200 (1ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à GET /api/notes ΓåÆ 200 (4ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      ΓÜá∩╕Å POST /api/restore ΓåÆ 400 (1ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.error
+      Γ¥î Unhandled error: SyntaxError: Unexpected token '"', ""just a string"" is not valid JSON
+        at JSON.parse (<anonymous>)
+        at createStrictSyntaxError (C:\Users\moamm\OneDrive\Desktop\Test\task-tracker\node_modules\body-parser\lib\types\json.js:169:10)
+        at parse (C:\Users\moamm\OneDrive\Desktop\Test\task-tracker\node_modules\body-parser\lib\types\json.js:86:15)
+        at C:\Users\moamm\OneDrive\Desktop\Test\task-tracker\node_modules\body-parser\lib\read.js:128:18
+        at AsyncResource.runInAsyncScope (node:async_hooks:214:14)
+        at invokeCallback (C:\Users\moamm\OneDrive\Desktop\Test\task-tracker\node_modules\raw-body\index.js:238:16)
+        at done (C:\Users\moamm\OneDrive\Desktop\Test\task-tracker\node_modules\raw-body\index.js:227:7)
+        at IncomingMessage.onEnd (C:\Users\moamm\OneDrive\Desktop\Test\task-tracker\node_modules\raw-body\index.js:287:7)
+        at IncomingMessage.emit (node:events:519:28)
+        at endReadableNT (node:internal/streams/readable:1698:12)
+        at processTicksAndRejections (node:internal/process/task_queues:90:21)
+
+    [0m [90m 703 |[39m     [36mconst[39m statusCode [33m=[39m err[33m.[39mstatusCode [33m||[39m [35m500[39m[33m;[39m
+     [90m 704 |[39m     [36mconst[39m message [33m=[39m err[33m.[39misOperational [33m?[39m err[33m.[39mmessage [33m:[39m [32m'Internal server error'[39m[33m;[39m
+    [31m[1m>[22m[39m[90m 705 |[39m     [36mif[39m ([33m![39merr[33m.[39misOperational) console[33m.[39merror([32m'  Γ¥î Unhandled error:'[39m[33m,[39m err[33m.[39mstack [33m||[39m err[33m.[39mmessage)[33m;[39m
+     [90m     |[39m                                     [31m[1m^[22m[39m
+     [90m 706 |[39m     res[33m.[39mstatus(statusCode)[33m.[39mjson({ error[33m:[39m message[33m,[39m [33m...[39m(err[33m.[39mdetails [33m&&[39m { details[33m:[39m err[33m.[39mdetails }) })[33m;[39m
+     [90m 707 |[39m })[33m;[39m
+     [90m 708 |[39m[0m
+
+      at error (server.js:705:37)
+      at Layer.handle_error (node_modules/express/lib/router/layer.js:71:5)
+      at trim_prefix (node_modules/express/lib/router/index.js:326:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at Layer.handle_error (node_modules/express/lib/router/layer.js:67:12)
+      at trim_prefix (node_modules/express/lib/router/index.js:326:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at param (node_modules/express/lib/router/index.js:365:14)
+      at param (node_modules/express/lib/router/index.js:376:14)
+      at Function.process_params (node_modules/express/lib/router/index.js:421:3)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at Layer.handle_error (node_modules/express/lib/router/layer.js:67:12)
+      at trim_prefix (node_modules/express/lib/router/index.js:326:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at Layer.handle_error (node_modules/express/lib/router/layer.js:67:12)
+      at trim_prefix (node_modules/express/lib/router/index.js:326:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at Layer.handle_error (node_modules/express/lib/router/layer.js:67:12)
+      at trim_prefix (node_modules/express/lib/router/index.js:326:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at node_modules/body-parser/lib/read.js:130:7
+      at invokeCallback (node_modules/raw-body/index.js:238:16)
+      at done (node_modules/raw-body/index.js:227:7)
+      at IncomingMessage.onEnd (node_modules/raw-body/index.js:287:7)
+
+  console.log
+      Γ£à POST /api/goals ΓåÆ 201 (11ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+  console.log
+      Γ£à POST /api/restore ΓåÆ 200 (11ms)
+
+      at ServerResponse.log (server.js:67:17)
+
+FAIL tests/api.test.js 
+(8.717 s)
+  Goals API
+    ΓêÜ POST /api/goals 
+creates a new goal and 
+returns 201 (293 ms)
+    ΓêÜ POST /api/goals 
+with empty title returns 
+400 (37 ms)
+    ΓêÜ POST /api/goals 
+with missing title returns 
+400 (31 ms)
+    ΓêÜ GET /api/goals 
+returns all goals (104 ms)
+    ΓêÜ GET /api/goals/:id 
+returns a single goal (90 
+ms)
+    ΓêÜ GET /api/goals/:id 
+with nonexistent id returns 
+404 (43 ms)
+    ΓêÜ PUT /api/goals/:id 
+updates a goal (122 ms)
+    ΓêÜ PUT /api/goals/:id 
+with nonexistent id returns 
+404 (40 ms)
+    ΓêÜ DELETE 
+/api/goals/:id removes the 
+goal and returns 204 (148 
+ms)
+    ΓêÜ DELETE 
+/api/goals/:id with 
+nonexistent id returns 404 
+(35 ms)
+  Tasks API
+    ΓêÜ POST 
+/api/goals/:id/tasks 
+creates a task under a goal 
+(108 ms)
+    ΓêÜ POST 
+/api/goals/:id/tasks with 
+empty title returns 400 (93 
+ms)
+    ΓêÜ POST 
+/api/goals/:id/tasks with 
+nonexistent goal returns 
+404 (59 ms)
+    ΓêÜ POST 
+/api/goals/:id/tasks with 
+tags, dueDate, subtasks (92 
+ms)
+    ├ù PUT /api/tasks/:id 
+updates task fields (202 ms)
+    ΓêÜ PUT /api/tasks/:id 
+status to "done" sets 
+completedAt (148 ms)
+    ΓêÜ PUT /api/tasks/:id 
+status from "done" back to 
+"todo" clears completedAt 
+(183 ms)
+    ΓêÜ PUT /api/tasks/:id 
+with invalid status returns 
+400 (151 ms)
+    ΓêÜ PUT /api/tasks/:id 
+with nonexistent id returns 
+404 (82 ms)
+    ΓêÜ DELETE 
+/api/tasks/:id removes the 
+task (132 ms)
+    ΓêÜ DELETE 
+/api/tasks/:id with 
+nonexistent id returns 404 
+(51 ms)
+  Notes API
+    ΓêÜ POST /api/notes 
+creates a note and returns 
+201 (45 ms)
+    ΓêÜ POST /api/notes 
+with empty title returns 
+400 (62 ms)
+    ΓêÜ GET /api/notes 
+returns all notes (115 ms)
+    ΓêÜ PUT /api/notes/:id 
+updates a note (125 ms)
+    ΓêÜ DELETE 
+/api/notes/:id removes the 
+note (109 ms)
+    ΓêÜ DELETE 
+/api/notes/:id with 
+nonexistent id returns 404 
+(39 ms)
+  Timer Sessions API
+    ΓêÜ POST 
+/api/timer-sessions creates 
+a session (47 ms)
+    ΓêÜ POST 
+/api/timer-sessions with 
+taskId increments task 
+timeSpent (222 ms)
+    ΓêÜ GET 
+/api/timer-sessions returns 
+all sessions (100 ms)
+  Stats API
+    ΓêÜ GET /api/stats 
+returns expected fields 
+with empty data (44 ms)
+    ├ù GET /api/stats 
+reflects correct counts 
+after creating data (307 ms)
+    ΓêÜ GET /api/stats 
+completion trend has 30 
+entries (50 ms)
+  Export API
+    ΓêÜ GET 
+/api/export/json returns 
+attachment with full data 
+(117 ms)
+    ΓêÜ GET /api/export/csv 
+returns CSV with correct 
+headers (710 ms)
+    ΓêÜ GET /api/export/csv 
+includes task data with 
+goal name (272 ms)
+  Error Handling
+    ΓêÜ unknown API route 
+returns 404 with error 
+message (89 ms)
+    ΓêÜ invalid JSON body 
+returns 400 (91 ms)
+    ΓêÜ validation errors 
+include structured details 
+(26 ms)
+  Restore API
+    ΓêÜ POST /api/restore 
+replaces all data and 
+returns 200 (158 ms)
+    ΓêÜ POST /api/restore 
+with missing goals array 
+returns 400 (22 ms)
+    ΓêÜ POST /api/restore 
+with non-object body 
+returns 400 (107 ms)
+    ΓêÜ POST /api/restore 
+creates a safety backup 
+before overwriting (92 ms)
+
+  ΓùÅ Tasks API ΓÇ║ PUT 
+/api/tasks/:id updates task 
+fields
+
+    expect(received).toBe(ex
+pected) // Object.is 
+equality
+
+    Expected: 200
+    Received: 500
+
+    [0m [90m 198 |[39m   
+          [33m.[39msend({ 
+title[33m:[39m [32m'Updat
+ed'[39m[33m,[39m 
+importance[33m:[39m [32m'
+urgent'[39m[33m,[39m 
+status[33m:[39m 
+[32m'in-progress'[39m 
+})[33m;[39m
+     [90m 199 |[39m
+    
+[31m[1m>[22m[39m[90m 
+200 |[39m         expect(re
+s[33m.[39mstatus)[33m.[3
+9mtoBe([35m200[39m)[33m;
+[39m
+     [90m     |[39m       
+                     
+[31m[1m^[22m[39m
+     [90m 201 |[39m       
+  expect(res[33m.[39mbody
+[33m.[39mtitle)[33m.[39mt
+oBe([32m'Updated'[39m)[33
+m;[39m
+     [90m 202 |[39m       
+  expect(res[33m.[39mbody
+[33m.[39mimportance)[33m.
+[39mtoBe([32m'urgent'[39m)
+[33m;[39m
+     [90m 203 |[39m       
+  expect(res[33m.[39mbody
+[33m.[39mstatus)[33m.[39m
+toBe([32m'in-progress'[39m
+)[33m;[39m[0m
+
+      at Object.toBe 
+(tests/api.test.js:200:28)
+
+  ΓùÅ Stats API ΓÇ║ GET 
+/api/stats reflects correct 
+counts after creating data
+
+    expect(received).toBe(ex
+pected) // Object.is 
+equality
+
+    Expected: 2
+    Received: 1
+
+    [0m [90m 419 |[39m
+     [90m 420 |[39m       
+  expect(res[33m.[39mbody
+[33m.[39mtotalGoals)[33m.
+[39mtoBe([35m1[39m)[33m;
+[39m
+    
+[31m[1m>[22m[39m[90m 
+421 |[39m         expect(re
+s[33m.[39mbody[33m.[39mt
+otalTasks)[33m.[39mtoBe([
+35m2[39m)[33m;[39m
+     [90m     |[39m       
+                            
+  [31m[1m^[22m[39m
+     [90m 422 |[39m       
+  expect(res[33m.[39mbody
+[33m.[39mtasksByStatus[33m
+.[39mtodo)[33m.[39mtoBe(
+[35m1[39m)[33m;[39m
+     [90m 423 |[39m       
+  expect(res[33m.[39mbody
+[33m.[39mtasksByStatus[33m
+.[39mdone)[33m.[39mtoBe(
+[35m1[39m)[33m;[39m
+     [90m 424 |[39m       
+  expect(res[33m.[39mbody
+[33m.[39mtasksByImportance
+[33m.[39mhigh)[33m.[39mto
+Be([35m1[39m)[33m;[39m[
+0m
+
+      at Object.toBe 
+(tests/api.test.js:421:37)
+
+Test Suites: 2 failed, 2 
+total
+Tests:       2 failed, 41 
+passed, 43 total
+Snapshots:   0 total
+Time:        10.486 s
+Ran all test suites.

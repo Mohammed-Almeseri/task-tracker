@@ -2,6 +2,7 @@
 // TASK TRACKER — Server (Full Feature Set)
 // ==========================================
 
+require('dotenv').config();
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
@@ -28,7 +29,7 @@ const app = express();
 
 app.use((req, res, next) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
-    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
     res.setHeader('X-XSS-Protection', '1; mode=block');
     res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
 
@@ -79,22 +80,34 @@ function readData() {
         if (!Array.isArray(parsed.goals)) parsed.goals = [];
         if (!Array.isArray(parsed.timerSessions)) parsed.timerSessions = [];
         if (!Array.isArray(parsed.notes)) parsed.notes = [];
-        if (!Array.isArray(parsed.workspaces)) parsed.workspaces = [];
         return parsed;
     } catch (err) {
         console.error('  ⚠️  Data file read error, using defaults:', err.message);
-        return { goals: [], timerSessions: [], notes: [], workspaces: [] };
+        return { goals: [], timerSessions: [], notes: [] };
     }
 }
 
 function writeData(data) {
+    const payload = JSON.stringify(data, null, 2);
     try {
         const tempFile = config.dataFile + '.tmp';
-        fs.writeFileSync(tempFile, JSON.stringify(data, null, 2), 'utf-8');
+        fs.writeFileSync(tempFile, payload, 'utf-8');
         fs.renameSync(tempFile, config.dataFile);
     } catch (err) {
-        console.error('  ❌ Data file write error:', err.message);
-        throw new AppError('Failed to save data', 500);
+        try {
+            if (fs.existsSync(config.dataFile + '.tmp')) {
+                fs.unlinkSync(config.dataFile + '.tmp');
+            }
+        } catch (cleanupErr) {
+            // Ignore cleanup errors and continue with the fallback write.
+        }
+
+        try {
+            fs.writeFileSync(config.dataFile, payload, 'utf-8');
+        } catch (fallbackErr) {
+            console.error('  ❌ Data file write error:', fallbackErr.message);
+            throw new AppError('Failed to save data', 500);
+        }
     }
 }
 
@@ -222,27 +235,6 @@ function validateNoteInput(body, isUpdate = false) {
     return {
         title: body.title ? body.title.trim() : undefined,
         content: body.content !== undefined ? body.content : undefined
-    };
-}
-
-function validateWorkspaceInput(body, isUpdate = false) {
-    const errors = [];
-    if (!isUpdate) {
-        if (!body.title || typeof body.title !== 'string' || body.title.trim().length === 0) {
-            errors.push('title is required and must be a string');
-        }
-    } else {
-        if (body.title !== undefined && (typeof body.title !== 'string' || body.title.trim().length === 0)) {
-            errors.push('title must be a non-empty string');
-        }
-    }
-    if (body.data !== undefined && typeof body.data !== 'object') {
-        errors.push('data must be an object (drawflow export structure)');
-    }
-    if (errors.length > 0) throw new ValidationError('Invalid workspace input', errors);
-    return {
-        title: body.title ? body.title.trim() : undefined,
-        data: body.data !== undefined ? body.data : undefined
     };
 }
 
@@ -391,35 +383,6 @@ const noteService = {
     }
 };
 
-const workspaceService = {
-    getAll() { return readData().workspaces || []; },
-    create(input) {
-        const data = readData();
-        if (!data.workspaces) data.workspaces = [];
-        const workspace = { id: uuidv4(), title: input.title, data: input.data || {}, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
-        data.workspaces.push(workspace);
-        writeData(data);
-        return workspace;
-    },
-    update(id, input) {
-        const data = readData();
-        if (!data.workspaces) data.workspaces = [];
-        const idx = data.workspaces.findIndex(w => w.id === id);
-        if (idx === -1) throw new NotFoundError('Workspace');
-        data.workspaces[idx] = { ...data.workspaces[idx], ...(input.title !== undefined && { title: input.title }), ...(input.data !== undefined && { data: input.data }), updatedAt: new Date().toISOString() };
-        writeData(data);
-        return data.workspaces[idx];
-    },
-    delete(id) {
-        const data = readData();
-        if (!data.workspaces) data.workspaces = [];
-        const idx = data.workspaces.findIndex(w => w.id === id);
-        if (idx === -1) throw new NotFoundError('Workspace');
-        data.workspaces.splice(idx, 1);
-        writeData(data);
-    }
-};
-
 const backupService = {
     createBackup() {
         const data = readData();
@@ -447,8 +410,7 @@ const backupService = {
         const restored = {
             goals: body.goals,
             timerSessions: Array.isArray(body.timerSessions) ? body.timerSessions : [],
-            notes: Array.isArray(body.notes) ? body.notes : [],
-            workspaces: Array.isArray(body.workspaces) ? body.workspaces : []
+            notes: Array.isArray(body.notes) ? body.notes : []
         };
         writeData(restored);
         return { safetyBackup: safetyFile };
@@ -584,12 +546,6 @@ app.post('/api/notes', asyncHandler(async (req, res) => { res.status(201).json(n
 app.put('/api/notes/:id', asyncHandler(async (req, res) => { res.json(noteService.update(req.params.id, validateNoteInput(req.body, true))); }));
 app.delete('/api/notes/:id', asyncHandler(async (req, res) => { noteService.delete(req.params.id); res.status(204).end(); }));
 
-// Workspaces
-app.get('/api/workspaces', asyncHandler(async (req, res) => { res.json(workspaceService.getAll()); }));
-app.post('/api/workspaces', asyncHandler(async (req, res) => { res.status(201).json(workspaceService.create(validateWorkspaceInput(req.body))); }));
-app.put('/api/workspaces/:id', asyncHandler(async (req, res) => { res.json(workspaceService.update(req.params.id, validateWorkspaceInput(req.body, true))); }));
-app.delete('/api/workspaces/:id', asyncHandler(async (req, res) => { workspaceService.delete(req.params.id); res.status(204).end(); }));
-
 // Stats
 app.get('/api/stats', asyncHandler(async (req, res) => { res.json(statsService.getStats()); }));
 
@@ -667,7 +623,7 @@ if (require.main === module) {
     process.on('SIGTERM', () => shutdown('SIGTERM'));
     process.on('SIGINT', () => shutdown('SIGINT'));
     process.on('unhandledRejection', (reason) => { console.error('  ❌ Unhandled Promise Rejection:', reason); });
-    process.on('uncaughtException', (err) => { console.error('  ❌ Uncaught Exception:', err.message); shutdown('uncaughtException'); });
+    process.on('uncaughtException', (err) => { require('fs').writeFileSync('bug.txt', err.stack); shutdown('uncaughtException'); });
 }
 
 module.exports = { app, config, readData, writeData };

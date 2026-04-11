@@ -529,8 +529,7 @@ describe('Restore API', () => {
         const backupData = {
             goals: [{ id: 'g1', title: 'Restored Goal', description: '', createdAt: new Date().toISOString(), tasks: [] }],
             timerSessions: [],
-            notes: [{ id: 'n1', title: 'Restored Note', content: 'Hello', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }],
-            workspaces: []
+            notes: [{ id: 'n1', title: 'Restored Note', content: 'Hello', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }]
         };
 
         const res = await request(app)
@@ -579,7 +578,7 @@ describe('Restore API', () => {
 
         await request(app)
             .post('/api/restore')
-            .send({ goals: [], timerSessions: [], notes: [], workspaces: [] });
+            .send({ goals: [], timerSessions: [], notes: [] });
 
         const backupsAfter = fs.readdirSync(path.join(__dirname, '..', 'backups')).length;
         expect(backupsAfter).toBeGreaterThan(backupsBefore);

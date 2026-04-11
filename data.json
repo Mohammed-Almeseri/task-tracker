@@ -26,7 +26,8 @@
           ],
           "dueDate": null,
           "subtasks": [],
-          "updatedAt": "2026-03-16T01:54:34.657Z"
+          "updatedAt": "2026-04-11T16:04:24.025Z",
+          "timeSpent": 60
         },
         {
           "id": "e355aed4-c794-4366-bda3-85199588d102",
@@ -50,8 +51,8 @@
       "tasks": [
         {
           "id": "f519beef-2a8e-4927-9c98-ed167b66f271",
-          "title": "Study Mathmatics",
-          "status": "in-progress",
+          "title": "Study Mathematics (Verified)",
+          "status": "done",
           "importance": "high",
           "tags": [
             "University",
@@ -59,13 +60,15 @@
           ],
           "dueDate": "2026-03-23",
           "subtasks": [],
-          "timeSpent": 29136,
-          "updatedAt": "2026-03-17T03:34:41.681Z"
+          "timeSpent": 31894,
+          "updatedAt": "2026-03-29T11:38:57.909Z",
+          "description": "",
+          "completedAt": "2026-03-29T11:38:57.909Z"
         },
         {
           "id": "b3e9a123-4567-89ab-cdef-0123456789ab",
           "title": "Learn Physics II",
-          "status": "in-progress",
+          "status": "done",
           "importance": "high",
           "tags": [
             "University",
@@ -73,23 +76,24 @@
           ],
           "dueDate": "2026-03-23",
           "subtasks": [],
-          "updatedAt": "2026-03-22T22:29:49.182Z",
-          "timeSpent": 13611
+          "updatedAt": "2026-03-28T09:22:56.630Z",
+          "timeSpent": 16587,
+          "completedAt": "2026-03-28T09:22:56.630Z"
         },
         {
           "id": "ae50b3f8-8b35-4560-9bc3-ee518ab865b8",
           "goalId": "d7211e4a-4c8d-4e92-bc12-f17a8db29a3a",
           "title": "Study Database",
           "description": "",
-          "status": "in-progress",
+          "status": "done",
           "importance": "high",
           "tags": [],
           "dueDate": null,
           "subtasks": [],
-          "timeSpent": 2844,
+          "timeSpent": 11143,
           "createdAt": "2026-03-11T08:07:21.707Z",
-          "updatedAt": "2026-03-22T22:58:38.130Z",
-          "completedAt": null
+          "updatedAt": "2026-03-28T09:22:55.352Z",
+          "completedAt": "2026-03-28T09:22:55.352Z"
         }
       ]
     },
@@ -208,15 +212,15 @@
           "goalId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
           "title": "Finish Building The Future Assignment 2",
           "description": "",
-          "status": "todo",
+          "status": "done",
           "importance": "medium",
           "tags": [],
           "dueDate": "2026-03-19",
           "subtasks": [],
           "timeSpent": 0,
           "createdAt": "2026-03-11T08:11:51.000Z",
-          "updatedAt": "2026-03-11T08:11:51.000Z",
-          "completedAt": null
+          "updatedAt": "2026-03-28T12:00:56.963Z",
+          "completedAt": "2026-03-28T12:00:56.963Z"
         },
         {
           "id": "3f89dc95-8451-4116-891a-51927854ff96",
@@ -232,6 +236,21 @@
           "createdAt": "2026-03-16T23:27:39.471Z",
           "updatedAt": "2026-03-17T03:06:10.067Z",
           "completedAt": "2026-03-17T03:06:10.067Z"
+        },
+        {
+          "id": "193ca580-2990-47d2-b871-8c1bf07c19df",
+          "goalId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+          "title": "Prepare for Software Engineer Exam",
+          "description": "",
+          "status": "done",
+          "importance": "medium",
+          "tags": [],
+          "dueDate": null,
+          "subtasks": [],
+          "timeSpent": 8692,
+          "createdAt": "2026-03-26T02:08:34.180Z",
+          "updatedAt": "2026-03-27T01:49:35.296Z",
+          "completedAt": "2026-03-27T01:49:35.296Z"
         }
       ]
     },
@@ -268,8 +287,8 @@
           "subtasks": [],
           "timeSpent": 0,
           "createdAt": "2026-03-17T01:57:42.187Z",
-          "updatedAt": "2026-03-17T01:58:34.170Z",
-          "completedAt": "2026-03-17T01:58:34.170Z"
+          "updatedAt": "2026-04-10T17:24:33.549Z",
+          "completedAt": "2026-04-10T17:24:33.549Z"
         },
         {
           "id": "cf796621-7fab-4a6f-8a33-257f21b94abe",
@@ -313,7 +332,42 @@
           "subtasks": [],
           "timeSpent": 0,
           "createdAt": "2026-03-20T22:42:29.157Z",
-          "updatedAt": "2026-03-20T22:42:29.157Z",
+          "updatedAt": "2026-04-11T14:23:03.557Z",
+          "completedAt": null
+        },
+        {
+          "id": "57ecab56-a767-45f7-9ea0-596df834dad6",
+          "goalId": "75c3e982-b56b-4a41-9c43-f61289421fa5",
+          "title": "a",
+          "description": "",
+          "status": "todo",
+          "importance": "low",
+          "tags": [],
+          "dueDate": null,
+          "subtasks": [],
+          "timeSpent": 0,
+          "createdAt": "2026-04-04T22:26:06.883Z",
+          "updatedAt": "2026-04-04T22:26:06.883Z",
+          "completedAt": null
+        },
+        {
+          "id": "be630683-0b23-4f07-9475-f85e1bc513de",
+          "goalId": "75c3e982-b56b-4a41-9c43-f61289421fa5",
+          "title": "Work on TaskTracker",
+          "description": "",
+          "status": "in-progress",
+          "importance": "urgent",
+          "tags": [
+            "Coding",
+            "Web",
+            "App",
+            "Project"
+          ],
+          "dueDate": null,
+          "subtasks": [],
+          "timeSpent": 59520,
+          "createdAt": "2026-04-10T15:19:56.735Z",
+          "updatedAt": "2026-04-11T15:59:34.382Z",
           "completedAt": null
         }
       ]
@@ -557,6 +611,153 @@
       "type": "stopwatch",
       "duration": 1351,
       "completedAt": "2026-03-22T22:58:38.130Z"
+    },
+    {
+      "id": "1d26a1b4-81da-4ed6-97f3-b359bc2d2c60",
+      "taskId": "ae50b3f8-8b35-4560-9bc3-ee518ab865b8",
+      "type": "manual",
+      "duration": 600,
+      "completedAt": "2026-03-23T00:19:52.068Z"
+    },
+    {
+      "id": "8542bac2-66e4-4207-b4a6-a896a0fcd2ae",
+      "taskId": "ae50b3f8-8b35-4560-9bc3-ee518ab865b8",
+      "type": "stopwatch",
+      "duration": 1761,
+      "completedAt": "2026-03-23T00:21:55.813Z"
+    },
+    {
+      "id": "7b22626e-0285-424d-89fc-301f7815e533",
+      "taskId": "ae50b3f8-8b35-4560-9bc3-ee518ab865b8",
+      "type": "stopwatch",
+      "duration": 306,
+      "completedAt": "2026-03-23T00:37:48.712Z"
+    },
+    {
+      "id": "9a5ee6b9-793f-4bb9-8e01-8b95b30359a3",
+      "taskId": "ae50b3f8-8b35-4560-9bc3-ee518ab865b8",
+      "type": "manual",
+      "duration": 600,
+      "completedAt": "2026-03-23T00:38:04.972Z"
+    },
+    {
+      "id": "9259318a-d4e3-4948-bbc3-76325149c221",
+      "taskId": "ae50b3f8-8b35-4560-9bc3-ee518ab865b8",
+      "type": "stopwatch",
+      "duration": 5032,
+      "completedAt": "2026-03-23T03:08:15.842Z"
+    },
+    {
+      "id": "5c22ce53-46f7-4fec-b186-68b09407c1d7",
+      "taskId": "193ca580-2990-47d2-b871-8c1bf07c19df",
+      "type": "manual",
+      "duration": 5580,
+      "completedAt": "2026-03-26T02:08:58.428Z"
+    },
+    {
+      "id": "f1d88d91-c614-4b25-a489-d9fa7eb13950",
+      "taskId": "193ca580-2990-47d2-b871-8c1bf07c19df",
+      "type": "stopwatch",
+      "duration": 3112,
+      "completedAt": "2026-03-26T09:12:09.575Z"
+    },
+    {
+      "id": "24b6a935-2e81-466c-9163-d54177da0513",
+      "taskId": "b3e9a123-4567-89ab-cdef-0123456789ab",
+      "type": "stopwatch",
+      "duration": 2976,
+      "completedAt": "2026-03-27T05:06:19.319Z"
+    },
+    {
+      "id": "012dca4f-299b-4b84-82c1-6b4fe881a2f4",
+      "taskId": "f519beef-2a8e-4927-9c98-ed167b66f271",
+      "type": "stopwatch",
+      "duration": 2758,
+      "completedAt": "2026-03-29T06:01:41.506Z"
+    },
+    {
+      "id": "002d67a8-4594-47e3-aeab-7e3b57e2ff90",
+      "taskId": "be630683-0b23-4f07-9475-f85e1bc513de",
+      "type": "manual",
+      "duration": 3120,
+      "completedAt": "2026-04-10T17:36:17.933Z"
+    },
+    {
+      "id": "f2eee1f6-e722-4f8c-8ce6-34f1179a4367",
+      "taskId": "be630683-0b23-4f07-9475-f85e1bc513de",
+      "type": "manual",
+      "duration": 5640,
+      "completedAt": "2026-04-11T15:59:28.803Z"
+    },
+    {
+      "id": "a09abfa9-cbfa-4343-9d3c-cd08f515feb2",
+      "taskId": "be630683-0b23-4f07-9475-f85e1bc513de",
+      "type": "manual",
+      "duration": 5640,
+      "completedAt": "2026-04-11T15:59:30.377Z"
+    },
+    {
+      "id": "491846f8-ab53-4983-a62f-9613753e409a",
+      "taskId": "be630683-0b23-4f07-9475-f85e1bc513de",
+      "type": "manual",
+      "duration": 5640,
+      "completedAt": "2026-04-11T15:59:33.073Z"
+    },
+    {
+      "id": "2974af8b-075a-4c7c-b17c-3d4d5316a8ce",
+      "taskId": "be630683-0b23-4f07-9475-f85e1bc513de",
+      "type": "manual",
+      "duration": 5640,
+      "completedAt": "2026-04-11T15:59:33.200Z"
+    },
+    {
+      "id": "7c8e691e-c518-456f-80c7-0373a516aed7",
+      "taskId": "be630683-0b23-4f07-9475-f85e1bc513de",
+      "type": "manual",
+      "duration": 5640,
+      "completedAt": "2026-04-11T15:59:33.388Z"
+    },
+    {
+      "id": "38d67fb4-7f32-4ec2-bb92-147ec9040ecc",
+      "taskId": "be630683-0b23-4f07-9475-f85e1bc513de",
+      "type": "manual",
+      "duration": 5640,
+      "completedAt": "2026-04-11T15:59:33.573Z"
+    },
+    {
+      "id": "ca9cdadd-97de-4d7d-9ece-2d7ebd9c540a",
+      "taskId": "be630683-0b23-4f07-9475-f85e1bc513de",
+      "type": "manual",
+      "duration": 5640,
+      "completedAt": "2026-04-11T15:59:33.887Z"
+    },
+    {
+      "id": "b522ef0b-0afe-43f4-b01e-c042cb8517a1",
+      "taskId": "be630683-0b23-4f07-9475-f85e1bc513de",
+      "type": "manual",
+      "duration": 5640,
+      "completedAt": "2026-04-11T15:59:33.982Z"
+    },
+    {
+      "id": "3557f505-c22f-4516-8e89-faa6058909b5",
+      "taskId": "be630683-0b23-4f07-9475-f85e1bc513de",
+      "type": "manual",
+      "duration": 5640,
+      "completedAt": "2026-04-11T15:59:34.198Z"
+    },
+    {
+      "id": "57ec95ad-25c0-47f5-862e-dc098316e190",
+      "taskId": "be630683-0b23-4f07-9475-f85e1bc513de",
+      "type": "manual",
+      "duration": 5640,
+      "completedAt": "2026-04-11T15:59:34.382Z"
+    },
+    {
+      "id": "6d41dec2-0217-43f3-b535-9d739bf0be3f",
+      "taskId": "19e0f013-e397-4999-8a6f-cedcda178688",
+      "type": "manual",
+      "duration": 60,
+      "completedAt": "2026-04-11T16:04:24.025Z"
     }
   ],
   "notes": [
@@ -587,13 +788,20 @@
       "content": "### 1. **UI/UX & Aesthetics**\n\n* **`ui-ux-pro-max`** (![]()c:\\\\Users\\\\moamm\\\\OneDrive\\\\Desktop\\\\Test.agents\\\\skills\\\\ui-ux-pro-max\\\\SKILL.md)\n    * **Why**: It provides 50+ design styles and 21 palettes. It is essential for achieving that \"polished, premium Figma-inspired\" look and handling the complex layout of a design tool.\n* **`frontend-ui-dark-ts`** (![]()c:\\\\Users\\\\moamm\\\\OneDrive\\\\Desktop\\\\Test.agents\\\\skills\\\\frontend-ui-dark-ts\\\\SKILL.md)\n    * **Why**: Specifically focused on building high-end dark-themed interfaces with glassmorphism and smooth animations, perfect for the requested UI style.\n* **`frontend-design`** (![]()c:\\\\Users\\\\moamm\\\\OneDrive\\\\Desktop\\\\Test.agents\\\\skills\\\\frontend-design\\\\SKILL.md)\n    * **Why**: Ensures the interface has \"intentional aesthetics\" and a non-generic visual identity, moving away from standard HTML/CSS defaults.\n\n### 2. **Core Component & Interaction Logic**\n\n* **`web-artifacts-builder`** (![]()c:\\\\Users\\\\moamm\\\\OneDrive\\\\Desktop\\\\Test.agents\\\\skills\\\\web-artifacts-builder\\\\SKILL.md)\n    * **Why**: Designed for creating elaborate, multi-component React/Tailwind/shadcn/ui artifacts. This is perfect for building a standalone, complex web tool like an ASCII editor.\n* **`modern-javascript-patterns`** (![]()c:\\\\Users\\\\moamm\\\\OneDrive\\\\Desktop\\\\Test.agents\\\\skills\\\\modern-javascript-patterns\\\\SKILL.md)\n    * **Why**: Crucial for implementing the complex JS event listeners (`mousedown`, `mousemove`, `e.preventDefault()`), undo/redo state management, and the exact character-width calculations required for the ASCII grid.\n* **`javascript-mastery`** (![]()c:\\\\Users\\\\moamm\\\\OneDrive\\\\Desktop\\\\Test.agents\\\\skills\\\\javascript-mastery\\\\SKILL.md)\n    * **Why**: Provides deep knowledge on closures and async patterns which are vital for a performant \"Freehand\" tool and smooth performance while dragging.\n\n### 3. **Canvas & Rendering Specialized**\n\n* **`canvas-design`** (![]()c:\\\\Users\\\\moamm\\\\OneDrive\\\\Desktop\\\\Test.agents\\\\skills\\\\canvas-design\\\\SKILL.md)\n    * **Why**: Although it focuses on static art, its underlying knowledge of canvas API interactions is highly relevant for the rendering engine you need.\n* **`react-flow-node-ts`** (![]()c:\\\\Users\\\\moamm\\\\OneDrive\\\\Desktop\\\\Test.agents\\\\skills\\\\react-flow-node-ts\\\\SKILL.md)\n    * **Why**: Useful if you decide to implement the editor using a node-based architecture for its state, particularly for the \"Select/Move\" and \"Select/Move\" logic.",
       "createdAt": "2026-03-20T22:41:46.684Z",
       "updatedAt": "2026-03-20T22:41:46.684Z"
-    }
-  ],
-  "workspaces": [
+    },
     {
-      "id": "w1",
-      "title": "Main Project Flow",
-      "data": {}
+      "id": "ba4351bb-4c89-4284-aecd-46f4eaeea931",
+      "title": "App Emer",
+      "content": "The app stll needs to be responsive, Create a stitch mobile and responsive desig n and implement it, Add teh ASCII Canva,",
+      "createdAt": "2026-03-23T00:21:41.561Z",
+      "updatedAt": "2026-03-23T00:21:41.561Z"
+    },
+    {
+      "id": "b9ec9b84-3eca-4bac-a590-759a16953bf2",
+      "title": "app",
+      "content": "Add homework tap and make it dashboard tap for statics, the homework page should be someth focuses on your tasks and notification\n\n",
+      "createdAt": "2026-03-27T00:57:33.484Z",
+      "updatedAt": "2026-03-27T00:57:33.484Z"
     }
   ]
 }

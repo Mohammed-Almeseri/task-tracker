@@ -1,4 +1,5 @@
+@echo off
+setlocal
 cd /d "%~dp0"
-start http://localhost:3000
-npm start
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0run_tracker.ps1"
 pause

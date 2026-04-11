@@ -22,70 +22,8 @@ const ICONS = {
     info: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>'
 };
 
-// ---- State ----
-let goals = [];
-let notes = [];
-let timerSessions = [];
-let workspaces = [];
-
-let currentGoalId = null;
-let currentTaskId = null;
-let currentNoteId = null;
-let currentWorkspaceId = null;
-
-let editingGoal = false;
-let editingTask = false;
-let editingNote = false;
-let pendingDeleteFn = null;
-let openedFromManage = false;
-let modalSubtasks = [];
-
-// ---- Filter state ----
-let filterStatus = 'all';
-let filterImportance = 'all';
-let searchQuery = '';
-let kanbanGoalFilter = '';
-
-// ---- Timer state ----
-let timerMode = 'pomodoro';
-let timerInterval = null;
-let timerRunning = false;
-
-// Unified state for persistent timers
-let timerStates = {
-    'pomodoro': {
-        seconds: 25 * 60,
-        total: 25 * 60,
-        session: 1,
-        isBreak: false,
-        label: 'FOCUS'
-    },
-    'stopwatch': {
-        seconds: 0,
-        total: 1,
-        laps: []
-    },
-    'countdown': {
-        seconds: 30 * 60,
-        total: 30 * 60,
-        label: 'COUNTDOWN'
-    }
-};
-
-let timerSeconds = 25 * 60;
-let timerTotalSeconds = 25 * 60;
-let pomodoroSession = 1;
-let pomodoroIsBreak = false;
-let stopwatchSeconds = 0;
-let laps = [];
-
-// ---- Drawflow state ----
-let editor = null;
-let isEditorUpdating = false;
-
-// Settings state
-const defaultSettings = {
-    profileName: 'Guest',
+var defaultSettings = {
+    profileName: 'User',
     accentColor: 'purple',
     accents: {
         purple: '#8b5cf6',
@@ -95,110 +33,207 @@ const defaultSettings = {
         rose: '#f43f5e'
     }
 };
-let settings = { ...defaultSettings };
 
-// ==========================================
-// INITIALIZATION
-// ==========================================
+var settings = { ...defaultSettings };
+var goals = [];
+var editingGoal = false;
+var editingTask = false;
+var openedFromManage = false;
+var currentGoalId = null;
+var currentTaskId = null;
+var kanbanGoalFilter = '';
+var searchQuery = '';
+var filterStatus = 'all';
+var filterImportance = 'all';
+var modalSubtasks = [];
+var pendingDeleteFn = null;
+var timerMode = 'pomodoro';
+var timerRunning = false;
+var timerInterval = null;
+var timerStates = {
+    pomodoro: { seconds: 25 * 60, total: 25 * 60, session: 1, isBreak: false, label: 'FOCUS' },
+    stopwatch: { seconds: 0, laps: [] },
+    countdown: { seconds: 30 * 60, total: 30 * 60, label: 'COUNTDOWN' }
+};
+var timerSeconds = timerStates.pomodoro.seconds;
+var timerTotalSeconds = timerStates.pomodoro.total;
+var stopwatchSeconds = timerStates.stopwatch.seconds;
+var laps = [...timerStates.stopwatch.laps];
+var pomodoroSession = timerStates.pomodoro.session;
+var pomodoroIsBreak = timerStates.pomodoro.isBreak;
+var logsTypeFilter = 'all';
 
-document.addEventListener('DOMContentLoaded', () => {
-    initNavigation();
-    initGoalModal();
-    initTaskModal();
-    initTimer();
-    initConfirmModal();
-    initManageView();
-    initNoteModal();
-    initWorkspaceModal();
-    loadSettings();
-    initSettingsView();
-    initExportModal();
-    initBackupButton();
-    initLogsView();
-    loadGoals();
-    loadDashboard();
-    updateGreeting();
-});
+const SYSTEM_LOGS_STORAGE_KEY = 'task_tracker_system_logs_v1';
 
-// ==========================================
-// TOAST NOTIFICATIONS
-// ==========================================
+function animateValue(element, start, end, duration) {
+    if (!element) return;
+
+    const fromValue = Number(start) || 0;
+    const toValue = Number(end) || 0;
+    const totalDuration = Math.max(Number(duration) || 0, 0);
+
+    if (totalDuration === 0) {
+        element.textContent = String(Math.round(toValue));
+        return;
+    }
+
+    const startTime = performance.now();
+
+    const step = (currentTime) => {
+        const progress = Math.min((currentTime - startTime) / totalDuration, 1);
+        const value = Math.round(fromValue + (toValue - fromValue) * progress);
+        element.textContent = String(value);
+
+        if (progress < 1) {
+            requestAnimationFrame(step);
+        }
+    };
+
+    requestAnimationFrame(step);
+}
+
+function formatTimeDisplay(totalSec) {
+    const h = Math.floor(totalSec / 3600);
+    const m = Math.floor((totalSec % 3600) / 60);
+    const s = totalSec % 60;
+    return h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
+}
+
+function pad(n) {
+    return String(n).padStart(2, '0');
+}
+
+function formatDuration(seconds) {
+    if (seconds < 60) return `${seconds}s`;
+    if (seconds < 3600) return `${Math.round(seconds / 60)}m`;
+    const h = Math.floor(seconds / 3600);
+    const m = Math.round((seconds % 3600) / 60);
+    return m > 0 ? `${h}h ${m}m` : `${h}h`;
+}
+
+function statusLabel(status) {
+    return { 'todo': 'To Do', 'in-progress': 'In Progress', 'blocked': 'Blocked', 'review': 'Review', 'done': 'Done' }[status] || status;
+}
+
+function escHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
 
 function showToast(message, type = 'success') {
     const container = document.getElementById('toast-container');
+    if (!container) return;
+
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
-    const iconMap = { success: ICONS.checkCircle, error: ICONS.alertCircle, info: ICONS.info };
-    toast.innerHTML = `<span class="toast-icon">${iconMap[type] || iconMap.success}</span><span class="toast-message">${message}</span>`;
+
+    const icon = type === 'error' ? ICONS.alertCircle : type === 'info' ? ICONS.info : ICONS.checkCircle;
+    toast.innerHTML = `
+        <div class="toast-icon">${icon}</div>
+        <div class="toast-message">${escHtml(message)}</div>
+    `;
+
     container.appendChild(toast);
-    requestAnimationFrame(() => toast.classList.add('toast-visible'));
-    setTimeout(() => {
-        toast.classList.remove('toast-visible');
+
+    requestAnimationFrame(() => {
+        toast.classList.add('toast-visible');
+    });
+
+    const dismiss = () => {
         toast.classList.add('toast-exit');
-        toast.addEventListener('transitionend', () => toast.remove());
-    }, 3000);
+        window.setTimeout(() => {
+            toast.remove();
+        }, 250);
+    };
+
+    window.setTimeout(dismiss, 2600);
+    return toast;
 }
 
-// ==========================================
-// GREETING
-// ==========================================
+function getSystemLogs() {
+    try {
+        const raw = localStorage.getItem(SYSTEM_LOGS_STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+    } catch (err) {
+        console.warn('Failed to read system logs:', err);
+        return [];
+    }
+}
 
-function updateGreeting() {
-    const hour = new Date().getHours();
-    const titleEl = document.getElementById('greeting-title');
-    const subtitleEl = document.getElementById('greeting-subtitle');
-    const dateEl = document.getElementById('greeting-date');
+function saveSystemLogs(logs) {
+    localStorage.setItem(SYSTEM_LOGS_STORAGE_KEY, JSON.stringify(logs.slice(-200)));
+}
 
-    let greeting, subtitle;
-    if (hour < 12) {
-        greeting = 'Good morning';
-        subtitle = 'Rise and grind — let\'s make today count';
-    } else if (hour < 17) {
-        greeting = 'Good afternoon';
-        subtitle = 'Stay sharp — you\'re doing great today';
-    } else if (hour < 21) {
-        greeting = 'Good evening';
-        subtitle = 'Wind down strong — finish what matters';
-    } else {
-        greeting = 'Good night';
-        subtitle = 'Reflect on today — plan for tomorrow';
+function getLogEventType(message = '') {
+    const normalized = String(message).toLowerCase();
+    if (normalized.includes('backup')) return 'backup';
+    if (normalized.includes('timer') || normalized.includes('time')) return 'timer';
+    if (normalized.includes('note')) return 'note';
+    if (normalized.includes('goal')) return 'goal';
+    if (normalized.includes('task')) return 'task';
+    return 'other';
+}
+
+function logSystemEvent(message, type) {
+    const logs = getSystemLogs();
+    logs.push({
+        id: `log-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        message,
+        type: type || getLogEventType(message),
+        timestamp: new Date().toISOString()
+    });
+    saveSystemLogs(logs);
+
+    if (document.getElementById('view-logs')?.classList.contains('active')) {
+        renderSystemLogs();
+    }
+}
+
+function clearSystemLogs() {
+    localStorage.removeItem(SYSTEM_LOGS_STORAGE_KEY);
+    logsTypeFilter = 'all';
+}
+
+function initLogsView() {
+    const clearBtn = document.getElementById('btn-clear-logs');
+    if (clearBtn && !clearBtn._logsClearBound) {
+        clearBtn._logsClearBound = true;
+        clearBtn.addEventListener('click', () => {
+            showConfirmModal('Clear all system logs?', () => {
+                clearSystemLogs();
+                renderSystemLogs();
+                showToast('Logs cleared');
+            });
+        });
     }
 
-    if (titleEl) titleEl.textContent = greeting;
-    if (subtitleEl) subtitleEl.textContent = subtitle;
-    if (dateEl) dateEl.textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+    const filterPills = document.querySelectorAll('#logs-type-filters .filter-pill');
+    filterPills.forEach(pill => {
+        if (pill._logsFilterInitialized) return;
+        pill._logsFilterInitialized = true;
+        pill.addEventListener('click', () => {
+            filterPills.forEach(p => p.classList.remove('active'));
+            pill.classList.add('active');
+            logsTypeFilter = pill.dataset.logType || 'all';
+            renderSystemLogs();
+        });
+    });
+
+    renderSystemLogs();
 }
 
+window.logSystemEvent = logSystemEvent;
+window.getSystemLogs = getSystemLogs;
+window.getLogEventType = getLogEventType;
+window.showToast = showToast;
 // ==========================================
 // NAVIGATION
 // ==========================================
 
-function initNavigation() {
-    document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.addEventListener('click', () => showView(btn.dataset.view));
-    });
-}
-
 function showView(name) {
-    // Skip loading animation on first load
-    if (!window._firstViewLoaded) {
-        window._firstViewLoaded = true;
-        performViewSwitch(name);
-        return;
-    }
-    // Show loading overlay
-    const overlay = document.getElementById('loading-overlay');
-    overlay.classList.add('active');
-    // Update loading label
-    const loadingLabel = document.getElementById('loading-text');
-    const viewNames = { dashboard: 'Dashboard', goals: 'Goals', manage: 'Tasks', kanban: 'Kanban', timer: 'Timer', notes: 'Notes', settings: 'Settings', logs: 'System Logs' };
-    if (loadingLabel) loadingLabel.textContent = viewNames[name] || name;
-    startLoadingAnimation();
-
-    setTimeout(() => {
-        performViewSwitch(name);
-        overlay.classList.remove('active');
-    }, 1400);
+    performViewSwitch(name);
 }
 
 function performViewSwitch(name) {
@@ -213,14 +248,44 @@ function performViewSwitch(name) {
     if (name === 'notes') loadNotes();
     if (name === 'logs') initLogsView();
     if (name === 'settings') populateSettingsTaskSelect();
-    if (name === 'workspaces') {
-        if (!workspaces || workspaces.length === 0) {
-            loadWorkspaces();
-        } else if (currentWorkspaceId) {
-            switchWorkspace(currentWorkspaceId);
-        }
-    }
 }
+
+function initNavigation() {
+    document.querySelectorAll('.nav-btn[data-view]').forEach(btn => {
+        if (btn._navBound) return;
+        btn._navBound = true;
+        btn.addEventListener('click', () => showView(btn.dataset.view));
+    });
+}
+
+async function initApp() {
+    initNavigation();
+
+    if (typeof loadSettings === 'function') {
+        loadSettings();
+    }
+    if (typeof initGoalModal === 'function') initGoalModal();
+    if (typeof initTaskModal === 'function') initTaskModal();
+    if (typeof initExportModal === 'function') initExportModal();
+    if (typeof initBackupButton === 'function') initBackupButton();
+    if (typeof initConfirmModal === 'function') initConfirmModal();
+    if (typeof initLogsView === 'function') initLogsView();
+    if (typeof initTimer === 'function') initTimer();
+    if (typeof initNoteModal === 'function') initNoteModal();
+    if (typeof initSettingsView === 'function') initSettingsView();
+
+    await Promise.allSettled([
+        typeof loadGoals === 'function' ? loadGoals() : Promise.resolve(),
+        typeof loadNotes === 'function' ? loadNotes() : Promise.resolve(),
+    ]);
+
+    const initialView = document.querySelector('.nav-btn.active')?.dataset.view || 'dashboard';
+    showView(initialView);
+}
+
+window.addEventListener('load', () => {
+    void initApp();
+});
 
 // ==========================================
 // API HELPERS
@@ -689,1292 +754,6 @@ async function handleKanbanDrop(e, newStatus) {
 }
 
 // ==========================================
-// TIMER
-// ==========================================
-
-function initTimer() {
-    document.querySelectorAll('.timer-tab').forEach(tab => { tab.addEventListener('click', () => switchTimerMode(tab.dataset.mode)); });
-    document.getElementById('timer-start').addEventListener('click', toggleTimer);
-    document.getElementById('timer-reset').addEventListener('click', resetTimer);
-    document.getElementById('timer-lap').addEventListener('click', addLap);
-}
-
-function switchTimerMode(mode) {
-    // Save current state before switching
-    saveTimerState(timerMode);
-
-    if (timerRunning) stopTimer();
-    timerMode = mode;
-
-    document.querySelectorAll('.timer-tab').forEach(t => t.classList.remove('active'));
-    document.querySelector(`[data-mode="${mode}"]`).classList.add('active');
-    document.getElementById('countdown-input').style.display = mode === 'countdown' ? 'flex' : 'none';
-    document.getElementById('timer-lap').style.display = mode === 'stopwatch' ? 'inline-flex' : 'none';
-    document.getElementById('laps-container').style.display = mode === 'stopwatch' ? 'block' : 'none';
-    document.getElementById('pomodoro-info').style.display = mode === 'pomodoro' ? 'flex' : 'none';
-
-    // Load state for the new mode
-    loadTimerState(mode);
-}
-
-function saveTimerState(mode) {
-    if (mode === 'pomodoro') {
-        timerStates.pomodoro.seconds = timerSeconds;
-        timerStates.pomodoro.total = timerTotalSeconds;
-        timerStates.pomodoro.session = pomodoroSession;
-        timerStates.pomodoro.isBreak = pomodoroIsBreak;
-        timerStates.pomodoro.label = document.getElementById('timer-label').textContent;
-    } else if (mode === 'stopwatch') {
-        timerStates.stopwatch.seconds = stopwatchSeconds;
-        timerStates.stopwatch.laps = [...laps];
-    } else if (mode === 'countdown') {
-        timerStates.countdown.seconds = timerSeconds;
-        timerStates.countdown.total = timerTotalSeconds;
-        timerStates.countdown.label = document.getElementById('timer-label').textContent;
-    }
-}
-
-function loadTimerState(mode) {
-    const state = timerStates[mode];
-    if (mode === 'pomodoro') {
-        timerSeconds = state.seconds;
-        timerTotalSeconds = state.total;
-        pomodoroSession = state.session;
-        pomodoroIsBreak = state.isBreak;
-        document.getElementById('timer-label').textContent = state.label;
-        updatePomodoroInfo();
-    } else if (mode === 'stopwatch') {
-        stopwatchSeconds = state.seconds;
-        laps = [...state.laps];
-        renderLaps();
-    } else if (mode === 'countdown') {
-        timerSeconds = state.seconds;
-        timerTotalSeconds = state.total;
-        document.getElementById('timer-label').textContent = state.label;
-    }
-
-    updateTimerDisplay();
-    updateTimerRing(mode === 'stopwatch' ? (stopwatchSeconds % 3600) / 3600 : timerSeconds / timerTotalSeconds);
-
-    const btn = document.getElementById('timer-start');
-    if (timerRunning) {
-        btn.textContent = 'Pause'; btn.classList.remove('btn-primary'); btn.classList.add('btn-danger');
-    } else {
-        btn.textContent = timerSeconds === timerTotalSeconds && mode !== 'stopwatch' ? 'Start' : 'Resume';
-        btn.classList.add('btn-primary'); btn.classList.remove('btn-danger');
-    }
-}
-
-function renderLaps() {
-    const list = document.getElementById('laps-list');
-    list.innerHTML = '';
-    laps.forEach((lap, i) => {
-        const li = document.createElement('li');
-        li.innerHTML = `<span>Lap ${i + 1}</span><span>${formatTimeDisplay(lap)}</span>`;
-        list.prepend(li);
-    });
-}
-
-function toggleTimer() { timerRunning ? stopTimer() : startTimer(); }
-
-function startTimer() {
-    timerRunning = true;
-    const btn = document.getElementById('timer-start');
-    btn.textContent = 'Pause'; btn.classList.remove('btn-primary'); btn.classList.add('btn-danger');
-    if (timerMode === 'pomodoro') timerInterval = setInterval(tickPomodoro, 1000);
-    else if (timerMode === 'stopwatch') timerInterval = setInterval(tickStopwatch, 1000);
-    else if (timerMode === 'countdown') {
-        if (timerSeconds <= 0) { const mins = parseInt(document.getElementById('countdown-minutes').value) || 30; timerSeconds = mins * 60; timerTotalSeconds = timerSeconds; }
-        timerInterval = setInterval(tickCountdown, 1000);
-    }
-}
-
-function stopTimer() {
-    timerRunning = false; clearInterval(timerInterval); timerInterval = null;
-    const btn = document.getElementById('timer-start');
-    btn.textContent = 'Resume'; btn.classList.remove('btn-danger'); btn.classList.add('btn-primary');
-}
-
-function resetTimer() {
-    // If stopwatch was running with time, log it as a session before resetting
-    if (timerMode === 'stopwatch' && stopwatchSeconds > 0) {
-        logTimerSession('stopwatch', stopwatchSeconds);
-    }
-
-    stopTimer();
-    laps = [];
-    document.getElementById('laps-list').innerHTML = '';
-    document.getElementById('timer-start').textContent = 'Start';
-
-    if (timerMode === 'pomodoro') {
-        pomodoroSession = 1;
-        pomodoroIsBreak = false;
-        timerSeconds = 25 * 60;
-        timerTotalSeconds = 25 * 60;
-        updatePomodoroInfo();
-        document.getElementById('timer-label').textContent = 'FOCUS';
-        // Sync to unified state
-        saveTimerState('pomodoro');
-    }
-    else if (timerMode === 'stopwatch') {
-        stopwatchSeconds = 0;
-        timerTotalSeconds = 1;
-        saveTimerState('stopwatch');
-    }
-    else if (timerMode === 'countdown') {
-        const mins = parseInt(document.getElementById('countdown-minutes').value) || 30;
-        timerSeconds = mins * 60;
-        timerTotalSeconds = timerSeconds;
-        document.getElementById('timer-label').textContent = 'COUNTDOWN';
-        saveTimerState('countdown');
-    }
-
-    updateTimerDisplay();
-    updateTimerRing(timerMode === 'stopwatch' ? 0 : 1);
-}
-
-function tickPomodoro() {
-    timerSeconds--; updateTimerDisplay(); updateTimerRing(timerSeconds / timerTotalSeconds);
-    if (timerSeconds <= 0) {
-        stopTimer(); logTimerSession('pomodoro', timerTotalSeconds);
-        if (pomodoroIsBreak) { pomodoroIsBreak = false; pomodoroSession++; if (pomodoroSession > 4) pomodoroSession = 1; timerSeconds = 25 * 60; timerTotalSeconds = 25 * 60; document.getElementById('timer-label').textContent = 'FOCUS'; }
-        else { pomodoroIsBreak = true; const bt = pomodoroSession === 4 ? 15 : 5; timerSeconds = bt * 60; timerTotalSeconds = timerSeconds; document.getElementById('timer-label').textContent = 'BREAK'; }
-        updatePomodoroInfo(); updateTimerDisplay(); updateTimerRing(1);
-    }
-}
-
-function tickStopwatch() { stopwatchSeconds++; updateTimerDisplay(); updateTimerRing((stopwatchSeconds % 3600) / 3600); }
-
-function tickCountdown() {
-    timerSeconds--; updateTimerDisplay(); updateTimerRing(timerSeconds / timerTotalSeconds);
-    if (timerSeconds <= 0) { stopTimer(); logTimerSession('countdown', timerTotalSeconds); document.getElementById('timer-start').textContent = 'Start'; updateTimerRing(0); }
-}
-
-function addLap() {
-    if (timerMode !== 'stopwatch' || !timerRunning) return;
-    laps.push(stopwatchSeconds);
-    const li = document.createElement('li');
-    li.innerHTML = `<span>Lap ${laps.length}</span><span>${formatTimeDisplay(stopwatchSeconds)}</span>`;
-    document.getElementById('laps-list').prepend(li);
-}
-
-function updateTimerDisplay() { document.getElementById('timer-display').textContent = formatTimeDisplay(timerMode === 'stopwatch' ? stopwatchSeconds : timerSeconds); }
-function updateTimerRing(fraction) { const c = 2 * Math.PI * 90; document.getElementById('timer-ring-progress').style.strokeDashoffset = c * (1 - fraction); }
-function updatePomodoroInfo() {
-    document.getElementById('pomodoro-count').textContent = `Session ${pomodoroSession} of 4`;
-    document.getElementById('pomodoro-dots').textContent = Array.from({ length: 4 }, (_, i) => i < pomodoroSession - (pomodoroIsBreak ? 0 : 1) ? '●' : '○').join(' ');
-}
-function populateTimerTaskSelect() {
-    const select = document.getElementById('timer-task-select');
-    select.innerHTML = '<option value="">— No task —</option>';
-    for (const goal of goals) { for (const task of goal.tasks) { if (task.status !== 'done') { const opt = document.createElement('option'); opt.value = task.id; opt.textContent = `${goal.title} → ${task.title}`; select.appendChild(opt); } } }
-}
-async function logTimerSession(type, duration) {
-    const taskId = document.getElementById('timer-task-select').value || null;
-    await apiPost('/api/timer-sessions', { taskId, type, duration });
-    if (taskId) await loadGoals();
-}
-
-// ==========================================
-// NOTES
-// ==========================================
-
-let noteEditor;
-
-async function loadNotes() {
-    notes = await apiGet('/api/notes');
-    renderNotes();
-}
-
-function parseRichText(text, noteId = null) {
-    if (!text) return '';
-    let parsed = escHtml(text);
-
-    // Remove ToastUI's backslash escapes for literal markdown characters
-    parsed = parsed.replace(/\\([*~\[\]\-_`])/g, '$1');
-
-    parsed = parsed.replace(/\*\*([\s\S]*?)\*\*/g, '<strong>$1</strong>');
-    parsed = parsed.replace(/~~([\s\S]*?)~~/g, '<del>$1</del>');
-
-    let chkIdx = 0;
-    parsed = parsed.replace(/^[-*] \[( |x|X)\] (.*)$/gm, (match, p1, p2) => {
-        const isChecked = p1.toLowerCase() === 'x';
-        const idx = chkIdx++;
-        if (noteId) {
-            return `<div style="display:flex;align-items:center;gap:8px;margin:2px 0;" onclick="event.stopPropagation()">
-                <input type="checkbox" class="interactive-checkbox" ${isChecked ? 'checked' : ''} onchange="toggleNoteCheckbox('${noteId}', ${idx}, this.checked)">
-                <span style="${isChecked ? 'text-decoration:line-through;color:var(--text-secondary);' : ''}word-break:break-word;">${p2}</span>
-            </div>`;
-        } else {
-            return `<div style="display:flex;align-items:center;gap:8px;margin:2px 0;">
-                <input type="checkbox" ${isChecked ? 'checked' : ''} disabled>
-                <span style="${isChecked ? 'text-decoration:line-through;color:var(--text-secondary);' : ''}word-break:break-word;">${p2}</span>
-            </div>`;
-        }
-    });
-    return parsed;
-}
-
-window.toggleNoteCheckbox = async function (noteId, index, isChecked) {
-    const note = notes.find(n => n.id === noteId);
-    if (!note) return;
-
-    let currIdx = 0;
-    const newContent = note.content.replace(/^[-*] \[( |x|X)\] (.*)$/gm, (match, p1, p2) => {
-        if (currIdx === index) {
-            currIdx++;
-            const marker = match.charAt(0);
-            return isChecked ? `${marker} [x] ${p2}` : `${marker} [ ] ${p2}`;
-        }
-        currIdx++;
-        return match;
-    });
-
-    if (newContent !== note.content) {
-        note.content = newContent;
-        renderNotes(); // Update UI immediately
-        try {
-            await apiPut(`/api/notes/${noteId}`, { title: note.title, content: newContent });
-        } catch (err) {
-            console.error('Failed to update checkbox', err);
-        }
-    }
-};
-
-function renderNotes() {
-    const container = document.getElementById('notes-container');
-    if (notes.length === 0) {
-        container.innerHTML = `
-            <div class="empty-state" id="empty-notes">
-                <div class="empty-icon">${ICONS.noteLg}</div>
-                <h3>No notes yet</h3>
-                <p>Start journaling or jot down quick thoughts</p>
-                <button class="btn btn-primary btn-glow btn-small" onclick="openAddNote()" style="margin-top:12px;">+ Write a Note</button>
-            </div>`;
-        return;
-    }
-    container.innerHTML = notes.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)).map(note => `
-        <div class="note-card" onclick="openEditNote('${note.id}')">
-            <div class="note-card-header">
-                <div class="note-card-title">${escHtml(note.title)}</div>
-                <div class="note-card-actions">
-                    <button class="btn-icon" title="Delete" aria-label="Delete note" onclick="event.stopPropagation(); deleteNote('${note.id}')">${ICONS.trash}</button>
-                </div>
-            </div>
-            <div class="note-card-content">${parseRichText(note.content || '', note.id)}</div>
-            <div class="note-card-date">${new Date(note.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
-        </div>
-    `).join('');
-}
-
-function initNoteModal() {
-    noteEditor = new toastui.Editor({
-        el: document.querySelector('#note-editor-container'),
-        initialEditType: 'wysiwyg',
-        previewStyle: 'vertical',
-        height: '400px',
-        theme: 'dark',
-        hideModeSwitch: true,
-        toolbarItems: [
-            ['heading', 'bold', 'italic', 'strike'],
-            ['hr', 'quote'],
-            ['ul', 'ol', 'task']
-        ]
-    });
-
-    document.getElementById('btn-add-note').addEventListener('click', openAddNote);
-    document.getElementById('modal-note-close').addEventListener('click', closeNoteModal);
-    document.getElementById('modal-note-cancel').addEventListener('click', closeNoteModal);
-    document.getElementById('modal-note-save').addEventListener('click', saveNote);
-    document.getElementById('modal-note').addEventListener('click', (e) => { if (e.target.classList.contains('modal-overlay')) closeNoteModal(); });
-}
-
-function openAddNote() {
-    editingNote = false; currentNoteId = null;
-    document.getElementById('modal-note-title').textContent = 'New Note';
-    document.getElementById('note-title-input').value = '';
-    noteEditor.setMarkdown('');
-    document.getElementById('modal-note').classList.add('open');
-    document.getElementById('note-title-input').focus();
-}
-
-function openEditNote(noteId) {
-    const note = notes.find(n => n.id === noteId);
-    if (!note) return;
-    editingNote = true; currentNoteId = noteId;
-    document.getElementById('modal-note-title').textContent = 'Edit Note';
-    document.getElementById('note-title-input').value = note.title;
-    noteEditor.setMarkdown(note.content || '');
-    document.getElementById('modal-note').classList.add('open');
-    document.getElementById('note-title-input').focus();
-}
-
-function closeNoteModal() { document.getElementById('modal-note').classList.remove('open'); }
-
-async function saveNote() {
-    const title = document.getElementById('note-title-input').value.trim();
-    const content = noteEditor.getMarkdown();
-    if (!title) { document.getElementById('note-title-input').focus(); return; }
-    try {
-        if (editingNote && currentNoteId) { await apiPut(`/api/notes/${currentNoteId}`, { title, content }); showToast('Note updated'); logSystemEvent('Note updated'); }
-        else { await apiPost('/api/notes', { title, content }); showToast('Note created'); logSystemEvent('Note created'); }
-        closeNoteModal();
-        await loadNotes();
-    } catch (err) {
-        console.error('Failed to save note:', err);
-        showToast('Failed to save note', 'error');
-    }
-}
-
-function deleteNote(noteId) {
-    showConfirmModal('Delete this note?', async () => { await apiDelete(`/api/notes/${noteId}`); await loadNotes(); showToast('Note deleted'); logSystemEvent('Note deleted'); });
-}
-
-// ==========================================
-// WORKSPACES & DRAWFLOW
-// ==========================================
-
-function initWorkspaceModal() {
-    document.getElementById('btn-add-workspace').addEventListener('click', () => {
-        document.getElementById('workspace-title-input').value = '';
-        document.getElementById('modal-workspace').classList.add('open');
-    });
-    document.getElementById('modal-workspace-close').addEventListener('click', closeWorkspaceModal);
-    document.getElementById('modal-workspace-cancel').addEventListener('click', closeWorkspaceModal);
-    document.getElementById('modal-workspace-save').addEventListener('click', async () => {
-        const title = document.getElementById('workspace-title-input').value.trim();
-        if (!title) return alert('Please enter a workspace name');
-
-        try {
-            const newWb = await apiPost('/api/workspaces', { title, data: {} });
-            workspaces.push(newWb);
-            closeWorkspaceModal();
-            renderWorkspaceTabs();
-            switchWorkspace(newWb.id);
-            showToast('Workspace created');
-            logSystemEvent('Workspace created');
-        } catch (err) {
-            console.error('Failed to create workspace:', err);
-            showToast('Failed to create workspace', 'error');
-        }
-    });
-    document.getElementById('btn-workspace-clear').addEventListener('click', () => {
-        if (!editor || !currentWorkspaceId) return;
-        showConfirmModal('Clear entire board?', () => {
-            editor.clearModuleSelected();
-            saveCurrentWorkspace();
-        });
-    });
-}
-
-function closeWorkspaceModal() {
-    document.getElementById('modal-workspace').classList.remove('open');
-}
-
-async function loadWorkspaces() {
-    try {
-        workspaces = await apiGet('/api/workspaces');
-        renderWorkspaceTabs();
-        if (workspaces.length > 0) {
-            switchWorkspace(workspaces[0].id);
-        }
-    } catch (e) {
-        console.error("Failed to load workspaces", e);
-    }
-}
-
-function renderWorkspaceTabs() {
-    const container = document.getElementById('workspace-tabs-container');
-    const content = document.getElementById('workspace-content');
-    const emptyState = document.getElementById('empty-workspaces');
-
-    if (workspaces.length === 0) {
-        container.innerHTML = '';
-        content.style.display = 'none';
-        emptyState.style.display = 'flex';
-        return;
-    }
-
-    content.style.display = 'flex';
-    emptyState.style.display = 'none';
-
-    container.innerHTML = workspaces.map(w => `
-        <div class="workspace-tab ${w.id === currentWorkspaceId ? 'active' : ''}" onclick="switchWorkspace('${w.id}')">
-            ${escHtml(w.title)}
-            <button class="workspace-tab-delete" onclick="event.stopPropagation(); deleteWorkspace('${w.id}')">×</button>
-        </div>
-    `).join('');
-}
-
-function switchWorkspace(id) {
-    currentWorkspaceId = id;
-    renderWorkspaceTabs();
-    const workspace = workspaces.find(w => w.id === id);
-    if (!workspace) return;
-
-    if (!editor) {
-        const idDraw = document.getElementById("drawflow");
-        editor = new Drawflow(idDraw);
-        editor.reroute = true;
-        editor.reroute_fix_curvature = true;
-        editor.curvature = 0.5; // Smoother curves
-        editor.line_path = 1.2; // Slightly thicker lines for visibility
-        editor.start();
-
-        // Bind events to save
-        editor.on('nodeCreated', saveCurrentWorkspace);
-        editor.on('nodeRemoved', saveCurrentWorkspace);
-        editor.on('nodeMoved', saveCurrentWorkspace);
-        editor.on('connectionCreated', saveCurrentWorkspace);
-        editor.on('connectionRemoved', saveCurrentWorkspace);
-        editor.on('nodeDataChanged', saveCurrentWorkspace);
-
-        // Inject SVG Marker for arrowheads if not already present
-        const svg = idDraw.querySelector('svg');
-        if (svg && !svg.querySelector('#arrowhead')) {
-            const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
-            defs.innerHTML = `
-                <marker id="arrowhead" markerWidth="10" markerHeight="7" 
-                refX="9" refY="3.5" orient="auto">
-                    <polygon points="0 0, 10 3.5, 0 7" fill="#888" />
-                </marker>
-            `;
-            svg.prepend(defs);
-        }
-    }
-
-    // Force marker-end on all connection paths (Drawflow doesn't always handle this natively via marker-end property)
-    // We add a recurring check or CSS-based injection. CSS is cleaner.
-    // I'll add the CSS part to style.css next.
-
-    // Board export / download listener
-    const downloadBtn = document.getElementById('btn-workspace-download');
-    if (downloadBtn) {
-        downloadBtn.onclick = () => {
-            const data = editor.export();
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `workspace-${id}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
-        };
-    }
-
-    isEditorUpdating = true;
-    editor.clearModuleSelected();
-    if (workspace.data && Object.keys(workspace.data).length > 0) {
-        try {
-            editor.import(workspace.data);
-            bindNodeInputs();
-        } catch (e) {
-            console.error("Error importing drawflow data", e);
-        }
-    }
-    isEditorUpdating = false;
-}
-
-function deleteWorkspace(id) {
-    showConfirmModal('Delete this workspace?', async () => {
-        try {
-            await apiDelete(`/api/workspaces/${id}`);
-            workspaces = workspaces.filter(w => w.id !== id);
-            if (currentWorkspaceId === id) {
-                currentWorkspaceId = workspaces.length > 0 ? workspaces[0].id : null;
-                if (currentWorkspaceId) switchWorkspace(currentWorkspaceId);
-                else if (editor) { editor.clearModuleSelected(); }
-            }
-            renderWorkspaceTabs();
-            showToast('Workspace deleted');
-            logSystemEvent('Workspace deleted');
-        } catch (err) {
-            console.error('Failed to delete workspace:', err);
-            showToast('Failed to delete workspace', 'error');
-        }
-    });
-}
-
-// ==========================================
-// SETTINGS
-// ==========================================
-
-function loadSettings() {
-    const saved = localStorage.getItem('task_tracker_settings');
-    if (saved) {
-        try {
-            settings = { ...defaultSettings, ...JSON.parse(saved) };
-        } catch (e) { console.error('Failed to parse settings', e); }
-    }
-    applyThemeSettings();
-}
-
-function saveSettings() {
-    localStorage.setItem('task_tracker_settings', JSON.stringify(settings));
-    applyThemeSettings();
-}
-
-function applyThemeSettings() {
-    const root = document.documentElement;
-    const color = settings.accents[settings.accentColor] || settings.accents.purple;
-    root.style.setProperty('--accent', color);
-
-    // Update UI elements
-    const nameInput = document.getElementById('user-name-input');
-    if (nameInput) nameInput.value = settings.profileName;
-
-    // Update dashboard greeting
-    const greeting = document.getElementById('dashboard-greeting');
-    if (greeting) {
-        const hour = new Date().getHours();
-        let intro = 'Good morning';
-        if (hour >= 12 && hour < 17) intro = 'Good afternoon';
-        if (hour >= 17) intro = 'Good evening';
-        greeting.textContent = `${intro}, ${settings.profileName}`;
-    }
-
-    // Mark active color preset
-    document.querySelectorAll('.btn-color-preset').forEach(btn => {
-        const bg = btn.style.background;
-        // Basic match based on hex or name
-        btn.classList.toggle('active', btn.title.toLowerCase() === settings.accentColor);
-    });
-}
-
-window.setAccentColor = (colorName) => {
-    settings.accentColor = colorName;
-    saveSettings();
-    showToast(`Accent color updated to ${colorName}`);
-};
-
-function initSettingsView() {
-    const btnLog = document.getElementById('btn-log-manual-time');
-    if (btnLog) btnLog.addEventListener('click', saveManualTime);
-
-    const btnSaveProfile = document.getElementById('btn-save-profile');
-    if (btnSaveProfile) {
-        btnSaveProfile.addEventListener('click', () => {
-            const name = document.getElementById('user-name-input').value.trim();
-            if (name) {
-                settings.profileName = name;
-                saveSettings();
-                showToast('Profile updated');
-            }
-        });
-    }
-
-    const btnReset = document.getElementById('btn-reset-data');
-    if (btnReset) {
-        btnReset.addEventListener('click', resetAppData);
-    }
-}
-
-async function resetAppData() {
-    showConfirmModal('Permanently delete ALL data? This cannot be undone.', async () => {
-        try {
-            // Sequential deletes for all data types
-            const items = ['goals', 'notes', 'workspaces', 'timer-sessions', 'logs'];
-            for (const item of items) {
-                const list = await apiGet(`/api/${item}`);
-                for (const entry of list) {
-                    await apiDelete(`/api/${item === 'goals' ? 'goals' : (item === 'timer-sessions' ? 'timer-sessions' : item)}/${entry.id}`);
-                }
-            }
-            showToast('All data has been reset');
-            logSystemEvent('All app data reset');
-            location.reload();
-        } catch (err) {
-            console.error('Reset failed:', err);
-            showToast('Reset failed', 'error');
-        }
-    });
-}
-
-function populateSettingsTaskSelect() {
-    const select = document.getElementById('manual-task-select');
-    if (!select) return;
-
-    select.innerHTML = '<option value="">— Select a task —</option>';
-    for (const goal of goals) {
-        for (const task of goal.tasks) {
-            if (task.status !== 'done') {
-                const opt = document.createElement('option');
-                opt.value = task.id;
-                opt.textContent = `${goal.title} → ${task.title}`;
-                select.appendChild(opt);
-            }
-        }
-    }
-}
-
-async function saveManualTime() {
-    const taskId = document.getElementById('manual-task-select').value;
-    const durationMins = parseInt(document.getElementById('manual-duration-input').value);
-
-    if (!taskId) {
-        showToast('Please select a task', 'error');
-        return;
-    }
-    if (isNaN(durationMins) || durationMins <= 0) {
-        showToast('Please enter a valid duration in minutes', 'error');
-        return;
-    }
-
-    try {
-        const durationSecs = durationMins * 60;
-        await apiPost('/api/timer-sessions', {
-            taskId,
-            type: 'manual',
-            duration: durationSecs
-        });
-
-        showToast(`Logged ${durationMins}m to task`);
-        logSystemEvent('Manual time logged');
-        document.getElementById('manual-duration-input').value = '';
-        await loadGoals(); // Refresh stats/etc
-    } catch (err) {
-        console.error('Failed to log manual time:', err);
-        showToast('Failed to log time', 'error');
-    }
-}
-
-async function saveCurrentWorkspace() {
-    if (isEditorUpdating || !currentWorkspaceId || !editor) return;
-    const exportData = editor.export();
-    const workspace = workspaces.find(w => w.id === currentWorkspaceId);
-    if (workspace) {
-        workspace.data = exportData;
-        await apiPut(`/api/workspaces/${currentWorkspaceId}`, { data: exportData });
-    }
-}
-
-function dragNode(ev) {
-    if (ev.type === "touchstart") {
-        mobile_item_selec = ev.target.closest(".drag-drawflow").getAttribute('data-node');
-    } else {
-        ev.dataTransfer.setData("node", ev.target.getAttribute('data-node'));
-    }
-}
-
-document.getElementById('drawflow').addEventListener('drop', (e) => {
-    e.preventDefault();
-    const data = e.dataTransfer.getData("node");
-    addNodeToDrawFlow(data, e.clientX, e.clientY);
-});
-
-document.getElementById('drawflow').addEventListener('dragover', (e) => {
-    e.preventDefault();
-});
-
-function addNodeToDrawFlow(name, pos_x, pos_y) {
-    if (editor.editor_mode === 'fixed') { return false; }
-
-    // Canvas transform fix
-    pos_x = pos_x * (editor.precanvas.clientWidth / (editor.precanvas.clientWidth * editor.zoom)) - (editor.precanvas.getBoundingClientRect().x * (editor.precanvas.clientWidth / (editor.precanvas.clientWidth * editor.zoom)));
-    pos_y = pos_y * (editor.precanvas.clientHeight / (editor.precanvas.clientHeight * editor.zoom)) - (editor.precanvas.getBoundingClientRect().y * (editor.precanvas.clientHeight / (editor.precanvas.clientHeight * editor.zoom)));
-
-    const templateMapping = {
-        'start': {
-            html: `
-            <div class="title-box">◎ Start</div>
-            <div class="box">
-                <input type="text" class="df-text-input" placeholder="Origin..." df-origin>
-            </div>
-        `, inputs: 0, outputs: 1
-        },
-
-        'end': {
-            html: `
-            <div class="title-box">▥ End</div>
-            <div class="box">
-                <p style="font-size: 11px; opacity: 0.6; text-align: center;">Flow Termination</p>
-            </div>
-        `, inputs: 1, outputs: 0
-        },
-
-        'delay': {
-            html: `
-            <div class="title-box">⌛ Delay</div>
-            <div class="box">
-                <input type="number" class="df-text-input" placeholder="Sec..." df-delay>
-            </div>
-        `, inputs: 1, outputs: 1
-        },
-
-        'task': {
-            html: `
-            <div class="title-box">■ Task</div>
-            <div class="box">
-                <textarea class="df-text-input" placeholder="Task details..." df-details></textarea>
-            </div>
-        `, inputs: 1, outputs: 1
-        },
-
-        'decision': {
-            html: `
-            <div class="title-box">◆ Decision</div>
-            <div class="box">
-                <input type="text" class="df-text-input" placeholder="Condition?" df-condition>
-            </div>
-        `, inputs: 1, outputs: 2
-        },
-
-        'command': {
-            html: `
-            <div class="title-box">▶ Command</div>
-            <div class="box">
-                <input type="text" class="df-text-input" placeholder="Action..." df-action>
-            </div>
-        `, inputs: 1, outputs: 1
-        },
-
-        'note': {
-            html: `
-            <div class="title-box">📄 Note</div>
-            <div class="box">
-                <textarea class="df-text-input" placeholder="Just an idea..." df-note></textarea>
-            </div>
-        `, inputs: 0, outputs: 0
-        },
-        'loop': {
-            html: `
-            <div class="title-box" style="background: var(--status-in-progress);">🔁 Loop</div>
-            <div class="box">
-                <input type="number" class="df-text-input" placeholder="Iterate..." df-iters>
-            </div>
-        `, inputs: 1, outputs: 1
-        },
-        'notification': {
-            html: `
-            <div class="title-box" style="background: var(--status-review);">🔔 Notify</div>
-            <div class="box">
-                <input type="text" class="df-text-input" placeholder="Message..." df-message>
-            </div>
-        `, inputs: 1, outputs: 1
-        }
-    };
-
-    const nodeCfg = templateMapping[name];
-    if (nodeCfg) {
-        editor.addNode(name, nodeCfg.inputs, nodeCfg.outputs, pos_x, pos_y, name, {}, nodeCfg.html);
-        bindNodeInputs();
-    }
-}
-
-// Binds native inputs within nodes to update data
-function bindNodeInputs() {
-    const inputs = document.querySelectorAll('.drawflow-node .df-text-input');
-    inputs.forEach(input => {
-        // Prevent event duplication
-        if (input.dataset.bound) return;
-        input.dataset.bound = "true";
-        input.addEventListener('input', () => {
-            const nodeId = input.closest('.drawflow-node').id.slice(5);
-            const dataKey = Array.from(input.attributes).find(a => a.name.startsWith('df-'))?.name.slice(3);
-            if (dataKey) {
-                editor.updateNodeDataFromId(nodeId, { [dataKey]: input.value });
-                saveCurrentWorkspace();
-            }
-        });
-    });
-}
-
-// ==========================================
-// DASHBOARD
-// ==========================================
-function animateValue(el, start, end, duration) {
-    if (!el || end === 0) {
-        if (el) el.textContent = end;
-        return;
-    }
-    let startTimestamp = null;
-    const step = (timestamp) => {
-        if (!startTimestamp) startTimestamp = timestamp;
-        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-        const easeOut = 1 - Math.pow(1 - progress, 3);
-        const current = Math.floor(easeOut * (end - start) + start);
-        el.textContent = current;
-        if (progress < 1) {
-            window.requestAnimationFrame(step);
-        } else {
-            el.textContent = end;
-        }
-    };
-    window.requestAnimationFrame(step);
-}
-
-async function loadDashboard() {
-    const stats = await apiGet('/api/stats');
-    const sessions = await apiGet('/api/timer-sessions');
-
-    // Core stats
-    const statGoals = document.getElementById('stat-goals');
-    if (statGoals) animateValue(statGoals, 0, stats.totalGoals, 1200);
-
-    const statTasks = document.getElementById('stat-tasks');
-    if (statTasks) animateValue(statTasks, 0, stats.totalTasks, 1200);
-
-    const statDone = document.getElementById('stat-done');
-    if (statDone) animateValue(statDone, 0, stats.tasksByStatus.done, 1200);
-
-    const statTime = document.getElementById('stat-time');
-    if (statTime) statTime.textContent = formatDuration(stats.totalTimeSpent);
-
-    const statStreak = document.getElementById('stat-streak');
-    if (statStreak) animateValue(statStreak, 0, stats.streak, 1200);
-
-    // Gamification UI
-    const statStreakFront = document.getElementById('stat-streak-front');
-    if (statStreakFront) animateValue(statStreakFront, 0, stats.streak || 0, 1200);
-
-    // Call gamification functions
-    const allTasksForGami = getAllTasks();
-    if (typeof renderUpNext === 'function') renderUpNext(allTasksForGami);
-    if (typeof renderDailyPlan === 'function') renderDailyPlan(allTasksForGami);
-    if (typeof renderProductivityPulse === 'function') renderProductivityPulse(sessions);
-
-    const statFocus = document.getElementById('stat-focus');
-    if (statFocus) animateValue(statFocus, 0, stats.todayFocus, 1200);
-
-    const statSessions = document.getElementById('stat-sessions');
-    if (statSessions) animateValue(statSessions, 0, stats.totalTimerSessions, 1200);
-
-    // Avg completion time
-    const statAvg = document.getElementById('stat-avg');
-    if (statAvg) {
-        if (stats.avgCompletionMs > 0) {
-            const hours = stats.avgCompletionMs / (1000 * 60 * 60);
-            statAvg.textContent = hours < 24 ? `${Math.round(hours)}h` : `${Math.round(hours / 24)}d`;
-        } else {
-            statAvg.textContent = '—';
-        }
-    }
-
-    // Completion trend chart
-    renderCompletionTrend(stats.completionTrend);
-
-    // Priority breakdown
-    renderPriorityBreakdown(stats.tasksByImportance, stats.totalTasks);
-
-    // Time distribution
-    renderTimeDistribution(stats.timeByGoal);
-
-    // Heatmap
-    renderHeatmap(stats.heatmapData);
-
-    // Goals progress
-    const progressList = document.getElementById('goals-progress-list');
-    if (stats.goalsProgress.length === 0) { progressList.innerHTML = '<div class="empty-state-small">No goals yet</div>'; }
-    else {
-        progressList.innerHTML = stats.goalsProgress.map(g => `
-          <div class="goal-progress-card">
-            <div class="goal-progress-header">
-              <span class="goal-progress-title">${escHtml(g.title)}</span>
-              <span class="goal-progress-percent">${g.percent}%</span>
-            </div>
-            <div class="progress-bar"><div class="progress-bar-fill" style="width:${g.percent}%"></div></div>
-            <div class="goal-progress-meta"><span>${g.done} of ${g.total} tasks done</span></div>
-          </div>`).join('');
-    }
-
-    // Status bars
-    const total = stats.totalTasks || 1;
-    ['todo', 'in-progress', 'blocked', 'review', 'done'].forEach(s => {
-        const count = stats.tasksByStatus[s] || 0;
-        const bar = document.getElementById(`bar-${s}`);
-        const countEl = document.getElementById(`count-${s}`);
-        if (bar) bar.style.width = `${(count / total) * 100}%`;
-        if (countEl) countEl.textContent = count;
-    });
-
-    // Recent sessions
-    const recentContainer = document.getElementById('recent-sessions');
-    if (sessions.length === 0) { recentContainer.innerHTML = '<div class="empty-state-small">No sessions yet</div>'; }
-    else {
-        const recent = sessions.slice(-8).reverse();
-        recentContainer.innerHTML = recent.map(s => {
-            const typeIcon = s.type === 'pomodoro' ? ICONS.timer : s.type === 'countdown' ? ICONS.hourglass : ICONS.clock;
-            const taskName = findTaskName(s.taskId) || 'No task linked';
-            const date = new Date(s.completedAt).toLocaleDateString();
-            return `<div class="session-card"><div class="session-type">${typeIcon}</div><div class="session-info"><div class="session-task-name">${escHtml(taskName)}</div><div class="session-date">${date}</div></div><div class="session-duration">${formatDuration(s.duration)}</div></div>`;
-        }).join('');
-    }
-}
-
-let completionTrendChartInstance = null;
-
-function renderCompletionTrend(trend) {
-    const container = document.getElementById('completion-trend-chart');
-    if (!container) return;
-
-    // Ensure a canvas exists inside the container
-    let canvas = container.querySelector('canvas#completion-trend-canvas');
-    if (!canvas) {
-        container.innerHTML = '<canvas id="completion-trend-canvas"></canvas>';
-        canvas = container.querySelector('canvas#completion-trend-canvas');
-    }
-
-    if (!trend || trend.length === 0) {
-        container.innerHTML = '<div class="empty-state-small">No data yet</div>';
-        return;
-    }
-
-    if (completionTrendChartInstance) {
-        completionTrendChartInstance.destroy();
-        completionTrendChartInstance = null;
-    }
-
-    if (!window.Chart) return;
-
-    const labels = trend.map(t => {
-        const d = new Date(t.date);
-        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    });
-    const data = trend.map(t => t.count);
-
-    Chart.defaults.color = '#8b8b9e';
-    Chart.defaults.font.family = 'Inter';
-
-    completionTrendChartInstance = new Chart(canvas.getContext('2d'), {
-        type: 'line',
-        data: {
-            labels,
-            datasets: [{
-                label: 'Tasks Completed',
-                data,
-                borderColor: '#10b981',
-                backgroundColor: 'rgba(16, 185, 129, 0.12)',
-                borderWidth: 2,
-                pointRadius: 3,
-                pointBackgroundColor: '#10b981',
-                tension: 0.4,
-                fill: true
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: { stepSize: 1, precision: 0 },
-                    grid: { color: 'rgba(255,255,255,0.05)' }
-                },
-                x: {
-                    grid: { display: false },
-                    ticks: { maxTicksLimit: 7, maxRotation: 0 }
-                }
-            }
-        }
-    });
-}
-
-
-function renderPriorityBreakdown(byImportance, total) {
-    const container = document.getElementById('priority-breakdown');
-    if (!container) return;
-    const t = total || 1;
-    const items = [
-        { label: 'Urgent', color: '#f43f5e', count: byImportance.urgent || 0 },
-        { label: 'High', color: '#fb923c', count: byImportance.high || 0 },
-        { label: 'Medium', color: '#fbbf24', count: byImportance.medium || 0 },
-        { label: 'Low', color: '#34d399', count: byImportance.low || 0 },
-    ];
-    const hasData = items.some(i => i.count > 0);
-    if (!hasData) {
-        container.innerHTML = '<div class="empty-state-small">No data yet</div>';
-        return;
-    }
-    // Build conic-gradient for donut
-    let cumPercent = 0;
-    const segments = items.map(i => {
-        const pct = (i.count / t) * 100;
-        const start = cumPercent;
-        cumPercent += pct;
-        return { ...i, pct, start };
-    });
-    const gradientParts = segments.map(s => `${s.color} ${s.start}% ${s.start + s.pct}%`).join(', ');
-    container.innerHTML = `
-        <div class="donut-ring" style="background: conic-gradient(${gradientParts});">
-            <div class="donut-ring-inner"></div>
-        </div>
-        <div class="donut-legend">
-            ${items.map(i => `
-                <div class="donut-legend-item">
-                    <span class="legend-dot" style="background:${i.color}"></span>
-                    <span class="legend-label">${i.label}</span>
-                    <span class="legend-count">${i.count}</span>
-                </div>
-            `).join('')}
-        </div>
-    `;
-}
-
-function renderTimeDistribution(timeByGoal) {
-    const container = document.getElementById('time-distribution');
-    if (!container) return;
-    if (!timeByGoal || timeByGoal.length === 0) { container.innerHTML = '<div class="empty-state-small">Track time to see distribution</div>'; return; }
-    const total = timeByGoal.reduce((s, g) => s + g.time, 0);
-    const colors = ['#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#f43f5e', '#06b6d4', '#ec4899'];
-    let cumPercent = 0;
-    const segments = timeByGoal.map((g, i) => {
-        const pct = (g.time / total) * 100;
-        const start = cumPercent;
-        cumPercent += pct;
-        return { ...g, pct, start, color: colors[i % colors.length] };
-    });
-    const gradientParts = segments.map(s => `${s.color} ${s.start}% ${s.start + s.pct}%`).join(', ');
-    container.innerHTML = `
-        <div class="donut-svg" style="border-radius:50%;background:conic-gradient(${gradientParts});width:100px;height:100px;position:relative;">
-            <div style="position:absolute;inset:25px;border-radius:50%;background:var(--bg-card)"></div>
-        </div>
-        <div class="donut-legend">
-            ${segments.map(s => `
-                <div class="donut-legend-item">
-                    <span class="legend-dot" style="background:${s.color}"></span>
-                    <span>${escHtml(s.title)}</span>
-                    <span class="legend-time">${formatDuration(s.time)}</span>
-                </div>
-            `).join('')}
-        </div>
-    `;
-}
-
-function renderHeatmap(heatmapData) {
-    const container = document.getElementById('heatmap-container');
-    if (!container) return;
-    if (!heatmapData) { container.innerHTML = ''; return; }
-    const entries = Object.entries(heatmapData);
-    const maxVal = Math.max(...entries.map(e => e[1]), 1);
-    container.innerHTML = entries.map(([date, count]) => {
-        let level = '';
-        if (count > 0) {
-            const ratio = count / maxVal;
-            if (ratio <= 0.25) level = 'level-1';
-            else if (ratio <= 0.5) level = 'level-2';
-            else if (ratio <= 0.75) level = 'level-3';
-            else level = 'level-4';
-        }
-        return `<div class="heatmap-cell ${level}" title="${date}: ${count} completed"></div>`;
-    }).join('');
-}
-
-function findTaskName(taskId) {
-    if (!taskId) return null;
-    for (const goal of goals) { const task = goal.tasks.find(t => t.id === taskId); if (task) return task.title; }
-    return null;
-}
-
-// ==== Gamification ====
-let productivityChartInstance = null;
-
-function renderUpNext(tasks) {
-    const container = document.getElementById('up-next-container');
-    if (!container) return;
-
-    let validTasks = tasks.filter(t => t.status !== 'done' && t.status !== 'review');
-    if (validTasks.length === 0) {
-        container.innerHTML = '<div class="empty-state-small text-muted">No pending tasks!</div>';
-        return;
-    }
-
-    const importanceOrder = { 'urgent': 0, 'high': 1, 'medium': 2, 'low': 3 };
-    validTasks.sort((a, b) => {
-        if (importanceOrder[a.importance] !== importanceOrder[b.importance]) {
-            return importanceOrder[a.importance] - importanceOrder[b.importance];
-        }
-        if (a.dueDate && b.dueDate) return new Date(a.dueDate) - new Date(b.dueDate);
-        if (a.dueDate) return -1;
-        if (b.dueDate) return 1;
-        return 0;
-    });
-
-    const task = validTasks[0];
-    const statusLabels = { 'todo': 'TO DO', 'in-progress': 'IN PROGRESS', 'blocked': 'BLOCKED', 'review': 'REVIEW' };
-    const statusLabel = statusLabels[task.status] || task.status.toUpperCase();
-
-    // Find the goal name for context
-    let goalName = 'No Goal';
-    for (const g of goals) {
-        if (g.tasks.some(t => t.id === task.id)) {
-            goalName = g.title;
-            break;
-        }
-    }
-
-    // Calculate subtask progress for visual bar
-    const subtasks = task.subtasks || [];
-    const subtaskDone = subtasks.filter(s => s.done).length;
-    const progressPct = subtasks.length > 0 ? Math.round((subtaskDone / subtasks.length) * 100) : 0;
-    const showProgress = subtasks.length > 0;
-
-    // Format a simple time window label
-    const now = new Date();
-    const startStr = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-    const endDate = new Date(now.getTime() + 25 * 60 * 1000);
-    const endStr = endDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-
-    container.innerHTML = `
-        <div class="focus-task-item">
-            <span class="focus-task-status-badge">${statusLabel}</span>
-            <div class="focus-task-title-text">${escHtml(task.title)}</div>
-            <div class="focus-task-subtitle">${escHtml(goalName)}</div>
-            ${showProgress ? `
-            <div class="focus-task-progress-wrap">
-                <div class="focus-task-progress-track">
-                    <div class="focus-task-progress-fill" style="width: ${progressPct}%"></div>
-                </div>
-                <div class="focus-task-time-row">
-                    <span>Start ${startStr}</span>
-                    <span>End ${endStr}</span>
-                </div>
-            </div>` : ''}
-            <div class="focus-task-actions-row">
-                <button class="btn btn-secondary" onclick="event.stopPropagation(); openEditTask('${task.id}')">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
-                </button>
-                <button class="btn btn-primary" onclick="quickStartTimer('${task.id}')">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    Start
-                </button>
-            </div>
-        </div>
-    `;
-}
-
-function completeTaskFromDashboard(taskId) {
-    // Basic implementation that finds the task and marks it as done
-    for (const goal of goals) {
-        const task = goal.tasks.find(t => t.id === taskId);
-        if (task) {
-            task.status = 'done';
-            appLog('Task Completed', `Task "${task.title}" marked as done from dashboard.`);
-            saveData();
-            loadDashboard();
-            break;
-        }
-    }
-}
-
-function quickStartTimer(taskId) {
-    currentTaskId = taskId;
-    performViewSwitch('timer');
-    // Start timer automatically could be a nice touch
-}
-
-function renderDailyPlan(tasks) {
-    const container = document.getElementById('daily-plan-container');
-    if (!container) return;
-
-    let validTasks = tasks.filter(t => t.status !== 'done');
-    const importanceOrder = { 'urgent': 0, 'high': 1, 'medium': 2, 'low': 3 };
-    validTasks.sort((a, b) => {
-        if (importanceOrder[a.importance] !== importanceOrder[b.importance]) return importanceOrder[a.importance] - importanceOrder[b.importance];
-        if (a.dueDate && b.dueDate) return new Date(a.dueDate) - new Date(b.dueDate);
-        if (a.dueDate) return -1;
-        return 1;
-    });
-
-    const topTasks = validTasks.slice(0, 4);
-
-    if (topTasks.length === 0) {
-        container.innerHTML = '<div class="empty-state-small text-muted" style="text-align:left;">All clear for today!</div>';
-        return;
-    }
-
-    container.innerHTML = topTasks.map(t => `
-        <div class="daily-action-item" onclick="showView('manage'); openEditTask('${t.id}')" style="cursor:pointer;">
-            <div class="daily-action-check"></div>
-            <div class="daily-action-title">${escHtml(t.title)}</div>
-            <span class="task-importance-dot ${t.importance}"></span>
-        </div>
-    `).join('');
-}
-
-function renderProductivityPulse(sessions) {
-    const canvas = document.getElementById('productivity-chart');
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    const last7Days = [];
-    const dataPoints = [];
-
-    for (let i = 6; i >= 0; i--) {
-        const d = new Date();
-        d.setDate(d.getDate() - i);
-        last7Days.push(d.toLocaleDateString('en-US', { weekday: 'short' }));
-
-        const dateStr = d.toDateString();
-        const sum = sessions.filter(s => new Date(s.completedAt).toDateString() === dateStr)
-            .reduce((acc, curr) => acc + (curr.duration || 0), 0);
-        dataPoints.push(Math.round(sum / 60)); // minutes
-    }
-
-    if (productivityChartInstance) {
-        productivityChartInstance.destroy();
-    }
-
-    if (window.Chart) {
-        Chart.defaults.color = '#8b8b9e';
-        Chart.defaults.font.family = 'Inter';
-        productivityChartInstance = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: last7Days,
-                datasets: [{
-                    label: 'Minutes Focused',
-                    data: dataPoints,
-                    borderColor: '#8b5cf6',
-                    backgroundColor: (context) => {
-                        const chart = context.chart;
-                        const { ctx: c, chartArea } = chart;
-                        if (!chartArea) return 'rgba(139, 92, 246, 0.15)';
-                        const gradient = c.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-                        gradient.addColorStop(0, 'rgba(139, 92, 246, 0.35)');
-                        gradient.addColorStop(1, 'rgba(139, 92, 246, 0.02)');
-                        return gradient;
-                    },
-                    borderWidth: 2.5,
-                    pointRadius: 4,
-                    pointBackgroundColor: '#8b5cf6',
-                    pointBorderColor: '#1a1a2e',
-                    pointBorderWidth: 2,
-                    pointHoverRadius: 6,
-                    tension: 0.45,
-                    fill: true
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: (ctx) => ` ${ctx.parsed.y} min focused`
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: { color: 'rgba(255,255,255,0.05)' },
-                        ticks: { maxTicksLimit: 5 }
-                    },
-                    x: { grid: { display: false } }
-                }
-            }
-        });
-    }
-}
-
-
-// ==========================================
-// DATA EXPORT
-// ==========================================
-
-// ==========================================
 // DATA EXPORT
 // ==========================================
 
@@ -2019,175 +798,27 @@ function initBackupButton() {
         if (!file) return;
 
         const reader = new FileReader();
-        reader.onload = (evt) => {
-            let parsed;
+        reader.onload = async (event) => {
             try {
-                parsed = JSON.parse(evt.target.result);
+                const backupData = JSON.parse(String(event.target.result || '{}'));
+                const result = await apiPost('/api/restore', backupData);
+                showToast('Backup restored');
+                logSystemEvent(`Restored from backup: ${result.safetyBackup}`);
+                location.reload();
             } catch (err) {
-                showToast('Invalid JSON file — could not parse', 'error');
+                console.error('Restore failed:', err);
+                showToast('Restore failed', 'error');
+            } finally {
                 fileInput.value = '';
-                return;
             }
-
-            showConfirmModal(
-                `Restore data from "${file.name}"? A safety backup will be created first. This will replace all current data.`,
-                async () => {
-                    restoreBtn.disabled = true;
-                    restoreBtn.textContent = 'Restoring...';
-                    try {
-                        const res = await apiPost('/api/restore', parsed);
-                        showToast(`Data restored! Safety backup: ${res.safetyBackup}`);
-                        logSystemEvent('Data restored from backup');
-                        // Reload all data
-                        await loadGoals();
-                        loadDashboard();
-                    } catch (err) {
-                        console.error('Restore failed:', err);
-                        showToast('Restore failed: ' + (err.message || 'Unknown error'), 'error');
-                    } finally {
-                        restoreBtn.disabled = false;
-                        restoreBtn.textContent = 'Restore from Backup';
-                        fileInput.value = '';
-                    }
-                }
-            );
+        };
+        reader.onerror = () => {
+            console.error('Failed to read backup file');
+            showToast('Failed to read backup file', 'error');
+            fileInput.value = '';
         };
         reader.readAsText(file);
     });
-}
-
-async function downloadFile(url, filename) {
-    try {
-        const res = await fetch(url);
-        if (!res.ok) throw new Error('Network response was not ok');
-        const blob = await res.blob();
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(a.href);
-        showToast(`Exported as ${filename}`);
-        logSystemEvent(`Data exported as ${filename}`);
-    } catch (err) {
-        showToast('Export failed', 'error');
-    }
-}
-
-// ==========================================
-// HELPERS
-// ==========================================
-
-function formatTimeDisplay(totalSec) {
-    const h = Math.floor(totalSec / 3600);
-    const m = Math.floor((totalSec % 3600) / 60);
-    const s = totalSec % 60;
-    return h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
-}
-
-function pad(n) { return String(n).padStart(2, '0'); }
-
-function formatDuration(seconds) {
-    if (seconds < 60) return `${seconds}s`;
-    if (seconds < 3600) return `${Math.round(seconds / 60)}m`;
-    const h = Math.floor(seconds / 3600);
-    const m = Math.round((seconds % 3600) / 60);
-    return m > 0 ? `${h}h ${m}m` : `${h}h`;
-}
-
-function statusLabel(status) {
-    return { 'todo': 'To Do', 'in-progress': 'In Progress', 'blocked': 'Blocked', 'review': 'Review', 'done': 'Done' }[status] || status;
-}
-
-function escHtml(str) {
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
-}
-
-// ==========================================
-// CONFIRM MODAL
-// ==========================================
-
-function initConfirmModal() {
-    document.getElementById('confirm-yes').addEventListener('click', () => { if (pendingDeleteFn) pendingDeleteFn(); closeConfirmModal(); });
-    document.getElementById('confirm-no').addEventListener('click', closeConfirmModal);
-    document.getElementById('modal-confirm').addEventListener('click', (e) => { if (e.target.classList.contains('modal-overlay')) closeConfirmModal(); });
-}
-
-function showConfirmModal(message, onConfirm) {
-    pendingDeleteFn = onConfirm;
-    document.getElementById('confirm-message').textContent = message;
-    document.getElementById('modal-confirm').classList.add('open');
-}
-
-function closeConfirmModal() {
-    pendingDeleteFn = null;
-    document.getElementById('modal-confirm').classList.remove('open');
-}
-
-// ==========================================
-// SYSTEM LOGS
-// ==========================================
-
-function getSystemLogs() {
-    return JSON.parse(localStorage.getItem('systemLogs')) || [];
-}
-
-function saveSystemLogs(logs) {
-    localStorage.setItem('systemLogs', JSON.stringify(logs));
-}
-
-// ---- Logs filter state ----
-let logsTypeFilter = 'all';
-
-function getLogEventType(message) {
-    const msg = message.toLowerCase();
-    if (msg.includes('task')) return 'task';
-    if (msg.includes('goal')) return 'goal';
-    if (msg.includes('note')) return 'note';
-    if (msg.includes('session') || msg.includes('timer') || msg.includes('focus') || msg.includes('pomodoro') || msg.includes('stopwatch') || msg.includes('countdown')) return 'timer';
-    if (msg.includes('backup') || msg.includes('restore') || msg.includes('export') || msg.includes('import')) return 'backup';
-    return 'other';
-}
-
-function logSystemEvent(message) {
-    const logs = getSystemLogs();
-    const entry = {
-        message,
-        timestamp: new Date().toISOString(),
-        type: getLogEventType(message)
-    };
-    logs.unshift(entry);
-
-    // Keep max 100 logs
-    if (logs.length > 100) {
-        logs.pop();
-    }
-
-    saveSystemLogs(logs);
-
-    // If we're currently looking at the logs view, update it
-    const logsView = document.getElementById('view-logs');
-    if (logsView && logsView.classList.contains('active')) {
-        renderSystemLogs();
-    }
-}
-
-function initLogsView() {
-    const btnClearLogs = document.getElementById('btn-clear-logs');
-    if (btnClearLogs && !btnClearLogs._logsInitialized) {
-        btnClearLogs._logsInitialized = true;
-        btnClearLogs.addEventListener('click', () => {
-            showConfirmModal('Are you sure you want to permanently delete all system logs?', () => {
-                localStorage.removeItem('systemLogs');
-                renderSystemLogs();
-                showToast('System logs cleared');
-                logSystemEvent('Cleared system logs');
-            });
-        });
-    }
 
     // Wire up type filter pills
     const filterPills = document.querySelectorAll('#logs-type-filters .filter-pill');
@@ -2550,206 +1181,5 @@ function renderSystemLogs() {
 })();
 
 
-// ==========================================
-// 3D LOADING OVERLAY — Cinematic DNA Helix
-// ==========================================
-
-let loadingScene, loadingCamera, loadingRenderer;
-let loadingAnimationId = null;
-let loadingInitialized = false;
-
-function initLoadingScene() {
-    if (loadingInitialized) return;
-    loadingInitialized = true;
-
-    const container = document.getElementById('loading-canvas-container');
-    if (!container || typeof THREE === 'undefined') return;
-
-    const W = 280, H = 280;
-    loadingScene = new THREE.Scene();
-    loadingCamera = new THREE.PerspectiveCamera(55, W / H, 0.1, 100);
-    loadingCamera.position.set(0, 0, 5.5);
-
-    loadingRenderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-    loadingRenderer.setSize(W, H);
-    loadingRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    loadingRenderer.setClearColor(0x000000, 0);
-    container.appendChild(loadingRenderer.domElement);
-
-    // Lights
-    loadingScene.add(new THREE.AmbientLight(0x6d28d9, 0.5));
-    const pt1 = new THREE.PointLight(0xa78bfa, 2.5, 20);
-    pt1.position.set(0, 0, 4);
-    loadingScene.add(pt1);
-    const pt2 = new THREE.PointLight(0x38bdf8, 1.5, 20);
-    pt2.position.set(2, 2, 2);
-    loadingScene.add(pt2);
-    const pt3 = new THREE.PointLight(0xf59e0b, 1.0, 15);
-    pt3.position.set(-2, -2, 3);
-    loadingScene.add(pt3);
-}
-
-function startLoadingAnimation() {
-    initLoadingScene();
-    if (!loadingRenderer) return;
-
-    // Clear previous objects except lights
-    while (loadingScene.children.length > 3) {
-        loadingScene.remove(loadingScene.children[loadingScene.children.length - 1]);
-    }
-
-    const helixGroup = new THREE.Group();
-    loadingScene.add(helixGroup);
-
-    // Build double-helix strands
-    const strandA = [], strandB = [];
-    const nodeCount = 24;
-    const helixRadius = 1.4;
-    const helixHeight = 4.0;
-
-    const sphereGeo = new THREE.SphereGeometry(0.12, 14, 14);
-
-    for (let i = 0; i < nodeCount; i++) {
-        const t = i / (nodeCount - 1);
-        const angle = t * Math.PI * 4; // 2 full rotations
-        const y = (t - 0.5) * helixHeight;
-
-        // Strand A — purple
-        const matA = new THREE.MeshPhongMaterial({
-            color: 0x8b5cf6,
-            emissive: 0x6d28d9,
-            emissiveIntensity: 0.5,
-            shininess: 150,
-            transparent: true,
-            opacity: 0.9
-        });
-        const nodeA = new THREE.Mesh(sphereGeo, matA);
-        nodeA.position.set(
-            Math.cos(angle) * helixRadius,
-            y,
-            Math.sin(angle) * helixRadius
-        );
-        nodeA.userData = { t, angle, baseColor: 0x8b5cf6 };
-        helixGroup.add(nodeA);
-        strandA.push(nodeA);
-
-        // Strand B — cyan (offset by PI)
-        const matB = new THREE.MeshPhongMaterial({
-            color: 0x38bdf8,
-            emissive: 0x0ea5e9,
-            emissiveIntensity: 0.5,
-            shininess: 150,
-            transparent: true,
-            opacity: 0.9
-        });
-        const nodeB = new THREE.Mesh(sphereGeo, matB);
-        nodeB.position.set(
-            Math.cos(angle + Math.PI) * helixRadius,
-            y,
-            Math.sin(angle + Math.PI) * helixRadius
-        );
-        nodeB.userData = { t, angle: angle + Math.PI, baseColor: 0x38bdf8 };
-        helixGroup.add(nodeB);
-        strandB.push(nodeB);
-    }
-
-    // Cross-links (rungs) between strands
-    const rungMat = new THREE.MeshBasicMaterial({
-        color: 0xfbbf24, transparent: true, opacity: 0.35
-    });
-    for (let i = 0; i < nodeCount; i += 3) {
-        const rungGeo = new THREE.CylinderGeometry(0.025, 0.025, 1, 6);
-        const rung = new THREE.Mesh(rungGeo, rungMat.clone());
-        const posA = strandA[i].position;
-        const posB = strandB[i].position;
-        const mid = new THREE.Vector3().addVectors(posA, posB).multiplyScalar(0.5);
-        rung.position.copy(mid);
-        const dir = new THREE.Vector3().subVectors(posB, posA);
-        const length = dir.length();
-        rung.scale.y = length;
-        rung.quaternion.setFromUnitVectors(
-            new THREE.Vector3(0, 1, 0),
-            dir.normalize()
-        );
-        helixGroup.add(rung);
-    }
-
-    // Tube backbones for each strand
-    function buildTube(nodes, color) {
-        const points = nodes.map(n => n.position.clone());
-        const curve = new THREE.CatmullRomCurve3(points);
-        const tubeGeo = new THREE.TubeGeometry(curve, 60, 0.04, 8, false);
-        const tubeMat = new THREE.MeshPhongMaterial({
-            color, emissive: color, emissiveIntensity: 0.3,
-            transparent: true, opacity: 0.5, shininess: 100
-        });
-        return new THREE.Mesh(tubeGeo, tubeMat);
-    }
-    helixGroup.add(buildTube(strandA, 0x8b5cf6));
-    helixGroup.add(buildTube(strandB, 0x38bdf8));
-
-    // Orbiting glow ring
-    const ringGeo = new THREE.TorusGeometry(2.2, 0.04, 8, 80);
-    const ringMat = new THREE.MeshBasicMaterial({ color: 0xa78bfa, transparent: true, opacity: 0.4 });
-    const ring = new THREE.Mesh(ringGeo, ringMat);
-    ring.rotation.x = Math.PI / 2.5;
-    loadingScene.add(ring);
-
-    // Particle field
-    const particleCount = 120;
-    const pGeo = new THREE.BufferGeometry();
-    const pPositions = new Float32Array(particleCount * 3);
-    for (let i = 0; i < particleCount; i++) {
-        pPositions[i * 3] = (Math.random() - 0.5) * 9;
-        pPositions[i * 3 + 1] = (Math.random() - 0.5) * 9;
-        pPositions[i * 3 + 2] = (Math.random() - 0.5) * 4;
-    }
-    pGeo.setAttribute('position', new THREE.BufferAttribute(pPositions, 3));
-    const pMat = new THREE.PointsMaterial({ color: 0x8b5cf6, size: 0.06, transparent: true, opacity: 0.5 });
-    loadingScene.add(new THREE.Points(pGeo, pMat));
-
-    const startTime = performance.now();
-
-    function animateLoading() {
-        loadingAnimationId = requestAnimationFrame(animateLoading);
-        const elapsed = (performance.now() - startTime) / 1000;
-
-        // Rotate the whole helix
-        helixGroup.rotation.y = elapsed * 1.2;
-        helixGroup.rotation.x = Math.sin(elapsed * 0.4) * 0.15;
-
-        // Pulse each node with a wave travelling up the helix
-        const allNodes = [...strandA, ...strandB];
-        allNodes.forEach(node => {
-            const wave = Math.sin(elapsed * 5 - node.userData.t * Math.PI * 3) * 0.5 + 0.5;
-            node.scale.setScalar(0.7 + wave * 0.7);
-            node.material.emissiveIntensity = 0.3 + wave * 0.9;
-            node.material.opacity = 0.6 + wave * 0.35;
-        });
-
-        // Ring orbit tilt
-        ring.rotation.z = elapsed * 0.6;
-        ringMat.opacity = 0.25 + Math.sin(elapsed * 2) * 0.18;
-
-        // Particle drift
-        pMat.opacity = 0.3 + Math.sin(elapsed * 1.5) * 0.2;
-
-        // Camera gentle sway
-        loadingCamera.position.x = Math.sin(elapsed * 0.5) * 0.4;
-        loadingCamera.position.y = Math.cos(elapsed * 0.3) * 0.3;
-        loadingCamera.lookAt(0, 0, 0);
-
-        loadingRenderer.render(loadingScene, loadingCamera);
-    }
-
-    animateLoading();
-
-    setTimeout(() => {
-        if (loadingAnimationId) {
-            cancelAnimationFrame(loadingAnimationId);
-            loadingAnimationId = null;
-        }
-    }, 2000);
-}
 
 
