@@ -4,9 +4,18 @@
 
 require('dotenv').config();
 const express = require('express');
+const { AsyncLocalStorage } = require('async_hooks');
 const fs = require('fs');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
+
+const DEFAULT_SUPABASE_URL = 'https://wqnrdahctafgdvsprkju.supabase.co';
+const DEFAULT_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndxbnJkYWhjdGFmZ2R2c3Bya2p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNjczNTUsImV4cCI6MjA5MTc0MzM1NX0.cRoE9OOw7xYsQ1BSsAFz1rRhfNQqF98qa8_R7E6bl7g';
+
+const supabaseConfig = {
+    url: String(process.env.SUPABASE_URL || DEFAULT_SUPABASE_URL).trim().replace(/\/$/, ''),
+    anonKey: String(process.env.SUPABASE_ANON_KEY || DEFAULT_SUPABASE_ANON_KEY).trim()
+};
 
 // =====================
 // 1. CONFIGURATION
@@ -21,73 +30,66 @@ const config = {
     allowedTimerTypes: ['pomodoro', 'stopwatch', 'countdown', 'manual']
 };
 
+function parseOriginList(value) {
+    return String(value || '')
+        .split(',')
+        .map((entry) => entry.trim())
+        .filter(Boolean);
+}
+
+const allowedOrigins = new Set([
+    ...parseOriginList(process.env.APP_ORIGIN),
+    ...parseOriginList(process.env.CORS_ORIGIN),
+    ...parseOriginList(process.env.CORS_ORIGINS),
+    `http://localhost:${config.port}`,
+    `http://127.0.0.1:${config.port}`
+]);
+
 const app = express();
+const requestContext = new AsyncLocalStorage();
+const rateLimitState = new Map();
 
-// =====================
-// 2. MIDDLEWARE
-// =====================
+function normalizeUserKey(value) {
+    return String(value || 'anonymous').trim().toLowerCase() || 'anonymous';
+}
 
-app.use((req, res, next) => {
-    res.setHeader('X-Content-Type-Options', 'nosniff');
-    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
-    res.setHeader('X-XSS-Protection', '1; mode=block');
-    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+function getCurrentUserKey() {
+    const store = requestContext.getStore();
+    return normalizeUserKey(store?.userKey);
+}
 
-    // CORS headers
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+function getEmptyUserData() {
+    return { goals: [], timerSessions: [], notes: [] };
+}
 
-    // Intercept OPTIONS method
-    if (req.method === 'OPTIONS') {
-        return res.sendStatus(200);
-    }
-
-    next();
-});
-
-app.use(express.json({ limit: config.maxBodySize }));
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Prevent browser caching of API responses
-app.use('/api', (req, res, next) => {
-    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
-    res.setHeader('Pragma', 'no-cache');
-    res.setHeader('Expires', '0');
-    next();
-});
-
-app.use((req, res, next) => {
-    const start = Date.now();
-    const originalEnd = res.end;
-    res.end = function (...args) {
-        const duration = Date.now() - start;
-        const logLevel = res.statusCode >= 400 ? '⚠️' : '✅';
-        console.log(`  ${logLevel} ${req.method} ${req.path} → ${res.statusCode} (${duration}ms)`);
-        originalEnd.apply(res, args);
+function normalizeUserData(data) {
+    return {
+        goals: Array.isArray(data?.goals) ? data.goals : [],
+        timerSessions: Array.isArray(data?.timerSessions) ? data.timerSessions : [],
+        notes: Array.isArray(data?.notes) ? data.notes : []
     };
-    next();
-});
+}
 
-// =====================
-// 3. DATA ACCESS LAYER
-// =====================
+function normalizeRootData(data) {
+    const root = (data && typeof data === 'object' && !Array.isArray(data)) ? { ...data } : {};
+    if (!Array.isArray(root.goals)) root.goals = [];
+    if (!Array.isArray(root.timerSessions)) root.timerSessions = [];
+    if (!Array.isArray(root.notes)) root.notes = [];
+    if (!root.users || typeof root.users !== 'object' || Array.isArray(root.users)) root.users = {};
+    return root;
+}
 
-function readData() {
+function readRootData() {
     try {
         const raw = fs.readFileSync(config.dataFile, 'utf-8');
-        const parsed = JSON.parse(raw);
-        if (!Array.isArray(parsed.goals)) parsed.goals = [];
-        if (!Array.isArray(parsed.timerSessions)) parsed.timerSessions = [];
-        if (!Array.isArray(parsed.notes)) parsed.notes = [];
-        return parsed;
+        return normalizeRootData(JSON.parse(raw));
     } catch (err) {
         console.error('  ⚠️  Data file read error, using defaults:', err.message);
-        return { goals: [], timerSessions: [], notes: [] };
+        return normalizeRootData({});
     }
 }
 
-function writeData(data) {
+function writeRootData(data) {
     const payload = JSON.stringify(data, null, 2);
     try {
         const tempFile = config.dataFile + '.tmp';
@@ -109,6 +111,109 @@ function writeData(data) {
             throw new AppError('Failed to save data', 500);
         }
     }
+}
+
+// =====================
+// 2. MIDDLEWARE
+// =====================
+
+app.use((req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+
+    const origin = req.get('Origin');
+    if (origin && allowedOrigins.has(origin)) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+        res.setHeader('Vary', 'Origin');
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-TaskTracker-Token');
+    }
+
+    // Intercept OPTIONS method
+    if (req.method === 'OPTIONS') {
+        return res.sendStatus(200);
+    }
+
+    next();
+});
+
+app.use(express.json({ limit: config.maxBodySize }));
+
+app.use('/api', authenticateApiRequest);
+
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Prevent browser caching of API responses
+app.use('/api', (req, res, next) => {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    next();
+});
+
+app.use((req, res, next) => {
+    const start = Date.now();
+    const originalEnd = res.end;
+    res.end = function (...args) {
+        const duration = Date.now() - start;
+        const logLevel = res.statusCode >= 400 ? '⚠️' : '✅';
+        const userKey = getCurrentUserKey();
+        const userLabel = userKey !== 'anonymous' ? ` [${userKey}]` : '';
+        console.log(`  ${logLevel} ${req.method} ${req.path}${userLabel} → ${res.statusCode} (${duration}ms)`);
+        originalEnd.apply(res, args);
+    };
+    next();
+});
+
+// =====================
+// 3. DATA ACCESS LAYER
+// =====================
+
+function readData() {
+    const root = readRootData();
+    const userKey = getCurrentUserKey();
+
+    if (userKey === 'anonymous') {
+        return normalizeUserData(root);
+    }
+
+    if (!root.users[userKey]) {
+        const hasLegacyData = Object.keys(root.users).length === 0 && (root.goals.length > 0 || root.timerSessions.length > 0 || root.notes.length > 0);
+        if (hasLegacyData) {
+            root.users[userKey] = normalizeUserData({
+                goals: root.goals,
+                timerSessions: root.timerSessions,
+                notes: root.notes
+            });
+            root.goals = [];
+            root.timerSessions = [];
+            root.notes = [];
+            writeRootData(root);
+            return normalizeUserData(root.users[userKey]);
+        }
+
+        return getEmptyUserData();
+    }
+
+    return normalizeUserData(root.users[userKey]);
+}
+
+function writeData(data) {
+    const root = readRootData();
+    const userKey = getCurrentUserKey();
+    const normalized = normalizeUserData(data);
+
+    if (userKey === 'anonymous') {
+        root.goals = normalized.goals;
+        root.timerSessions = normalized.timerSessions;
+        root.notes = normalized.notes;
+    } else {
+        root.users[userKey] = normalized;
+    }
+
+    writeRootData(root);
 }
 
 // =====================
@@ -238,6 +343,144 @@ function validateNoteInput(body, isUpdate = false) {
     };
 }
 
+function getSupabaseConfig() {
+    return {
+        supabaseUrl: supabaseConfig.url,
+        supabaseAnonKey: supabaseConfig.anonKey
+    };
+}
+
+async function verifySupabaseSession(accessToken) {
+    if (!supabaseConfig.url || !supabaseConfig.anonKey) {
+        throw new AppError('Supabase auth is not configured', 503);
+    }
+
+    const token = String(accessToken || '').trim();
+    if (!token) {
+        throw new ValidationError('accessToken is required');
+    }
+
+    let response;
+    try {
+        response = await fetch(`${supabaseConfig.url}/auth/v1/user`, {
+            headers: {
+                apikey: supabaseConfig.anonKey,
+                Authorization: `Bearer ${token}`
+            }
+        });
+    } catch (error) {
+        throw new AppError('Unable to verify Supabase session', 502);
+    }
+
+    if (!response.ok) {
+        if (response.status === 401 || response.status === 403) {
+            throw new AppError('Supabase session is invalid or expired', 401);
+        }
+
+        throw new AppError('Unable to verify Supabase session', 502);
+    }
+
+    return response.json();
+}
+
+function extractAccessToken(req) {
+    const authHeader = String(req.get('Authorization') || '').trim();
+    if (authHeader.toLowerCase().startsWith('bearer ')) {
+        return authHeader.slice(7).trim();
+    }
+
+    return String(req.get('X-TaskTracker-Token') || req.get('X-Tasktracker-Token') || '').trim();
+}
+
+function isPublicApiRoute(req) {
+    return req.path === '/supabase-config' || req.path === '/auth/session';
+}
+
+async function authenticateApiRequest(req, res, next) {
+    if (req.method === 'OPTIONS' || isPublicApiRoute(req)) {
+        return next();
+    }
+
+    const accessToken = extractAccessToken(req);
+    if (!accessToken) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    try {
+        const user = await verifySupabaseSession(accessToken);
+        const userKey = normalizeUserKey(user.email);
+
+        requestContext.run({ userKey }, () => {
+            req.user = { id: user.id || null, email: user.email || null };
+            next();
+        });
+    } catch (error) {
+        const statusCode = error instanceof AppError ? error.statusCode : 401;
+        const message = error instanceof AppError ? error.message : 'Unauthorized';
+        res.status(statusCode).json({ error: message });
+    }
+}
+
+function getRequestIp(req) {
+    const forwardedFor = String(req.get('X-Forwarded-For') || '').split(',')[0].trim();
+    const rawIp = forwardedFor || req.ip || req.socket?.remoteAddress || 'unknown';
+    return rawIp.replace(/^::ffff:/, '');
+}
+
+function createRateLimitMiddleware({ windowMs, max, scope, message }) {
+    return (req, res, next) => {
+        const userKey = getCurrentUserKey();
+        const identity = userKey !== 'anonymous' ? `user:${userKey}` : `ip:${getRequestIp(req)}`;
+        const bucketKey = `${scope}:${identity}`;
+        const now = Date.now();
+
+        const currentBucket = rateLimitState.get(bucketKey);
+        if (!currentBucket || currentBucket.resetAt <= now) {
+            rateLimitState.set(bucketKey, { count: 1, resetAt: now + windowMs });
+            res.setHeader('X-RateLimit-Limit', String(max));
+            res.setHeader('X-RateLimit-Remaining', String(Math.max(max - 1, 0)));
+            res.setHeader('X-RateLimit-Reset', String(Math.ceil((now + windowMs) / 1000)));
+            return next();
+        }
+
+        if (currentBucket.count >= max) {
+            const retryAfterSeconds = Math.max(1, Math.ceil((currentBucket.resetAt - now) / 1000));
+            res.setHeader('X-RateLimit-Limit', String(max));
+            res.setHeader('X-RateLimit-Remaining', '0');
+            res.setHeader('X-RateLimit-Reset', String(Math.ceil(currentBucket.resetAt / 1000)));
+            res.setHeader('Retry-After', String(retryAfterSeconds));
+            return res.status(429).json({ error: message || 'Too many requests', retryAfterSeconds });
+        }
+
+        currentBucket.count += 1;
+        res.setHeader('X-RateLimit-Limit', String(max));
+        res.setHeader('X-RateLimit-Remaining', String(Math.max(max - currentBucket.count, 0)));
+        res.setHeader('X-RateLimit-Reset', String(Math.ceil(currentBucket.resetAt / 1000)));
+        next();
+    };
+}
+
+const authSessionRateLimit = createRateLimitMiddleware({
+    windowMs: 10 * 60 * 1000,
+    max: 20,
+    scope: 'auth-session',
+    message: 'Too many session checks. Please wait a moment and try again.'
+});
+
+const backupRestoreRateLimit = createRateLimitMiddleware({
+    windowMs: 60 * 60 * 1000,
+    max: 10,
+    scope: 'data-protection',
+    message: 'Too many backup or restore requests. Please wait and try again.'
+});
+
+const exportRateLimit = createRateLimitMiddleware({
+    windowMs: 60 * 60 * 1000,
+    max: 20,
+    scope: 'data-export',
+    message: 'Too many export requests. Please wait and try again.'
+});
+
 // =====================
 // 7. SERVICE LAYER
 // =====================
@@ -351,6 +594,26 @@ const timerService = {
         }
         writeData(data);
         return session;
+    },
+    delete(id) {
+        const data = readData();
+        const index = data.timerSessions.findIndex(session => session.id === id);
+        if (index === -1) throw new NotFoundError('Timer session');
+
+        const [session] = data.timerSessions.splice(index, 1);
+        if (session?.taskId) {
+            for (const goal of data.goals) {
+                const task = goal.tasks.find(t => t.id === session.taskId);
+                if (task) {
+                    const currentTimeSpent = Number(task.timeSpent) || 0;
+                    task.timeSpent = Math.max(0, currentTimeSpent - (Number(session.duration) || 0));
+                    task.updatedAt = new Date().toISOString();
+                    break;
+                }
+            }
+        }
+
+        writeData(data);
     }
 };
 
@@ -524,6 +787,18 @@ const statsService = {
 // 8. ROUTES
 // =====================
 
+// Auth
+app.get('/api/supabase-config', asyncHandler(async (req, res) => { res.json(getSupabaseConfig()); }));
+app.post('/api/auth/session', authSessionRateLimit, asyncHandler(async (req, res) => {
+    const user = await verifySupabaseSession(req.body?.accessToken || extractAccessToken(req));
+    res.json({
+        email: user.email || null,
+        userId: user.id || null,
+        expiresAt: user.exp || null
+    });
+}));
+app.delete('/api/auth/session', asyncHandler(async (req, res) => { res.status(204).end(); }));
+
 // Goals
 app.get('/api/goals', asyncHandler(async (req, res) => { res.json(goalService.getAll()); }));
 app.get('/api/goals/:id', asyncHandler(async (req, res) => { res.json(goalService.getById(req.params.id)); }));
@@ -539,6 +814,7 @@ app.delete('/api/tasks/:id', asyncHandler(async (req, res) => { taskService.dele
 // Timer Sessions
 app.post('/api/timer-sessions', asyncHandler(async (req, res) => { res.status(201).json(timerService.create(validateTimerSessionInput(req.body))); }));
 app.get('/api/timer-sessions', asyncHandler(async (req, res) => { res.json(timerService.getAll()); }));
+app.delete('/api/timer-sessions/:id', asyncHandler(async (req, res) => { timerService.delete(req.params.id); res.status(204).end(); }));
 
 // Notes
 app.get('/api/notes', asyncHandler(async (req, res) => { res.json(noteService.getAll()); }));
@@ -550,25 +826,25 @@ app.delete('/api/notes/:id', asyncHandler(async (req, res) => { noteService.dele
 app.get('/api/stats', asyncHandler(async (req, res) => { res.json(statsService.getStats()); }));
 
 // Backup
-app.post('/api/backup', asyncHandler(async (req, res) => {
+app.post('/api/backup', backupRestoreRateLimit, asyncHandler(async (req, res) => {
     const backupFile = backupService.createBackup();
     res.status(201).json({ message: 'Backup created successfully', file: backupFile });
 }));
 
 // Restore
-app.post('/api/restore', asyncHandler(async (req, res) => {
+app.post('/api/restore', backupRestoreRateLimit, asyncHandler(async (req, res) => {
     const result = backupService.restoreBackup(req.body);
     res.json({ message: 'Data restored successfully', safetyBackup: result.safetyBackup });
 }));
 
 // Data Export
-app.get('/api/export/json', asyncHandler(async (req, res) => {
+app.get('/api/export/json', exportRateLimit, asyncHandler(async (req, res) => {
     const data = readData();
     res.setHeader('Content-Disposition', 'attachment; filename=tasktracker-export.json');
     res.json(data);
 }));
 
-app.get('/api/export/csv', asyncHandler(async (req, res) => {
+app.get('/api/export/csv', exportRateLimit, asyncHandler(async (req, res) => {
     const data = readData();
     const allTasks = [];
     for (const goal of data.goals) {

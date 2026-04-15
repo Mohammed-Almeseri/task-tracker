@@ -3,3 +3,8 @@ backups/
 *.log
 .DS_Store
 .env
+.vscode/
+appdeploy-build/
+task-tracker/
+Task-Tracker-V1/
+*.code-workspace

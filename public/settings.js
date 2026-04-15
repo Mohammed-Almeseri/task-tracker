@@ -1,17 +1,57 @@
 // Settings feature module
 
+const SETTINGS_AUTH_EMAIL_STORAGE_KEY = 'task_tracker_current_email';
+const SETTINGS_AUTH_TOKEN_STORAGE_KEY = 'task_tracker_supabase_access_token';
+
+function getSettingsStorageKey(baseKey) {
+    return typeof getScopedStorageKey === 'function' ? getScopedStorageKey(baseKey) : baseKey;
+}
+
+function clearSupabaseAuthStorage() {
+    const keysToRemove = [];
+    for (let index = 0; index < localStorage.length; index += 1) {
+        const key = localStorage.key(index);
+        if (key && (key.startsWith('sb-') || key.includes('supabase'))) {
+            keysToRemove.push(key);
+        }
+    }
+
+    keysToRemove.forEach((key) => localStorage.removeItem(key));
+}
+
+async function clearAuthSession() {
+    const accessToken = String(localStorage.getItem(SETTINGS_AUTH_TOKEN_STORAGE_KEY) || '').trim();
+    localStorage.removeItem(SETTINGS_AUTH_EMAIL_STORAGE_KEY);
+    localStorage.removeItem(SETTINGS_AUTH_TOKEN_STORAGE_KEY);
+    clearSupabaseAuthStorage();
+
+    try {
+        await fetch('/api/auth/session', {
+            method: 'DELETE',
+            cache: 'no-store',
+            ...(accessToken ? { headers: { Authorization: `Bearer ${accessToken}` } } : {})
+        });
+    } catch (error) {
+        // Ignore network failures during sign-out.
+    }
+}
+
+window.clearAuthSession = clearAuthSession;
+
 function loadSettings() {
-    const saved = localStorage.getItem('task_tracker_settings');
+    const saved = localStorage.getItem(getSettingsStorageKey('task_tracker_settings'));
     if (saved) {
         try {
             settings = { ...defaultSettings, ...JSON.parse(saved) };
-        } catch (e) { console.error('Failed to parse settings', e); }
+        } catch (error) {
+            console.error('Failed to parse settings', error);
+        }
     }
     applyThemeSettings();
 }
 
 function saveSettings() {
-    localStorage.setItem('task_tracker_settings', JSON.stringify(settings));
+    localStorage.setItem(getSettingsStorageKey('task_tracker_settings'), JSON.stringify(settings));
     applyThemeSettings();
 }
 
@@ -20,11 +60,11 @@ function applyThemeSettings() {
     const color = settings.accents[settings.accentColor] || settings.accents.purple;
     root.style.setProperty('--accent', color);
 
-    // Update UI elements
     const nameInput = document.getElementById('user-name-input');
-    if (nameInput) nameInput.value = settings.profileName;
+    if (nameInput) {
+        nameInput.value = settings.profileName;
+    }
 
-    // Update dashboard greeting
     const greeting = document.getElementById('dashboard-greeting');
     if (greeting) {
         const hour = new Date().getHours();
@@ -34,11 +74,8 @@ function applyThemeSettings() {
         greeting.textContent = `${intro}, ${settings.profileName}`;
     }
 
-    // Mark active color preset
-    document.querySelectorAll('.btn-color-preset').forEach(btn => {
-        const bg = btn.style.background;
-        // Basic match based on hex or name
-        btn.classList.toggle('active', btn.title.toLowerCase() === settings.accentColor);
+    document.querySelectorAll('.btn-color-preset').forEach((button) => {
+        button.classList.toggle('active', button.title.toLowerCase() === settings.accentColor);
     });
 }
 
@@ -55,7 +92,8 @@ function initSettingsView() {
     const btnSaveProfile = document.getElementById('btn-save-profile');
     if (btnSaveProfile) {
         btnSaveProfile.addEventListener('click', () => {
-            const name = document.getElementById('user-name-input').value.trim();
+            const nameInput = document.getElementById('user-name-input');
+            const name = nameInput ? nameInput.value.trim() : '';
             if (name) {
                 settings.profileName = name;
                 saveSettings();
@@ -68,12 +106,33 @@ function initSettingsView() {
     if (btnReset) {
         btnReset.addEventListener('click', resetAppData);
     }
+
+    const btnLogout = document.getElementById('btn-logout');
+    if (btnLogout) {
+        btnLogout.addEventListener('click', async () => {
+            if (!window.confirm('Sign out of this browser?')) {
+                return;
+            }
+
+            btnLogout.disabled = true;
+
+            try {
+                if (typeof clearAuthSession === 'function') {
+                    await clearAuthSession();
+                } else {
+                    localStorage.removeItem(SETTINGS_AUTH_EMAIL_STORAGE_KEY);
+                    localStorage.removeItem(SETTINGS_AUTH_TOKEN_STORAGE_KEY);
+                }
+            } finally {
+                window.location.replace('login.html');
+            }
+        });
+    }
 }
 
 async function resetAppData() {
     showConfirmModal('Permanently delete ALL data? This cannot be undone.', async () => {
         try {
-            // Sequential deletes for all data types
             const items = ['goals', 'notes', 'timer-sessions'];
             for (const item of items) {
                 const list = await apiGet(`/api/${item}`);
@@ -81,16 +140,29 @@ async function resetAppData() {
                     await apiDelete(`/api/${item === 'goals' ? 'goals' : (item === 'timer-sessions' ? 'timer-sessions' : item)}/${entry.id}`);
                 }
             }
+
+            const scopedKeys = [
+                'task_tracker_settings',
+                'task_tracker_hobbies_v1',
+                'task_tracker_timer_selected_task',
+                'task_tracker_runtime_state_v1'
+            ];
+
+            scopedKeys.forEach((baseKey) => {
+                localStorage.removeItem(getSettingsStorageKey(baseKey));
+            });
+
             if (typeof clearSystemLogs === 'function') {
                 clearSystemLogs();
             } else {
-                localStorage.removeItem('task_tracker_system_logs_v1');
+                localStorage.removeItem(getSettingsStorageKey('task_tracker_system_logs_v1'));
             }
+
             showToast('All data has been reset');
             logSystemEvent('All app data reset');
             location.reload();
-        } catch (err) {
-            console.error('Reset failed:', err);
+        } catch (error) {
+            console.error('Reset failed:', error);
             showToast('Reset failed', 'error');
         }
     });
@@ -104,23 +176,26 @@ function populateSettingsTaskSelect() {
     for (const goal of goals) {
         for (const task of goal.tasks) {
             if (task.status !== 'done') {
-                const opt = document.createElement('option');
-                opt.value = task.id;
-                opt.textContent = `${goal.title} → ${task.title}`;
-                select.appendChild(opt);
+                const option = document.createElement('option');
+                option.value = task.id;
+                option.textContent = `${goal.title} → ${task.title}`;
+                select.appendChild(option);
             }
         }
     }
 }
 
 async function saveManualTime() {
-    const taskId = document.getElementById('manual-task-select').value;
-    const durationMins = parseInt(document.getElementById('manual-duration-input').value);
+    const taskSelect = document.getElementById('manual-task-select');
+    const durationInput = document.getElementById('manual-duration-input');
+    const taskId = taskSelect ? taskSelect.value : '';
+    const durationMins = durationInput ? parseInt(durationInput.value, 10) : Number.NaN;
 
     if (!taskId) {
         showToast('Please select a task', 'error');
         return;
     }
+
     if (isNaN(durationMins) || durationMins <= 0) {
         showToast('Please enter a valid duration in minutes', 'error');
         return;
@@ -136,10 +211,12 @@ async function saveManualTime() {
 
         showToast(`Logged ${durationMins}m to task`);
         logSystemEvent('Manual time logged');
-        document.getElementById('manual-duration-input').value = '';
-        await loadGoals(); // Refresh stats/etc
-    } catch (err) {
-        console.error('Failed to log time:', err);
+        if (durationInput) {
+            durationInput.value = '';
+        }
+        await loadGoals();
+    } catch (error) {
+        console.error('Failed to log time:', error);
         showToast('Failed to log time', 'error');
     }
 }

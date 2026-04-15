@@ -2,8 +2,14 @@
 
 let completionTrendChartInstance = null;
 let productivityChartInstance = null;
-const HOBBIES_STORAGE_KEY = 'task_tracker_hobbies_v1';
-const DASHBOARD_TIMER_TASK_STORAGE_KEY = 'task_tracker_timer_selected_task';
+
+function getHobbiesStorageKey() {
+    return typeof getScopedStorageKey === 'function' ? getScopedStorageKey('task_tracker_hobbies_v1') : 'task_tracker_hobbies_v1';
+}
+
+function getDashboardTimerTaskStorageKey() {
+    return typeof getScopedStorageKey === 'function' ? getScopedStorageKey('task_tracker_timer_selected_task') : 'task_tracker_timer_selected_task';
+}
 
 function getTodayKey() {
     return new Date().toISOString().slice(0, 10);
@@ -11,7 +17,7 @@ function getTodayKey() {
 
 function readHobbiesState() {
     try {
-        const raw = localStorage.getItem(HOBBIES_STORAGE_KEY);
+        const raw = localStorage.getItem(getHobbiesStorageKey());
         const parsed = raw ? JSON.parse(raw) : null;
         const items = Array.isArray(parsed?.items) ? parsed.items : [];
         return {
@@ -29,7 +35,7 @@ function readHobbiesState() {
 }
 
 function writeHobbiesState(state) {
-    localStorage.setItem(HOBBIES_STORAGE_KEY, JSON.stringify(state));
+    localStorage.setItem(getHobbiesStorageKey(), JSON.stringify(state));
 }
 
 function getDailyHobbiesState() {
@@ -51,7 +57,7 @@ function getSelectedTimerTaskId() {
     if (select && select.value) {
         return select.value;
     }
-    return localStorage.getItem(DASHBOARD_TIMER_TASK_STORAGE_KEY) || '';
+    return localStorage.getItem(getDashboardTimerTaskStorageKey()) || '';
 }
 
 async function loadDashboard() {
@@ -468,7 +474,7 @@ function quickToggleFocusTimer(taskId) {
     const timerSelect = document.getElementById('timer-task-select');
     if (timerSelect) {
         timerSelect.value = taskId;
-        localStorage.setItem(DASHBOARD_TIMER_TASK_STORAGE_KEY, taskId);
+        localStorage.setItem(getDashboardTimerTaskStorageKey(), taskId);
     }
 
     if (typeof toggleTimer === 'function') {
@@ -524,6 +530,20 @@ function toggleHobbyDone(hobbyId) {
     renderDailyPlan(getAllTasks());
 }
 
+function deleteHobby(hobbyId) {
+    const state = getDailyHobbiesState();
+    const index = state.items.findIndex(item => item.id === hobbyId);
+    if (index === -1) return;
+
+    state.items.splice(index, 1);
+    writeHobbiesState(state);
+    renderDailyPlan(getAllTasks());
+
+    if (typeof showToast === 'function') {
+        showToast('Hobby deleted');
+    }
+}
+
 function renderDailyPlan(tasks) {
     const container = document.getElementById('daily-plan-container');
     if (!container) return;
@@ -539,6 +559,7 @@ function renderDailyPlan(tasks) {
         return `
         <div class="daily-action-item ${isDone ? 'done' : ''}" onclick="toggleHobbyDone('${hobby.id}')" style="cursor:pointer;">
             <div class="daily-action-left">
+                <button class="daily-action-delete" type="button" aria-label="Delete hobby" title="Delete hobby" onclick="event.stopPropagation(); deleteHobby('${hobby.id}')">&times;</button>
                 <div class="daily-action-check"></div>
                 <div class="daily-action-title">${escHtml(hobby.title)}</div>
             </div>

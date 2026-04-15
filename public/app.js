@@ -3,6 +3,81 @@
 // ==========================================
 
 const API = window.location.origin;
+const AUTH_EMAIL_STORAGE_KEY = 'task_tracker_current_email';
+const AUTH_TOKEN_STORAGE_KEY = 'task_tracker_supabase_access_token';
+
+function getCurrentUserKey() {
+    return String(localStorage.getItem(AUTH_EMAIL_STORAGE_KEY) || 'anonymous').trim().toLowerCase() || 'anonymous';
+}
+
+function setCurrentUserEmail(email) {
+    const normalized = String(email || '').trim().toLowerCase();
+    if (normalized) {
+        localStorage.setItem(AUTH_EMAIL_STORAGE_KEY, normalized);
+    }
+}
+
+function getCurrentAccessToken() {
+    return String(localStorage.getItem(AUTH_TOKEN_STORAGE_KEY) || '').trim();
+}
+
+function clearCurrentAuthSession() {
+    localStorage.removeItem(AUTH_EMAIL_STORAGE_KEY);
+    localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
+}
+
+function redirectToLogin() {
+    window.location.replace('login.html');
+}
+
+function getScopedStorageKey(baseKey) {
+    return `${baseKey}:${getCurrentUserKey()}`;
+}
+
+function buildAuthHeaders(extraHeaders = {}) {
+    const headers = {
+        ...extraHeaders
+    };
+
+    const accessToken = getCurrentAccessToken();
+    if (accessToken) {
+        headers.Authorization = `Bearer ${accessToken}`;
+    }
+
+    return headers;
+}
+
+async function ensureAuthenticatedSession() {
+    const accessToken = getCurrentAccessToken();
+    if (!accessToken) {
+        redirectToLogin();
+        return false;
+    }
+
+    try {
+        const response = await fetch(API + '/api/auth/session', {
+            method: 'POST',
+            cache: 'no-store',
+            headers: buildAuthHeaders({ 'Content-Type': 'application/json' }),
+            body: JSON.stringify({ accessToken })
+        });
+
+        if (!response.ok) {
+            throw new Error('Session validation failed');
+        }
+
+        const session = await response.json().catch(() => ({}));
+        if (session?.email) {
+            setCurrentUserEmail(session.email);
+        }
+
+        return true;
+    } catch (error) {
+        clearCurrentAuthSession();
+        redirectToLogin();
+        return false;
+    }
+}
 
 // ---- SVG Icon Library (Lucide-style) ----
 const ICONS = {
@@ -63,7 +138,9 @@ var pomodoroSession = timerStates.pomodoro.session;
 var pomodoroIsBreak = timerStates.pomodoro.isBreak;
 var logsTypeFilter = 'all';
 
-const SYSTEM_LOGS_STORAGE_KEY = 'task_tracker_system_logs_v1';
+function getSystemLogsStorageKey() {
+    return getScopedStorageKey('task_tracker_system_logs_v1');
+}
 
 function animateValue(element, start, end, duration) {
     if (!element) return;
@@ -153,7 +230,7 @@ function showToast(message, type = 'success') {
 
 function getSystemLogs() {
     try {
-        const raw = localStorage.getItem(SYSTEM_LOGS_STORAGE_KEY);
+        const raw = localStorage.getItem(getSystemLogsStorageKey());
         const parsed = raw ? JSON.parse(raw) : [];
         return Array.isArray(parsed) ? parsed : [];
     } catch (err) {
@@ -163,7 +240,7 @@ function getSystemLogs() {
 }
 
 function saveSystemLogs(logs) {
-    localStorage.setItem(SYSTEM_LOGS_STORAGE_KEY, JSON.stringify(logs.slice(-200)));
+    localStorage.setItem(getSystemLogsStorageKey(), JSON.stringify(logs.slice(-200)));
 }
 
 function getLogEventType(message = '') {
@@ -192,7 +269,7 @@ function logSystemEvent(message, type) {
 }
 
 function clearSystemLogs() {
-    localStorage.removeItem(SYSTEM_LOGS_STORAGE_KEY);
+    localStorage.removeItem(getSystemLogsStorageKey());
     logsTypeFilter = 'all';
 }
 
@@ -258,7 +335,32 @@ function initNavigation() {
     });
 }
 
+// ==========================================
+// CONFIRM MODAL
+// ==========================================
+
+function initConfirmModal() {
+    document.getElementById('confirm-yes').addEventListener('click', () => { if (pendingDeleteFn) pendingDeleteFn(); closeConfirmModal(); });
+    document.getElementById('confirm-no').addEventListener('click', closeConfirmModal);
+    document.getElementById('modal-confirm').addEventListener('click', (e) => { if (e.target.classList.contains('modal-overlay')) closeConfirmModal(); });
+}
+
+function showConfirmModal(message, onConfirm) {
+    pendingDeleteFn = onConfirm;
+    document.getElementById('confirm-message').textContent = message;
+    document.getElementById('modal-confirm').classList.add('open');
+}
+
+function closeConfirmModal() {
+    pendingDeleteFn = null;
+    document.getElementById('modal-confirm').classList.remove('open');
+}
+
 async function initApp() {
+    if (!(await ensureAuthenticatedSession())) {
+        return;
+    }
+
     initNavigation();
 
     if (typeof loadSettings === 'function') {
@@ -273,6 +375,7 @@ async function initApp() {
     if (typeof initTimer === 'function') initTimer();
     if (typeof initNoteModal === 'function') initNoteModal();
     if (typeof initSettingsView === 'function') initSettingsView();
+    if (typeof initManageView === 'function') initManageView();
 
     await Promise.allSettled([
         typeof loadGoals === 'function' ? loadGoals() : Promise.resolve(),
@@ -292,21 +395,27 @@ window.addEventListener('load', () => {
 // ==========================================
 
 async function apiGet(url) {
-    const res = await fetch(API + url, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } });
+    const res = await fetch(API + url, { cache: 'no-store', headers: buildAuthHeaders({ 'Cache-Control': 'no-cache' }) });
+    if (res.status === 401) { clearCurrentAuthSession(); redirectToLogin(); return []; }
     if (!res.ok) { console.error('API GET error:', res.status, url); return []; }
     return res.json();
 }
 async function apiPost(url, body) {
-    const res = await fetch(API + url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const res = await fetch(API + url, { method: 'POST', headers: buildAuthHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify(body) });
+    if (res.status === 401) { clearCurrentAuthSession(); redirectToLogin(); throw new Error('Unauthorized'); }
     if (!res.ok) { const err = await res.json().catch(() => ({})); console.error('API POST error:', res.status, url, err); throw new Error(err.error || 'API error'); }
     return res.json();
 }
 async function apiPut(url, body) {
-    const res = await fetch(API + url, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const res = await fetch(API + url, { method: 'PUT', headers: buildAuthHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify(body) });
+    if (res.status === 401) { clearCurrentAuthSession(); redirectToLogin(); throw new Error('Unauthorized'); }
     if (!res.ok) { const err = await res.json().catch(() => ({})); console.error('API PUT error:', res.status, url, err); throw new Error(err.error || 'API error'); }
     return res.json();
 }
-async function apiDelete(url) { await fetch(API + url, { method: 'DELETE' }); }
+async function apiDelete(url) {
+    const res = await fetch(API + url, { method: 'DELETE', headers: buildAuthHeaders() });
+    if (res.status === 401) { clearCurrentAuthSession(); redirectToLogin(); throw new Error('Unauthorized'); }
+}
 
 // ==========================================
 // GOALS & TASKS
@@ -844,6 +953,26 @@ function initBackupButton() {
         navLogs.addEventListener('click', () => {
             renderSystemLogs();
         });
+    }
+}
+
+async function downloadFile(url, filename) {
+    try {
+        const res = await fetch(API + url, { headers: buildAuthHeaders() });
+        if (!res.ok) throw new Error('Network response was not ok');
+        const blob = await res.blob();
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(a.href);
+        showToast(`Exported as ${filename}`);
+        logSystemEvent(`Data exported as ${filename}`);
+    } catch (err) {
+        console.error('Export failed:', err);
+        showToast('Export failed', 'error');
     }
 }
 

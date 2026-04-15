@@ -5,6 +5,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TaskTracker — Personal Productivity</title>
+    <script>
+        (function () {
+            try {
+                const isAuthPage = window.location.pathname.endsWith('login.html') || window.location.pathname.endsWith('forgot-password.html');
+                const accessToken = String(localStorage.getItem('task_tracker_supabase_access_token') || '').trim();
+                if (!isAuthPage && !accessToken) {
+                    window.location.replace('login.html');
+                }
+            } catch (error) {
+                window.location.replace('login.html');
+            }
+        }());
+    </script>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="new_styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -633,9 +646,12 @@
                                     style="background: #f43f5e;" title="Rose" aria-label="Rose accent"></button>
                             </div>
                         </div>
-                        <div class="settings-actions" style="margin-top: 1.5rem;">
+                        <div class="settings-actions" style="margin-top: 1.5rem; display: grid; gap: 0.75rem;">
                             <button class="btn btn-secondary" id="btn-save-profile" style="width: 100%;">
                                 Save Profile
+                            </button>
+                            <button class="btn btn-secondary" id="btn-logout" type="button" style="width: 100%;">
+                                Log Out
                             </button>
                         </div>
                     </div>

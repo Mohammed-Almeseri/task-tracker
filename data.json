@@ -1,807 +1,1000 @@
 {
-  "goals": [
-    {
-      "id": "e458af6b-36b0-4592-8ca5-263a75a7c26c",
-      "title": "AI Engineer",
-      "description": "Finish the course on Udemy",
-      "tasks": [
+  "goals": [],
+  "timerSessions": [],
+  "notes": [],
+  "users": {
+    "scholarly.contacts@gmail.com": {
+      "goals": [],
+      "timerSessions": [],
+      "notes": []
+    },
+    "browser.verify.1776232565106@example.com": {
+      "goals": [
         {
-          "id": "aec6c102-1450-4337-bb3e-7e3a7dc2b439",
-          "title": "Python",
-          "status": "done",
-          "importance": "high",
-          "tags": [
-            "Career"
-          ],
-          "dueDate": null,
-          "subtasks": []
-        },
+          "id": "eaee5dc7-854d-4a8b-ac13-0fc1e9d36f5c",
+          "title": "Browser Filter Goal",
+          "description": "Seeded by automated browser verification",
+          "createdAt": "2026-04-15T05:56:17.738Z",
+          "tasks": [
+            {
+              "id": "0ec8b502-cd2c-4dd8-abe1-90c1880f976c",
+              "goalId": "eaee5dc7-854d-4a8b-ac13-0fc1e9d36f5c",
+              "title": "Todo task",
+              "description": "",
+              "status": "todo",
+              "importance": "low",
+              "tags": [],
+              "dueDate": null,
+              "subtasks": [],
+              "timeSpent": 0,
+              "createdAt": "2026-04-15T05:56:17.751Z",
+              "updatedAt": "2026-04-15T05:56:17.751Z",
+              "completedAt": null
+            },
+            {
+              "id": "57324682-ca61-4782-afd8-ff5b950059a7",
+              "goalId": "eaee5dc7-854d-4a8b-ac13-0fc1e9d36f5c",
+              "title": "In progress task",
+              "description": "",
+              "status": "in-progress",
+              "importance": "urgent",
+              "tags": [],
+              "dueDate": null,
+              "subtasks": [],
+              "timeSpent": 0,
+              "createdAt": "2026-04-15T05:56:17.761Z",
+              "updatedAt": "2026-04-15T05:56:17.761Z",
+              "completedAt": null
+            },
+            {
+              "id": "677a4848-ba6d-442b-be4c-f3a57493135e",
+              "goalId": "eaee5dc7-854d-4a8b-ac13-0fc1e9d36f5c",
+              "title": "Done task",
+              "description": "",
+              "status": "done",
+              "importance": "high",
+              "tags": [],
+              "dueDate": null,
+              "subtasks": [],
+              "timeSpent": 0,
+              "createdAt": "2026-04-15T05:56:17.778Z",
+              "updatedAt": "2026-04-15T05:56:17.778Z",
+              "completedAt": null
+            }
+          ]
+        }
+      ],
+      "timerSessions": [],
+      "notes": []
+    },
+    "browser.verify.1776232612099@example.com": {
+      "goals": [
         {
-          "id": "19e0f013-e397-4999-8a6f-cedcda178688",
-          "title": "NLP",
-          "status": "todo",
-          "importance": "medium",
-          "tags": [
-            "Career"
-          ],
-          "dueDate": null,
-          "subtasks": [],
-          "updatedAt": "2026-04-11T16:04:24.025Z",
-          "timeSpent": 60
-        },
+          "id": "238bc750-963e-4ebe-b2a3-8f0e39c0e6a4",
+          "title": "Browser Filter Goal",
+          "description": "Seeded by automated browser verification",
+          "createdAt": "2026-04-15T05:57:09.908Z",
+          "tasks": [
+            {
+              "id": "35a88af2-04f8-4466-8c27-f38c62918db4",
+              "goalId": "238bc750-963e-4ebe-b2a3-8f0e39c0e6a4",
+              "title": "Todo task",
+              "description": "",
+              "status": "todo",
+              "importance": "low",
+              "tags": [],
+              "dueDate": null,
+              "subtasks": [],
+              "timeSpent": 0,
+              "createdAt": "2026-04-15T05:57:10.089Z",
+              "updatedAt": "2026-04-15T05:57:10.089Z",
+              "completedAt": null
+            },
+            {
+              "id": "7b066c25-e360-4fee-a90e-35a80f3fbc5b",
+              "goalId": "238bc750-963e-4ebe-b2a3-8f0e39c0e6a4",
+              "title": "In progress task",
+              "description": "",
+              "status": "in-progress",
+              "importance": "urgent",
+              "tags": [],
+              "dueDate": null,
+              "subtasks": [],
+              "timeSpent": 0,
+              "createdAt": "2026-04-15T05:57:10.115Z",
+              "updatedAt": "2026-04-15T05:57:10.115Z",
+              "completedAt": null
+            },
+            {
+              "id": "4eb8c7c3-cec8-4879-b98f-668ad96a5b65",
+              "goalId": "238bc750-963e-4ebe-b2a3-8f0e39c0e6a4",
+              "title": "Done task",
+              "description": "",
+              "status": "done",
+              "importance": "high",
+              "tags": [],
+              "dueDate": null,
+              "subtasks": [],
+              "timeSpent": 0,
+              "createdAt": "2026-04-15T05:57:10.132Z",
+              "updatedAt": "2026-04-15T05:57:10.132Z",
+              "completedAt": null
+            }
+          ]
+        }
+      ],
+      "timerSessions": [],
+      "notes": []
+    },
+    "qa@example.com": {
+      "goals": [
         {
-          "id": "e355aed4-c794-4366-bda3-85199588d102",
-          "title": "LLM",
-          "status": "todo",
-          "importance": "medium",
-          "tags": [
-            "Career"
-          ],
-          "dueDate": null,
-          "subtasks": [],
-          "updatedAt": "2026-03-10T19:56:22.759Z",
-          "completedAt": null
+          "id": "ec4cc2b8-b6e6-44f7-89be-b2cb62417666",
+          "title": "Reset Goal",
+          "description": "",
+          "createdAt": "2026-04-15T06:11:29.008Z",
+          "tasks": []
+        }
+      ],
+      "timerSessions": [
+        {
+          "id": "d16f3f1f-33cf-4813-8e2c-198024032c30",
+          "taskId": null,
+          "type": "manual",
+          "duration": 120,
+          "completedAt": "2026-04-15T06:11:29.031Z"
+        }
+      ],
+      "notes": [
+        {
+          "id": "7a8d363c-345a-4111-a753-b896f9a66ff2",
+          "title": "Reset Note",
+          "content": "temp",
+          "createdAt": "2026-04-15T06:11:29.022Z",
+          "updatedAt": "2026-04-15T06:11:29.022Z"
         }
       ]
     },
-    {
-      "id": "d7211e4a-4c8d-4e92-bc12-f17a8db29a3a",
-      "title": "Midterm Exams",
-      "description": "Prepare for the Midterm exams",
-      "tasks": [
+    "qa2@example.com": {
+      "goals": [
         {
-          "id": "f519beef-2a8e-4927-9c98-ed167b66f271",
-          "title": "Study Mathematics (Verified)",
-          "status": "done",
-          "importance": "high",
-          "tags": [
-            "University",
-            "Exams"
-          ],
-          "dueDate": "2026-03-23",
-          "subtasks": [],
-          "timeSpent": 31894,
-          "updatedAt": "2026-03-29T11:38:57.909Z",
+          "id": "85ec3eb5-8bca-4721-9e17-0afe9cbcea91",
+          "title": "Reset Goal",
           "description": "",
-          "completedAt": "2026-03-29T11:38:57.909Z"
-        },
+          "createdAt": "2026-04-15T06:13:10.227Z",
+          "tasks": []
+        }
+      ],
+      "timerSessions": [
         {
-          "id": "b3e9a123-4567-89ab-cdef-0123456789ab",
-          "title": "Learn Physics II",
-          "status": "done",
-          "importance": "high",
-          "tags": [
-            "University",
-            "Exams"
-          ],
-          "dueDate": "2026-03-23",
-          "subtasks": [],
-          "updatedAt": "2026-03-28T09:22:56.630Z",
-          "timeSpent": 16587,
-          "completedAt": "2026-03-28T09:22:56.630Z"
-        },
+          "id": "c1e65bc6-cc7e-4d19-aed3-8eee62993a2d",
+          "taskId": null,
+          "type": "manual",
+          "duration": 120,
+          "completedAt": "2026-04-15T06:13:10.912Z"
+        }
+      ],
+      "notes": [
         {
-          "id": "ae50b3f8-8b35-4560-9bc3-ee518ab865b8",
-          "goalId": "d7211e4a-4c8d-4e92-bc12-f17a8db29a3a",
-          "title": "Study Database",
-          "description": "",
-          "status": "done",
-          "importance": "high",
-          "tags": [],
-          "dueDate": null,
-          "subtasks": [],
-          "timeSpent": 11143,
-          "createdAt": "2026-03-11T08:07:21.707Z",
-          "updatedAt": "2026-03-28T09:22:55.352Z",
-          "completedAt": "2026-03-28T09:22:55.352Z"
+          "id": "5cdee9fd-0b58-41aa-8b71-d8eb6a3db5dc",
+          "title": "Reset Note",
+          "content": "temp",
+          "createdAt": "2026-04-15T06:13:10.864Z",
+          "updatedAt": "2026-04-15T06:13:10.864Z"
         }
       ]
     },
-    {
-      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-      "title": "University",
-      "description": "",
-      "tasks": [
-        {
-          "id": "f045ca94-585c-4698-91a3-70e5fb9e4c0f",
-          "goalId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-          "title": "Finish Math HW 2 & Bonus 2",
-          "description": "",
-          "status": "done",
-          "importance": "medium",
-          "tags": [],
-          "dueDate": null,
-          "subtasks": [],
-          "timeSpent": 0,
-          "createdAt": "2026-03-11T08:05:37.322Z",
-          "updatedAt": "2026-03-11T08:05:37.322Z",
-          "completedAt": null
-        },
-        {
-          "id": "2fd1ccb5-6286-4b2a-b010-cf56f21ec344",
-          "goalId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-          "title": "Finish Math HW 1 & Bonus 1",
-          "description": "",
-          "status": "done",
-          "importance": "medium",
-          "tags": [],
-          "dueDate": null,
-          "subtasks": [],
-          "timeSpent": 0,
-          "createdAt": "2026-03-11T08:05:51.577Z",
-          "updatedAt": "2026-03-11T08:05:51.577Z",
-          "completedAt": null
-        },
-        {
-          "id": "56662642-0c97-428a-bb86-92d23911f7ba",
-          "goalId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-          "title": "Finish Math HW 3 & Bonus 3",
-          "description": "",
-          "status": "done",
-          "importance": "medium",
-          "tags": [],
-          "dueDate": null,
-          "subtasks": [],
-          "timeSpent": 0,
-          "createdAt": "2026-03-11T08:06:08.699Z",
-          "updatedAt": "2026-03-11T08:06:08.699Z",
-          "completedAt": null
-        },
-        {
-          "id": "138a383b-58c8-4bb9-819f-b6b9c1434881",
-          "goalId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-          "title": "NewTrends W1 Assignment",
-          "description": "",
-          "status": "done",
-          "importance": "medium",
-          "tags": [],
-          "dueDate": null,
-          "subtasks": [],
-          "timeSpent": 0,
-          "createdAt": "2026-03-11T08:06:37.470Z",
-          "updatedAt": "2026-03-11T08:06:37.470Z",
-          "completedAt": null
-        },
-        {
-          "id": "9ce35d32-bbdb-473f-a865-fcab8e9b6b82",
-          "goalId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-          "title": "NewTrends W2 & 3 Assignment",
-          "description": "",
-          "status": "done",
-          "importance": "medium",
-          "tags": [],
-          "dueDate": null,
-          "subtasks": [],
-          "timeSpent": 0,
-          "createdAt": "2026-03-11T08:06:56.742Z",
-          "updatedAt": "2026-03-11T08:08:02.226Z",
-          "completedAt": "2026-03-11T08:08:02.226Z"
-        },
-        {
-          "id": "3d959854-7afc-496d-bbb1-0ae8ea65d889",
-          "goalId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-          "title": "Finish Math HW 4 & Bonux &",
-          "description": "",
-          "status": "todo",
-          "importance": "medium",
-          "tags": [],
-          "dueDate": "2026-03-13",
-          "subtasks": [],
-          "timeSpent": 0,
-          "createdAt": "2026-03-11T08:09:32.339Z",
-          "updatedAt": "2026-03-17T03:06:13.835Z",
-          "completedAt": null
-        },
-        {
-          "id": "a233942d-370f-4d31-8690-fb9e03f2f38c",
-          "goalId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-          "title": "Finish Building the Future Assignment",
-          "description": "",
-          "status": "done",
-          "importance": "medium",
-          "tags": [],
-          "dueDate": "2026-03-16",
-          "subtasks": [],
-          "timeSpent": 0,
-          "createdAt": "2026-03-11T08:10:07.526Z",
-          "updatedAt": "2026-03-17T01:51:43.098Z",
-          "completedAt": "2026-03-17T01:51:43.098Z"
-        },
-        {
-          "id": "90d29574-bb62-4456-b7d7-2643724d13a1",
-          "goalId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-          "title": "Finish Building The Future Assignment 2",
-          "description": "",
-          "status": "done",
-          "importance": "medium",
-          "tags": [],
-          "dueDate": "2026-03-19",
-          "subtasks": [],
-          "timeSpent": 0,
-          "createdAt": "2026-03-11T08:11:51.000Z",
-          "updatedAt": "2026-03-28T12:00:56.963Z",
-          "completedAt": "2026-03-28T12:00:56.963Z"
-        },
-        {
-          "id": "3f89dc95-8451-4116-891a-51927854ff96",
-          "goalId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-          "title": "Finish Physics Homework",
-          "description": "",
-          "status": "done",
-          "importance": "high",
-          "tags": [],
-          "dueDate": "2026-03-18",
-          "subtasks": [],
-          "timeSpent": 0,
-          "createdAt": "2026-03-16T23:27:39.471Z",
-          "updatedAt": "2026-03-17T03:06:10.067Z",
-          "completedAt": "2026-03-17T03:06:10.067Z"
-        },
-        {
-          "id": "193ca580-2990-47d2-b871-8c1bf07c19df",
-          "goalId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-          "title": "Prepare for Software Engineer Exam",
-          "description": "",
-          "status": "done",
-          "importance": "medium",
-          "tags": [],
-          "dueDate": null,
-          "subtasks": [],
-          "timeSpent": 8692,
-          "createdAt": "2026-03-26T02:08:34.180Z",
-          "updatedAt": "2026-03-27T01:49:35.296Z",
-          "completedAt": "2026-03-27T01:49:35.296Z"
-        }
-      ]
+    "qa5@example.com": {
+      "goals": [],
+      "timerSessions": [],
+      "notes": []
     },
-    {
-      "id": "75c3e982-b56b-4a41-9c43-f61289421fa5",
-      "title": "App",
-      "description": "Used for TaskTracker related updates/Tasks",
-      "createdAt": "2026-03-14T04:10:51.663Z",
-      "tasks": [
+    "moammedezzat2006@gmail.com": {
+      "goals": [
         {
-          "id": "d0b6d00d-0fe8-49df-96ae-f85fd1c812b8",
-          "goalId": "75c3e982-b56b-4a41-9c43-f61289421fa5",
-          "title": "Update and Imrpove Note System",
+          "id": "e458af6b-36b0-4592-8ca5-263a75a7c26c",
+          "title": "AI Engineer",
+          "description": "Finish the course on Udemy",
+          "tasks": [
+            {
+              "id": "aec6c102-1450-4337-bb3e-7e3a7dc2b439",
+              "title": "Python",
+              "status": "done",
+              "importance": "high",
+              "tags": [
+                "Career"
+              ],
+              "dueDate": null,
+              "subtasks": []
+            },
+            {
+              "id": "19e0f013-e397-4999-8a6f-cedcda178688",
+              "title": "NLP",
+              "status": "todo",
+              "importance": "medium",
+              "tags": [
+                "Career"
+              ],
+              "dueDate": null,
+              "subtasks": [],
+              "updatedAt": "2026-04-11T16:04:24.025Z",
+              "timeSpent": 60
+            },
+            {
+              "id": "e355aed4-c794-4366-bda3-85199588d102",
+              "title": "LLM",
+              "status": "todo",
+              "importance": "medium",
+              "tags": [
+                "Career"
+              ],
+              "dueDate": null,
+              "subtasks": [],
+              "updatedAt": "2026-03-10T19:56:22.759Z",
+              "completedAt": null
+            }
+          ]
+        },
+        {
+          "id": "d7211e4a-4c8d-4e92-bc12-f17a8db29a3a",
+          "title": "Midterm Exams",
+          "description": "Prepare for the Midterm exams",
+          "tasks": [
+            {
+              "id": "f519beef-2a8e-4927-9c98-ed167b66f271",
+              "title": "Study Mathematics (Verified)",
+              "status": "done",
+              "importance": "high",
+              "tags": [
+                "University",
+                "Exams"
+              ],
+              "dueDate": "2026-03-23",
+              "subtasks": [],
+              "timeSpent": 31894,
+              "updatedAt": "2026-03-29T11:38:57.909Z",
+              "description": "",
+              "completedAt": "2026-03-29T11:38:57.909Z"
+            },
+            {
+              "id": "b3e9a123-4567-89ab-cdef-0123456789ab",
+              "title": "Learn Physics II",
+              "status": "done",
+              "importance": "high",
+              "tags": [
+                "University",
+                "Exams"
+              ],
+              "dueDate": "2026-03-23",
+              "subtasks": [],
+              "updatedAt": "2026-03-28T09:22:56.630Z",
+              "timeSpent": 16587,
+              "completedAt": "2026-03-28T09:22:56.630Z"
+            },
+            {
+              "id": "ae50b3f8-8b35-4560-9bc3-ee518ab865b8",
+              "goalId": "d7211e4a-4c8d-4e92-bc12-f17a8db29a3a",
+              "title": "Study Database",
+              "description": "",
+              "status": "done",
+              "importance": "high",
+              "tags": [],
+              "dueDate": null,
+              "subtasks": [],
+              "timeSpent": 11143,
+              "createdAt": "2026-03-11T08:07:21.707Z",
+              "updatedAt": "2026-03-28T09:22:55.352Z",
+              "completedAt": "2026-03-28T09:22:55.352Z"
+            }
+          ]
+        },
+        {
+          "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+          "title": "University",
           "description": "",
-          "status": "done",
-          "importance": "low",
-          "tags": [],
-          "dueDate": null,
-          "subtasks": [],
-          "timeSpent": 0,
-          "createdAt": "2026-03-14T04:11:06.345Z",
-          "updatedAt": "2026-03-14T04:11:14.309Z",
-          "completedAt": "2026-03-14T04:11:14.309Z"
+          "tasks": [
+            {
+              "id": "f045ca94-585c-4698-91a3-70e5fb9e4c0f",
+              "goalId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+              "title": "Finish Math HW 2 & Bonus 2",
+              "description": "",
+              "status": "done",
+              "importance": "medium",
+              "tags": [],
+              "dueDate": null,
+              "subtasks": [],
+              "timeSpent": 0,
+              "createdAt": "2026-03-11T08:05:37.322Z",
+              "updatedAt": "2026-03-11T08:05:37.322Z",
+              "completedAt": null
+            },
+            {
+              "id": "2fd1ccb5-6286-4b2a-b010-cf56f21ec344",
+              "goalId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+              "title": "Finish Math HW 1 & Bonus 1",
+              "description": "",
+              "status": "done",
+              "importance": "medium",
+              "tags": [],
+              "dueDate": null,
+              "subtasks": [],
+              "timeSpent": 0,
+              "createdAt": "2026-03-11T08:05:51.577Z",
+              "updatedAt": "2026-03-11T08:05:51.577Z",
+              "completedAt": null
+            },
+            {
+              "id": "56662642-0c97-428a-bb86-92d23911f7ba",
+              "goalId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+              "title": "Finish Math HW 3 & Bonus 3",
+              "description": "",
+              "status": "done",
+              "importance": "medium",
+              "tags": [],
+              "dueDate": null,
+              "subtasks": [],
+              "timeSpent": 0,
+              "createdAt": "2026-03-11T08:06:08.699Z",
+              "updatedAt": "2026-03-11T08:06:08.699Z",
+              "completedAt": null
+            },
+            {
+              "id": "138a383b-58c8-4bb9-819f-b6b9c1434881",
+              "goalId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+              "title": "NewTrends W1 Assignment",
+              "description": "",
+              "status": "done",
+              "importance": "medium",
+              "tags": [],
+              "dueDate": null,
+              "subtasks": [],
+              "timeSpent": 0,
+              "createdAt": "2026-03-11T08:06:37.470Z",
+              "updatedAt": "2026-03-11T08:06:37.470Z",
+              "completedAt": null
+            },
+            {
+              "id": "9ce35d32-bbdb-473f-a865-fcab8e9b6b82",
+              "goalId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+              "title": "NewTrends W2 & 3 Assignment",
+              "description": "",
+              "status": "done",
+              "importance": "medium",
+              "tags": [],
+              "dueDate": null,
+              "subtasks": [],
+              "timeSpent": 0,
+              "createdAt": "2026-03-11T08:06:56.742Z",
+              "updatedAt": "2026-03-11T08:08:02.226Z",
+              "completedAt": "2026-03-11T08:08:02.226Z"
+            },
+            {
+              "id": "3d959854-7afc-496d-bbb1-0ae8ea65d889",
+              "goalId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+              "title": "Finish Math HW 4 & Bonux &",
+              "description": "",
+              "status": "todo",
+              "importance": "medium",
+              "tags": [],
+              "dueDate": "2026-03-13",
+              "subtasks": [],
+              "timeSpent": 0,
+              "createdAt": "2026-03-11T08:09:32.339Z",
+              "updatedAt": "2026-03-17T03:06:13.835Z",
+              "completedAt": null
+            },
+            {
+              "id": "a233942d-370f-4d31-8690-fb9e03f2f38c",
+              "goalId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+              "title": "Finish Building the Future Assignment",
+              "description": "",
+              "status": "done",
+              "importance": "medium",
+              "tags": [],
+              "dueDate": "2026-03-16",
+              "subtasks": [],
+              "timeSpent": 0,
+              "createdAt": "2026-03-11T08:10:07.526Z",
+              "updatedAt": "2026-03-17T01:51:43.098Z",
+              "completedAt": "2026-03-17T01:51:43.098Z"
+            },
+            {
+              "id": "90d29574-bb62-4456-b7d7-2643724d13a1",
+              "goalId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+              "title": "Finish Building The Future Assignment 2",
+              "description": "",
+              "status": "done",
+              "importance": "medium",
+              "tags": [],
+              "dueDate": "2026-03-19",
+              "subtasks": [],
+              "timeSpent": 0,
+              "createdAt": "2026-03-11T08:11:51.000Z",
+              "updatedAt": "2026-03-28T12:00:56.963Z",
+              "completedAt": "2026-03-28T12:00:56.963Z"
+            },
+            {
+              "id": "3f89dc95-8451-4116-891a-51927854ff96",
+              "goalId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+              "title": "Finish Physics Homework",
+              "description": "",
+              "status": "done",
+              "importance": "high",
+              "tags": [],
+              "dueDate": "2026-03-18",
+              "subtasks": [],
+              "timeSpent": 0,
+              "createdAt": "2026-03-16T23:27:39.471Z",
+              "updatedAt": "2026-03-17T03:06:10.067Z",
+              "completedAt": "2026-03-17T03:06:10.067Z"
+            },
+            {
+              "id": "193ca580-2990-47d2-b871-8c1bf07c19df",
+              "goalId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+              "title": "Prepare for Software Engineer Exam",
+              "description": "",
+              "status": "done",
+              "importance": "medium",
+              "tags": [],
+              "dueDate": null,
+              "subtasks": [],
+              "timeSpent": 8692,
+              "createdAt": "2026-03-26T02:08:34.180Z",
+              "updatedAt": "2026-03-27T01:49:35.296Z",
+              "completedAt": "2026-03-27T01:49:35.296Z"
+            }
+          ]
         },
         {
-          "id": "59479329-dc07-4c83-b2ac-9cb14fb41f5e",
-          "goalId": "75c3e982-b56b-4a41-9c43-f61289421fa5",
-          "title": "Update the app",
-          "description": "Fix the dashboard and Settings issues",
-          "status": "done",
-          "importance": "medium",
-          "tags": [],
-          "dueDate": null,
-          "subtasks": [],
-          "timeSpent": 0,
-          "createdAt": "2026-03-17T01:57:42.187Z",
-          "updatedAt": "2026-04-10T17:24:33.549Z",
-          "completedAt": "2026-04-10T17:24:33.549Z"
+          "id": "75c3e982-b56b-4a41-9c43-f61289421fa5",
+          "title": "App",
+          "description": "Used for TaskTracker related updates/Tasks",
+          "createdAt": "2026-03-14T04:10:51.663Z",
+          "tasks": [
+            {
+              "id": "d0b6d00d-0fe8-49df-96ae-f85fd1c812b8",
+              "goalId": "75c3e982-b56b-4a41-9c43-f61289421fa5",
+              "title": "Update and Imrpove Note System",
+              "description": "",
+              "status": "done",
+              "importance": "low",
+              "tags": [],
+              "dueDate": null,
+              "subtasks": [],
+              "timeSpent": 0,
+              "createdAt": "2026-03-14T04:11:06.345Z",
+              "updatedAt": "2026-03-14T04:11:14.309Z",
+              "completedAt": "2026-03-14T04:11:14.309Z"
+            },
+            {
+              "id": "59479329-dc07-4c83-b2ac-9cb14fb41f5e",
+              "goalId": "75c3e982-b56b-4a41-9c43-f61289421fa5",
+              "title": "Update the app",
+              "description": "Fix the dashboard and Settings issues",
+              "status": "done",
+              "importance": "medium",
+              "tags": [],
+              "dueDate": null,
+              "subtasks": [],
+              "timeSpent": 0,
+              "createdAt": "2026-03-17T01:57:42.187Z",
+              "updatedAt": "2026-04-10T17:24:33.549Z",
+              "completedAt": "2026-04-10T17:24:33.549Z"
+            },
+            {
+              "id": "cf796621-7fab-4a6f-8a33-257f21b94abe",
+              "goalId": "75c3e982-b56b-4a41-9c43-f61289421fa5",
+              "title": "Add the SKILL.md skills to perplexity for unlimited uses",
+              "description": "",
+              "status": "done",
+              "importance": "high",
+              "tags": [],
+              "dueDate": null,
+              "subtasks": [],
+              "timeSpent": 3600,
+              "createdAt": "2026-03-17T01:58:07.041Z",
+              "updatedAt": "2026-03-17T01:59:38.645Z",
+              "completedAt": "2026-03-17T01:59:38.645Z"
+            },
+            {
+              "id": "cd57c92a-8bc1-4079-9fa7-527e298f5421",
+              "goalId": "75c3e982-b56b-4a41-9c43-f61289421fa5",
+              "title": "Log the wasted time while upgrading the app",
+              "description": "",
+              "status": "done",
+              "importance": "medium",
+              "tags": [],
+              "dueDate": null,
+              "subtasks": [],
+              "timeSpent": 10800,
+              "createdAt": "2026-03-17T02:21:29.949Z",
+              "updatedAt": "2026-03-17T02:21:48.263Z",
+              "completedAt": "2026-03-17T02:21:48.263Z"
+            },
+            {
+              "id": "e6d4727d-ee7d-40f7-bd74-0f55616c7b51",
+              "goalId": "75c3e982-b56b-4a41-9c43-f61289421fa5",
+              "title": "Add ASCII",
+              "description": "Update the app to add the ASCII tap",
+              "status": "todo",
+              "importance": "high",
+              "tags": [],
+              "dueDate": null,
+              "subtasks": [],
+              "timeSpent": 0,
+              "createdAt": "2026-03-20T22:42:29.157Z",
+              "updatedAt": "2026-04-11T14:23:03.557Z",
+              "completedAt": null
+            },
+            {
+              "id": "57ecab56-a767-45f7-9ea0-596df834dad6",
+              "goalId": "75c3e982-b56b-4a41-9c43-f61289421fa5",
+              "title": "a",
+              "description": "",
+              "status": "todo",
+              "importance": "low",
+              "tags": [],
+              "dueDate": null,
+              "subtasks": [],
+              "timeSpent": 0,
+              "createdAt": "2026-04-04T22:26:06.883Z",
+              "updatedAt": "2026-04-04T22:26:06.883Z",
+              "completedAt": null
+            },
+            {
+              "id": "be630683-0b23-4f07-9475-f85e1bc513de",
+              "goalId": "75c3e982-b56b-4a41-9c43-f61289421fa5",
+              "title": "Work on TaskTracker",
+              "description": "",
+              "status": "in-progress",
+              "importance": "urgent",
+              "tags": [
+                "Coding",
+                "Web",
+                "App",
+                "Project"
+              ],
+              "dueDate": null,
+              "subtasks": [],
+              "timeSpent": 59520,
+              "createdAt": "2026-04-10T15:19:56.735Z",
+              "updatedAt": "2026-04-11T15:59:34.382Z",
+              "completedAt": null
+            }
+          ]
+        }
+      ],
+      "timerSessions": [
+        {
+          "id": "afa450b7-097e-43fd-b15f-ab7535b70d98",
+          "taskId": null,
+          "type": "countdown",
+          "duration": 60,
+          "completedAt": "2026-03-01T02:32:17.498Z"
         },
         {
-          "id": "cf796621-7fab-4a6f-8a33-257f21b94abe",
-          "goalId": "75c3e982-b56b-4a41-9c43-f61289421fa5",
-          "title": "Add the SKILL.md skills to perplexity for unlimited uses",
-          "description": "",
-          "status": "done",
-          "importance": "high",
-          "tags": [],
-          "dueDate": null,
-          "subtasks": [],
-          "timeSpent": 3600,
-          "createdAt": "2026-03-17T01:58:07.041Z",
-          "updatedAt": "2026-03-17T01:59:38.645Z",
-          "completedAt": "2026-03-17T01:59:38.645Z"
+          "id": "cd5e6ae3-53df-4249-8ffd-ce0c37f3c17e",
+          "taskId": "19e0f013-e397-4999-8a6f-cedcda178688",
+          "type": "countdown",
+          "duration": 300,
+          "completedAt": "2026-03-02T10:29:04.936Z"
         },
         {
-          "id": "cd57c92a-8bc1-4079-9fa7-527e298f5421",
-          "goalId": "75c3e982-b56b-4a41-9c43-f61289421fa5",
-          "title": "Log the wasted time while upgrading the app",
-          "description": "",
-          "status": "done",
-          "importance": "medium",
-          "tags": [],
-          "dueDate": null,
-          "subtasks": [],
-          "timeSpent": 10800,
-          "createdAt": "2026-03-17T02:21:29.949Z",
-          "updatedAt": "2026-03-17T02:21:48.263Z",
-          "completedAt": "2026-03-17T02:21:48.263Z"
+          "id": "cfaf1efc-aa0f-437f-8f30-3de4d32f046c",
+          "taskId": "19e0f013-e397-4999-8a6f-cedcda178688",
+          "type": "countdown",
+          "duration": 300,
+          "completedAt": "2026-03-02T11:01:03.914Z"
         },
         {
-          "id": "e6d4727d-ee7d-40f7-bd74-0f55616c7b51",
-          "goalId": "75c3e982-b56b-4a41-9c43-f61289421fa5",
-          "title": "Add ASCII",
-          "description": "Update the app to add the ASCII tap",
-          "status": "todo",
-          "importance": "high",
-          "tags": [],
-          "dueDate": null,
-          "subtasks": [],
-          "timeSpent": 0,
-          "createdAt": "2026-03-20T22:42:29.157Z",
-          "updatedAt": "2026-04-11T14:23:03.557Z",
-          "completedAt": null
+          "id": "400208c1-ef9d-4d9b-9b0f-7311725bdbd3",
+          "taskId": "aec6c102-1450-4337-bb3e-7e3a7dc2b439",
+          "type": "stopwatch",
+          "duration": 3,
+          "completedAt": "2026-03-02T18:01:06.086Z"
         },
         {
-          "id": "57ecab56-a767-45f7-9ea0-596df834dad6",
-          "goalId": "75c3e982-b56b-4a41-9c43-f61289421fa5",
-          "title": "a",
-          "description": "",
-          "status": "todo",
-          "importance": "low",
-          "tags": [],
-          "dueDate": null,
-          "subtasks": [],
-          "timeSpent": 0,
-          "createdAt": "2026-04-04T22:26:06.883Z",
-          "updatedAt": "2026-04-04T22:26:06.883Z",
-          "completedAt": null
+          "id": "f91b9e68-ac8d-4e1e-8862-3d1edf502c20",
+          "taskId": "aec6c102-1450-4337-bb3e-7e3a7dc2b439",
+          "type": "stopwatch",
+          "duration": 2554,
+          "completedAt": "2026-03-02T18:57:21.789Z"
         },
         {
-          "id": "be630683-0b23-4f07-9475-f85e1bc513de",
-          "goalId": "75c3e982-b56b-4a41-9c43-f61289421fa5",
-          "title": "Work on TaskTracker",
-          "description": "",
-          "status": "in-progress",
-          "importance": "urgent",
-          "tags": [
-            "Coding",
-            "Web",
-            "App",
-            "Project"
-          ],
-          "dueDate": null,
-          "subtasks": [],
-          "timeSpent": 59520,
-          "createdAt": "2026-04-10T15:19:56.735Z",
-          "updatedAt": "2026-04-11T15:59:34.382Z",
-          "completedAt": null
+          "id": "b6276d19-cf23-4a0c-8383-bffd6cc8df48",
+          "taskId": "aec6c102-1450-4337-bb3e-7e3a7dc2b439",
+          "type": "stopwatch",
+          "duration": 1887,
+          "completedAt": "2026-03-03T18:05:46.587Z"
+        },
+        {
+          "id": "862aa0d5-3c4c-4634-a065-4bde91fc424d",
+          "taskId": "aec6c102-1450-4337-bb3e-7e3a7dc2b439",
+          "type": "pomodoro",
+          "duration": 1500,
+          "completedAt": "2026-03-04T10:33:00.481Z"
+        },
+        {
+          "id": "3b2b88d5-a7e5-481d-8b54-61b6bbe23abc",
+          "taskId": "aec6c102-1450-4337-bb3e-7e3a7dc2b439",
+          "type": "pomodoro",
+          "duration": 300,
+          "completedAt": "2026-03-04T10:38:26.487Z"
+        },
+        {
+          "id": "b259c228-9c6a-4240-a772-e7a51cc52e67",
+          "taskId": "aec6c102-1450-4337-bb3e-7e3a7dc2b439",
+          "type": "pomodoro",
+          "duration": 1500,
+          "completedAt": "2026-03-04T12:34:33.016Z"
+        },
+        {
+          "id": "13217701-dc87-493a-8d01-0a1c2e06fe38",
+          "taskId": "e355aed4-c794-4366-bda3-85199588d102",
+          "type": "stopwatch",
+          "duration": 37,
+          "completedAt": "2026-03-08T23:47:57.089Z"
+        },
+        {
+          "id": "c59c9dc2-8e48-4601-b9bf-c0a79f8e8337",
+          "taskId": null,
+          "type": "stopwatch",
+          "duration": 6311,
+          "completedAt": "2026-03-09T01:33:54.581Z"
+        },
+        {
+          "id": "5d37f6ce-5b43-4b90-bbbe-6b9262999097",
+          "taskId": "e355aed4-c794-4366-bda3-85199588d102",
+          "type": "manual",
+          "duration": 6300,
+          "completedAt": "2026-03-09T01:49:26.380Z"
+        },
+        {
+          "id": "32aa865e-27c3-4b35-8883-545dcdeec077",
+          "taskId": "aec6c102-1450-4337-bb3e-7e3a7dc2b439",
+          "type": "manual",
+          "duration": 600,
+          "completedAt": "2026-03-09T01:49:57.393Z"
+        },
+        {
+          "id": "7574d6de-46b2-4002-b576-fee438d32c6a",
+          "taskId": "aec6c102-1450-4337-bb3e-7e3a7dc2b439",
+          "type": "manual",
+          "duration": 600,
+          "completedAt": "2026-03-09T01:50:42.407Z"
+        },
+        {
+          "id": "bf291539-fc89-4a64-bd13-564723a5d13c",
+          "taskId": "f519beef-2a8e-4927-9c98-ed167b66f271",
+          "type": "manual",
+          "duration": 8400,
+          "completedAt": "2026-03-10T19:59:33.266Z"
+        },
+        {
+          "id": "b27c1c67-e432-4dec-ba91-eb694789b517",
+          "taskId": "f519beef-2a8e-4927-9c98-ed167b66f271",
+          "type": "manual",
+          "duration": 9000,
+          "completedAt": "2026-03-14T02:41:29.868Z"
+        },
+        {
+          "id": "9a080f7d-18fc-4718-9796-d458d2a49f78",
+          "taskId": "f519beef-2a8e-4927-9c98-ed167b66f271",
+          "type": "stopwatch",
+          "duration": 917,
+          "completedAt": "2026-03-14T02:56:21.850Z"
+        },
+        {
+          "id": "11299e8e-492f-43cb-85ed-155597cdae56",
+          "taskId": "f519beef-2a8e-4927-9c98-ed167b66f271",
+          "type": "stopwatch",
+          "duration": 619,
+          "completedAt": "2026-03-14T03:43:12.496Z"
+        },
+        {
+          "id": "630b971e-94f9-4772-9c01-e4ab356465b9",
+          "taskId": null,
+          "type": "stopwatch",
+          "duration": 2687,
+          "completedAt": "2026-03-15T03:12:29.092Z"
+        },
+        {
+          "id": "5f5e8fdb-f7f4-4de5-8ca7-c042774a3357",
+          "taskId": "f519beef-2a8e-4927-9c98-ed167b66f271",
+          "type": "manual",
+          "duration": 10200,
+          "completedAt": "2026-03-15T03:12:58.945Z"
+        },
+        {
+          "id": "470d647b-8381-4e52-8a0c-a4c17446912f",
+          "taskId": "cf796621-7fab-4a6f-8a33-257f21b94abe",
+          "type": "manual",
+          "duration": 3600,
+          "completedAt": "2026-03-17T01:59:33.526Z"
+        },
+        {
+          "id": "31f1f555-4018-492d-9fda-46f92b09ffd4",
+          "taskId": "cd57c92a-8bc1-4079-9fa7-527e298f5421",
+          "type": "manual",
+          "duration": 10800,
+          "completedAt": "2026-03-17T02:21:43.118Z"
+        },
+        {
+          "id": "20a1eac1-7559-4fc3-a36d-0824431179d3",
+          "taskId": "ae50b3f8-8b35-4560-9bc3-ee518ab865b8",
+          "type": "stopwatch",
+          "duration": 773,
+          "completedAt": "2026-03-17T03:33:42.067Z"
+        },
+        {
+          "id": "fd4cc686-bc7f-4e92-9e5d-4acd6ce16b94",
+          "taskId": "ae50b3f8-8b35-4560-9bc3-ee518ab865b8",
+          "type": "manual",
+          "duration": 720,
+          "completedAt": "2026-03-17T03:34:07.719Z"
+        },
+        {
+          "id": "ef2244db-05f7-456c-bd4b-d26e5518cfad",
+          "taskId": "b3e9a123-4567-89ab-cdef-0123456789ab",
+          "type": "stopwatch",
+          "duration": 711,
+          "completedAt": "2026-03-21T23:48:56.271Z"
+        },
+        {
+          "id": "c3b10ba6-aeed-4a7b-b2ea-024bb083768d",
+          "taskId": "b3e9a123-4567-89ab-cdef-0123456789ab",
+          "type": "pomodoro",
+          "duration": 1500,
+          "completedAt": "2026-03-22T00:24:51.461Z"
+        },
+        {
+          "id": "d65d1c5a-5ad0-47cb-b29d-feb3a6737046",
+          "taskId": "b3e9a123-4567-89ab-cdef-0123456789ab",
+          "type": "pomodoro",
+          "duration": 300,
+          "completedAt": "2026-03-22T00:30:01.849Z"
+        },
+        {
+          "id": "0386edb6-19d9-4a49-adce-bd0aa248f30b",
+          "taskId": "b3e9a123-4567-89ab-cdef-0123456789ab",
+          "type": "pomodoro",
+          "duration": 1500,
+          "completedAt": "2026-03-22T01:01:52.345Z"
+        },
+        {
+          "id": "b898e060-0dbb-47d1-9838-85742d206638",
+          "taskId": "b3e9a123-4567-89ab-cdef-0123456789ab",
+          "type": "pomodoro",
+          "duration": 300,
+          "completedAt": "2026-03-22T01:07:55.357Z"
+        },
+        {
+          "id": "5f73fae2-0141-49e1-8c86-9d66136c1a33",
+          "taskId": "b3e9a123-4567-89ab-cdef-0123456789ab",
+          "type": "pomodoro",
+          "duration": 1500,
+          "completedAt": "2026-03-22T02:38:55.836Z"
+        },
+        {
+          "id": "2ab73915-e91c-4313-a587-c4f277683f53",
+          "taskId": "b3e9a123-4567-89ab-cdef-0123456789ab",
+          "type": "pomodoro",
+          "duration": 300,
+          "completedAt": "2026-03-22T02:50:24.056Z"
+        },
+        {
+          "id": "8759e000-dc38-4d83-8ccd-abb50bb3d8c2",
+          "taskId": "b3e9a123-4567-89ab-cdef-0123456789ab",
+          "type": "pomodoro",
+          "duration": 1500,
+          "completedAt": "2026-03-22T03:38:14.730Z"
+        },
+        {
+          "id": "df9dc953-b391-4ae9-81ee-786ef3545a23",
+          "taskId": "b3e9a123-4567-89ab-cdef-0123456789ab",
+          "type": "manual",
+          "duration": 6000,
+          "completedAt": "2026-03-22T03:39:38.680Z"
+        },
+        {
+          "id": "49a89cc0-c95e-4984-9654-661641407947",
+          "taskId": "ae50b3f8-8b35-4560-9bc3-ee518ab865b8",
+          "type": "stopwatch",
+          "duration": 1351,
+          "completedAt": "2026-03-22T22:58:38.130Z"
+        },
+        {
+          "id": "1d26a1b4-81da-4ed6-97f3-b359bc2d2c60",
+          "taskId": "ae50b3f8-8b35-4560-9bc3-ee518ab865b8",
+          "type": "manual",
+          "duration": 600,
+          "completedAt": "2026-03-23T00:19:52.068Z"
+        },
+        {
+          "id": "8542bac2-66e4-4207-b4a6-a896a0fcd2ae",
+          "taskId": "ae50b3f8-8b35-4560-9bc3-ee518ab865b8",
+          "type": "stopwatch",
+          "duration": 1761,
+          "completedAt": "2026-03-23T00:21:55.813Z"
+        },
+        {
+          "id": "7b22626e-0285-424d-89fc-301f7815e533",
+          "taskId": "ae50b3f8-8b35-4560-9bc3-ee518ab865b8",
+          "type": "stopwatch",
+          "duration": 306,
+          "completedAt": "2026-03-23T00:37:48.712Z"
+        },
+        {
+          "id": "9a5ee6b9-793f-4bb9-8e01-8b95b30359a3",
+          "taskId": "ae50b3f8-8b35-4560-9bc3-ee518ab865b8",
+          "type": "manual",
+          "duration": 600,
+          "completedAt": "2026-03-23T00:38:04.972Z"
+        },
+        {
+          "id": "9259318a-d4e3-4948-bbc3-76325149c221",
+          "taskId": "ae50b3f8-8b35-4560-9bc3-ee518ab865b8",
+          "type": "stopwatch",
+          "duration": 5032,
+          "completedAt": "2026-03-23T03:08:15.842Z"
+        },
+        {
+          "id": "5c22ce53-46f7-4fec-b186-68b09407c1d7",
+          "taskId": "193ca580-2990-47d2-b871-8c1bf07c19df",
+          "type": "manual",
+          "duration": 5580,
+          "completedAt": "2026-03-26T02:08:58.428Z"
+        },
+        {
+          "id": "f1d88d91-c614-4b25-a489-d9fa7eb13950",
+          "taskId": "193ca580-2990-47d2-b871-8c1bf07c19df",
+          "type": "stopwatch",
+          "duration": 3112,
+          "completedAt": "2026-03-26T09:12:09.575Z"
+        },
+        {
+          "id": "24b6a935-2e81-466c-9163-d54177da0513",
+          "taskId": "b3e9a123-4567-89ab-cdef-0123456789ab",
+          "type": "stopwatch",
+          "duration": 2976,
+          "completedAt": "2026-03-27T05:06:19.319Z"
+        },
+        {
+          "id": "012dca4f-299b-4b84-82c1-6b4fe881a2f4",
+          "taskId": "f519beef-2a8e-4927-9c98-ed167b66f271",
+          "type": "stopwatch",
+          "duration": 2758,
+          "completedAt": "2026-03-29T06:01:41.506Z"
+        },
+        {
+          "id": "002d67a8-4594-47e3-aeab-7e3b57e2ff90",
+          "taskId": "be630683-0b23-4f07-9475-f85e1bc513de",
+          "type": "manual",
+          "duration": 3120,
+          "completedAt": "2026-04-10T17:36:17.933Z"
+        },
+        {
+          "id": "f2eee1f6-e722-4f8c-8ce6-34f1179a4367",
+          "taskId": "be630683-0b23-4f07-9475-f85e1bc513de",
+          "type": "manual",
+          "duration": 5640,
+          "completedAt": "2026-04-11T15:59:28.803Z"
+        },
+        {
+          "id": "a09abfa9-cbfa-4343-9d3c-cd08f515feb2",
+          "taskId": "be630683-0b23-4f07-9475-f85e1bc513de",
+          "type": "manual",
+          "duration": 5640,
+          "completedAt": "2026-04-11T15:59:30.377Z"
+        },
+        {
+          "id": "491846f8-ab53-4983-a62f-9613753e409a",
+          "taskId": "be630683-0b23-4f07-9475-f85e1bc513de",
+          "type": "manual",
+          "duration": 5640,
+          "completedAt": "2026-04-11T15:59:33.073Z"
+        },
+        {
+          "id": "2974af8b-075a-4c7c-b17c-3d4d5316a8ce",
+          "taskId": "be630683-0b23-4f07-9475-f85e1bc513de",
+          "type": "manual",
+          "duration": 5640,
+          "completedAt": "2026-04-11T15:59:33.200Z"
+        },
+        {
+          "id": "7c8e691e-c518-456f-80c7-0373a516aed7",
+          "taskId": "be630683-0b23-4f07-9475-f85e1bc513de",
+          "type": "manual",
+          "duration": 5640,
+          "completedAt": "2026-04-11T15:59:33.388Z"
+        },
+        {
+          "id": "38d67fb4-7f32-4ec2-bb92-147ec9040ecc",
+          "taskId": "be630683-0b23-4f07-9475-f85e1bc513de",
+          "type": "manual",
+          "duration": 5640,
+          "completedAt": "2026-04-11T15:59:33.573Z"
+        },
+        {
+          "id": "ca9cdadd-97de-4d7d-9ece-2d7ebd9c540a",
+          "taskId": "be630683-0b23-4f07-9475-f85e1bc513de",
+          "type": "manual",
+          "duration": 5640,
+          "completedAt": "2026-04-11T15:59:33.887Z"
+        },
+        {
+          "id": "b522ef0b-0afe-43f4-b01e-c042cb8517a1",
+          "taskId": "be630683-0b23-4f07-9475-f85e1bc513de",
+          "type": "manual",
+          "duration": 5640,
+          "completedAt": "2026-04-11T15:59:33.982Z"
+        },
+        {
+          "id": "3557f505-c22f-4516-8e89-faa6058909b5",
+          "taskId": "be630683-0b23-4f07-9475-f85e1bc513de",
+          "type": "manual",
+          "duration": 5640,
+          "completedAt": "2026-04-11T15:59:34.198Z"
+        },
+        {
+          "id": "57ec95ad-25c0-47f5-862e-dc098316e190",
+          "taskId": "be630683-0b23-4f07-9475-f85e1bc513de",
+          "type": "manual",
+          "duration": 5640,
+          "completedAt": "2026-04-11T15:59:34.382Z"
+        },
+        {
+          "id": "6d41dec2-0217-43f3-b535-9d739bf0be3f",
+          "taskId": "19e0f013-e397-4999-8a6f-cedcda178688",
+          "type": "manual",
+          "duration": 60,
+          "completedAt": "2026-04-11T16:04:24.025Z"
+        }
+      ],
+      "notes": [
+        {
+          "id": "c75a1d82-858d-49bb-9ce6-52e9db04d937",
+          "title": "Math Mid Prepare",
+          "content": "\\*\\*Must-cover tests\n\\*\\*\n. Nth-Term Test for Divergence. ✅\n\n. Integral Test. ✅\n\n. Direct Comparison Test. ✅\n\n. Limit Comparison Test. ✅\n\n. Alternating Series Test. ✅\n\n. Absolute Convergence check ✅\n\n. Conditional Convergence check ✅\n\n. Ratio Test. ✅\n\n. Root Test. ✅\n\n**Also know these patterns**\n\n. P-series recognition: ✅\n\n. Geometric-series recognition ❌",
+          "createdAt": "2026-03-14T03:36:42.986Z",
+          "updatedAt": "2026-03-16T01:56:45.261Z"
+        },
+        {
+          "id": "d8dda2d0-334f-4c6d-a164-54efbd5ac730",
+          "title": "Math Mid Prepare - Remind",
+          "content": "* [ ] Learn when to use LCT, DCT, Integral Test",
+          "createdAt": "2026-03-15T03:19:53.478Z",
+          "updatedAt": "2026-03-15T03:19:53.478Z"
+        },
+        {
+          "id": "fecbb0a6-62d5-4cb8-b33e-ff1e93d67be6",
+          "title": "App Upgrade",
+          "content": "# Dashboard Fixes Round 2\n\n* Fix greeting banner (\"Good Morning\") styling\n* Fix Focus Task card — larger buttons matching the screenshot\n* Fix Productivity Pulse — use line/area chart instead of bar squares\n* Fix Completion Trend chart — broken display\n* Fix modal z-index — backup popup overlapped by sidebar\n* Add System Logs filter by event type",
+          "createdAt": "2026-03-16T03:03:34.034Z",
+          "updatedAt": "2026-03-16T03:37:18.460Z"
+        },
+        {
+          "id": "170c6d30-a3e2-4ef1-883f-d1f98042193b",
+          "title": "App update",
+          "content": "### 1. **UI/UX & Aesthetics**\n\n* **`ui-ux-pro-max`** (![]()c:\\\\Users\\\\moamm\\\\OneDrive\\\\Desktop\\\\Test.agents\\\\skills\\\\ui-ux-pro-max\\\\SKILL.md)\n    * **Why**: It provides 50+ design styles and 21 palettes. It is essential for achieving that \"polished, premium Figma-inspired\" look and handling the complex layout of a design tool.\n* **`frontend-ui-dark-ts`** (![]()c:\\\\Users\\\\moamm\\\\OneDrive\\\\Desktop\\\\Test.agents\\\\skills\\\\frontend-ui-dark-ts\\\\SKILL.md)\n    * **Why**: Specifically focused on building high-end dark-themed interfaces with glassmorphism and smooth animations, perfect for the requested UI style.\n* **`frontend-design`** (![]()c:\\\\Users\\\\moamm\\\\OneDrive\\\\Desktop\\\\Test.agents\\\\skills\\\\frontend-design\\\\SKILL.md)\n    * **Why**: Ensures the interface has \"intentional aesthetics\" and a non-generic visual identity, moving away from standard HTML/CSS defaults.\n\n### 2. **Core Component & Interaction Logic**\n\n* **`web-artifacts-builder`** (![]()c:\\\\Users\\\\moamm\\\\OneDrive\\\\Desktop\\\\Test.agents\\\\skills\\\\web-artifacts-builder\\\\SKILL.md)\n    * **Why**: Designed for creating elaborate, multi-component React/Tailwind/shadcn/ui artifacts. This is perfect for building a standalone, complex web tool like an ASCII editor.\n* **`modern-javascript-patterns`** (![]()c:\\\\Users\\\\moamm\\\\OneDrive\\\\Desktop\\\\Test.agents\\\\skills\\\\modern-javascript-patterns\\\\SKILL.md)\n    * **Why**: Crucial for implementing the complex JS event listeners (`mousedown`, `mousemove`, `e.preventDefault()`), undo/redo state management, and the exact character-width calculations required for the ASCII grid.\n* **`javascript-mastery`** (![]()c:\\\\Users\\\\moamm\\\\OneDrive\\\\Desktop\\\\Test.agents\\\\skills\\\\javascript-mastery\\\\SKILL.md)\n    * **Why**: Provides deep knowledge on closures and async patterns which are vital for a performant \"Freehand\" tool and smooth performance while dragging.\n\n### 3. **Canvas & Rendering Specialized**\n\n* **`canvas-design`** (![]()c:\\\\Users\\\\moamm\\\\OneDrive\\\\Desktop\\\\Test.agents\\\\skills\\\\canvas-design\\\\SKILL.md)\n    * **Why**: Although it focuses on static art, its underlying knowledge of canvas API interactions is highly relevant for the rendering engine you need.\n* **`react-flow-node-ts`** (![]()c:\\\\Users\\\\moamm\\\\OneDrive\\\\Desktop\\\\Test.agents\\\\skills\\\\react-flow-node-ts\\\\SKILL.md)\n    * **Why**: Useful if you decide to implement the editor using a node-based architecture for its state, particularly for the \"Select/Move\" and \"Select/Move\" logic.",
+          "createdAt": "2026-03-20T22:41:46.684Z",
+          "updatedAt": "2026-03-20T22:41:46.684Z"
+        },
+        {
+          "id": "ba4351bb-4c89-4284-aecd-46f4eaeea931",
+          "title": "App Emer",
+          "content": "The app stll needs to be responsive, Create a stitch mobile and responsive desig n and implement it, Add teh ASCII Canva,",
+          "createdAt": "2026-03-23T00:21:41.561Z",
+          "updatedAt": "2026-03-23T00:21:41.561Z"
+        },
+        {
+          "id": "b9ec9b84-3eca-4bac-a590-759a16953bf2",
+          "title": "app",
+          "content": "Add homework tap and make it dashboard tap for statics, the homework page should be someth focuses on your tasks and notification\n\n",
+          "createdAt": "2026-03-27T00:57:33.484Z",
+          "updatedAt": "2026-03-27T00:57:33.484Z"
         }
       ]
     }
-  ],
-  "timerSessions": [
-    {
-      "id": "afa450b7-097e-43fd-b15f-ab7535b70d98",
-      "taskId": null,
-      "type": "countdown",
-      "duration": 60,
-      "completedAt": "2026-03-01T02:32:17.498Z"
-    },
-    {
-      "id": "cd5e6ae3-53df-4249-8ffd-ce0c37f3c17e",
-      "taskId": "19e0f013-e397-4999-8a6f-cedcda178688",
-      "type": "countdown",
-      "duration": 300,
-      "completedAt": "2026-03-02T10:29:04.936Z"
-    },
-    {
-      "id": "cfaf1efc-aa0f-437f-8f30-3de4d32f046c",
-      "taskId": "19e0f013-e397-4999-8a6f-cedcda178688",
-      "type": "countdown",
-      "duration": 300,
-      "completedAt": "2026-03-02T11:01:03.914Z"
-    },
-    {
-      "id": "400208c1-ef9d-4d9b-9b0f-7311725bdbd3",
-      "taskId": "aec6c102-1450-4337-bb3e-7e3a7dc2b439",
-      "type": "stopwatch",
-      "duration": 3,
-      "completedAt": "2026-03-02T18:01:06.086Z"
-    },
-    {
-      "id": "f91b9e68-ac8d-4e1e-8862-3d1edf502c20",
-      "taskId": "aec6c102-1450-4337-bb3e-7e3a7dc2b439",
-      "type": "stopwatch",
-      "duration": 2554,
-      "completedAt": "2026-03-02T18:57:21.789Z"
-    },
-    {
-      "id": "b6276d19-cf23-4a0c-8383-bffd6cc8df48",
-      "taskId": "aec6c102-1450-4337-bb3e-7e3a7dc2b439",
-      "type": "stopwatch",
-      "duration": 1887,
-      "completedAt": "2026-03-03T18:05:46.587Z"
-    },
-    {
-      "id": "862aa0d5-3c4c-4634-a065-4bde91fc424d",
-      "taskId": "aec6c102-1450-4337-bb3e-7e3a7dc2b439",
-      "type": "pomodoro",
-      "duration": 1500,
-      "completedAt": "2026-03-04T10:33:00.481Z"
-    },
-    {
-      "id": "3b2b88d5-a7e5-481d-8b54-61b6bbe23abc",
-      "taskId": "aec6c102-1450-4337-bb3e-7e3a7dc2b439",
-      "type": "pomodoro",
-      "duration": 300,
-      "completedAt": "2026-03-04T10:38:26.487Z"
-    },
-    {
-      "id": "b259c228-9c6a-4240-a772-e7a51cc52e67",
-      "taskId": "aec6c102-1450-4337-bb3e-7e3a7dc2b439",
-      "type": "pomodoro",
-      "duration": 1500,
-      "completedAt": "2026-03-04T12:34:33.016Z"
-    },
-    {
-      "id": "13217701-dc87-493a-8d01-0a1c2e06fe38",
-      "taskId": "e355aed4-c794-4366-bda3-85199588d102",
-      "type": "stopwatch",
-      "duration": 37,
-      "completedAt": "2026-03-08T23:47:57.089Z"
-    },
-    {
-      "id": "c59c9dc2-8e48-4601-b9bf-c0a79f8e8337",
-      "taskId": null,
-      "type": "stopwatch",
-      "duration": 6311,
-      "completedAt": "2026-03-09T01:33:54.581Z"
-    },
-    {
-      "id": "5d37f6ce-5b43-4b90-bbbe-6b9262999097",
-      "taskId": "e355aed4-c794-4366-bda3-85199588d102",
-      "type": "manual",
-      "duration": 6300,
-      "completedAt": "2026-03-09T01:49:26.380Z"
-    },
-    {
-      "id": "32aa865e-27c3-4b35-8883-545dcdeec077",
-      "taskId": "aec6c102-1450-4337-bb3e-7e3a7dc2b439",
-      "type": "manual",
-      "duration": 600,
-      "completedAt": "2026-03-09T01:49:57.393Z"
-    },
-    {
-      "id": "7574d6de-46b2-4002-b576-fee438d32c6a",
-      "taskId": "aec6c102-1450-4337-bb3e-7e3a7dc2b439",
-      "type": "manual",
-      "duration": 600,
-      "completedAt": "2026-03-09T01:50:42.407Z"
-    },
-    {
-      "id": "bf291539-fc89-4a64-bd13-564723a5d13c",
-      "taskId": "f519beef-2a8e-4927-9c98-ed167b66f271",
-      "type": "manual",
-      "duration": 8400,
-      "completedAt": "2026-03-10T19:59:33.266Z"
-    },
-    {
-      "id": "b27c1c67-e432-4dec-ba91-eb694789b517",
-      "taskId": "f519beef-2a8e-4927-9c98-ed167b66f271",
-      "type": "manual",
-      "duration": 9000,
-      "completedAt": "2026-03-14T02:41:29.868Z"
-    },
-    {
-      "id": "9a080f7d-18fc-4718-9796-d458d2a49f78",
-      "taskId": "f519beef-2a8e-4927-9c98-ed167b66f271",
-      "type": "stopwatch",
-      "duration": 917,
-      "completedAt": "2026-03-14T02:56:21.850Z"
-    },
-    {
-      "id": "11299e8e-492f-43cb-85ed-155597cdae56",
-      "taskId": "f519beef-2a8e-4927-9c98-ed167b66f271",
-      "type": "stopwatch",
-      "duration": 619,
-      "completedAt": "2026-03-14T03:43:12.496Z"
-    },
-    {
-      "id": "630b971e-94f9-4772-9c01-e4ab356465b9",
-      "taskId": null,
-      "type": "stopwatch",
-      "duration": 2687,
-      "completedAt": "2026-03-15T03:12:29.092Z"
-    },
-    {
-      "id": "5f5e8fdb-f7f4-4de5-8ca7-c042774a3357",
-      "taskId": "f519beef-2a8e-4927-9c98-ed167b66f271",
-      "type": "manual",
-      "duration": 10200,
-      "completedAt": "2026-03-15T03:12:58.945Z"
-    },
-    {
-      "id": "470d647b-8381-4e52-8a0c-a4c17446912f",
-      "taskId": "cf796621-7fab-4a6f-8a33-257f21b94abe",
-      "type": "manual",
-      "duration": 3600,
-      "completedAt": "2026-03-17T01:59:33.526Z"
-    },
-    {
-      "id": "31f1f555-4018-492d-9fda-46f92b09ffd4",
-      "taskId": "cd57c92a-8bc1-4079-9fa7-527e298f5421",
-      "type": "manual",
-      "duration": 10800,
-      "completedAt": "2026-03-17T02:21:43.118Z"
-    },
-    {
-      "id": "20a1eac1-7559-4fc3-a36d-0824431179d3",
-      "taskId": "ae50b3f8-8b35-4560-9bc3-ee518ab865b8",
-      "type": "stopwatch",
-      "duration": 773,
-      "completedAt": "2026-03-17T03:33:42.067Z"
-    },
-    {
-      "id": "fd4cc686-bc7f-4e92-9e5d-4acd6ce16b94",
-      "taskId": "ae50b3f8-8b35-4560-9bc3-ee518ab865b8",
-      "type": "manual",
-      "duration": 720,
-      "completedAt": "2026-03-17T03:34:07.719Z"
-    },
-    {
-      "id": "ef2244db-05f7-456c-bd4b-d26e5518cfad",
-      "taskId": "b3e9a123-4567-89ab-cdef-0123456789ab",
-      "type": "stopwatch",
-      "duration": 711,
-      "completedAt": "2026-03-21T23:48:56.271Z"
-    },
-    {
-      "id": "c3b10ba6-aeed-4a7b-b2ea-024bb083768d",
-      "taskId": "b3e9a123-4567-89ab-cdef-0123456789ab",
-      "type": "pomodoro",
-      "duration": 1500,
-      "completedAt": "2026-03-22T00:24:51.461Z"
-    },
-    {
-      "id": "d65d1c5a-5ad0-47cb-b29d-feb3a6737046",
-      "taskId": "b3e9a123-4567-89ab-cdef-0123456789ab",
-      "type": "pomodoro",
-      "duration": 300,
-      "completedAt": "2026-03-22T00:30:01.849Z"
-    },
-    {
-      "id": "0386edb6-19d9-4a49-adce-bd0aa248f30b",
-      "taskId": "b3e9a123-4567-89ab-cdef-0123456789ab",
-      "type": "pomodoro",
-      "duration": 1500,
-      "completedAt": "2026-03-22T01:01:52.345Z"
-    },
-    {
-      "id": "b898e060-0dbb-47d1-9838-85742d206638",
-      "taskId": "b3e9a123-4567-89ab-cdef-0123456789ab",
-      "type": "pomodoro",
-      "duration": 300,
-      "completedAt": "2026-03-22T01:07:55.357Z"
-    },
-    {
-      "id": "5f73fae2-0141-49e1-8c86-9d66136c1a33",
-      "taskId": "b3e9a123-4567-89ab-cdef-0123456789ab",
-      "type": "pomodoro",
-      "duration": 1500,
-      "completedAt": "2026-03-22T02:38:55.836Z"
-    },
-    {
-      "id": "2ab73915-e91c-4313-a587-c4f277683f53",
-      "taskId": "b3e9a123-4567-89ab-cdef-0123456789ab",
-      "type": "pomodoro",
-      "duration": 300,
-      "completedAt": "2026-03-22T02:50:24.056Z"
-    },
-    {
-      "id": "8759e000-dc38-4d83-8ccd-abb50bb3d8c2",
-      "taskId": "b3e9a123-4567-89ab-cdef-0123456789ab",
-      "type": "pomodoro",
-      "duration": 1500,
-      "completedAt": "2026-03-22T03:38:14.730Z"
-    },
-    {
-      "id": "df9dc953-b391-4ae9-81ee-786ef3545a23",
-      "taskId": "b3e9a123-4567-89ab-cdef-0123456789ab",
-      "type": "manual",
-      "duration": 6000,
-      "completedAt": "2026-03-22T03:39:38.680Z"
-    },
-    {
-      "id": "49a89cc0-c95e-4984-9654-661641407947",
-      "taskId": "ae50b3f8-8b35-4560-9bc3-ee518ab865b8",
-      "type": "stopwatch",
-      "duration": 1351,
-      "completedAt": "2026-03-22T22:58:38.130Z"
-    },
-    {
-      "id": "1d26a1b4-81da-4ed6-97f3-b359bc2d2c60",
-      "taskId": "ae50b3f8-8b35-4560-9bc3-ee518ab865b8",
-      "type": "manual",
-      "duration": 600,
-      "completedAt": "2026-03-23T00:19:52.068Z"
-    },
-    {
-      "id": "8542bac2-66e4-4207-b4a6-a896a0fcd2ae",
-      "taskId": "ae50b3f8-8b35-4560-9bc3-ee518ab865b8",
-      "type": "stopwatch",
-      "duration": 1761,
-      "completedAt": "2026-03-23T00:21:55.813Z"
-    },
-    {
-      "id": "7b22626e-0285-424d-89fc-301f7815e533",
-      "taskId": "ae50b3f8-8b35-4560-9bc3-ee518ab865b8",
-      "type": "stopwatch",
-      "duration": 306,
-      "completedAt": "2026-03-23T00:37:48.712Z"
-    },
-    {
-      "id": "9a5ee6b9-793f-4bb9-8e01-8b95b30359a3",
-      "taskId": "ae50b3f8-8b35-4560-9bc3-ee518ab865b8",
-      "type": "manual",
-      "duration": 600,
-      "completedAt": "2026-03-23T00:38:04.972Z"
-    },
-    {
-      "id": "9259318a-d4e3-4948-bbc3-76325149c221",
-      "taskId": "ae50b3f8-8b35-4560-9bc3-ee518ab865b8",
-      "type": "stopwatch",
-      "duration": 5032,
-      "completedAt": "2026-03-23T03:08:15.842Z"
-    },
-    {
-      "id": "5c22ce53-46f7-4fec-b186-68b09407c1d7",
-      "taskId": "193ca580-2990-47d2-b871-8c1bf07c19df",
-      "type": "manual",
-      "duration": 5580,
-      "completedAt": "2026-03-26T02:08:58.428Z"
-    },
-    {
-      "id": "f1d88d91-c614-4b25-a489-d9fa7eb13950",
-      "taskId": "193ca580-2990-47d2-b871-8c1bf07c19df",
-      "type": "stopwatch",
-      "duration": 3112,
-      "completedAt": "2026-03-26T09:12:09.575Z"
-    },
-    {
-      "id": "24b6a935-2e81-466c-9163-d54177da0513",
-      "taskId": "b3e9a123-4567-89ab-cdef-0123456789ab",
-      "type": "stopwatch",
-      "duration": 2976,
-      "completedAt": "2026-03-27T05:06:19.319Z"
-    },
-    {
-      "id": "012dca4f-299b-4b84-82c1-6b4fe881a2f4",
-      "taskId": "f519beef-2a8e-4927-9c98-ed167b66f271",
-      "type": "stopwatch",
-      "duration": 2758,
-      "completedAt": "2026-03-29T06:01:41.506Z"
-    },
-    {
-      "id": "002d67a8-4594-47e3-aeab-7e3b57e2ff90",
-      "taskId": "be630683-0b23-4f07-9475-f85e1bc513de",
-      "type": "manual",
-      "duration": 3120,
-      "completedAt": "2026-04-10T17:36:17.933Z"
-    },
-    {
-      "id": "f2eee1f6-e722-4f8c-8ce6-34f1179a4367",
-      "taskId": "be630683-0b23-4f07-9475-f85e1bc513de",
-      "type": "manual",
-      "duration": 5640,
-      "completedAt": "2026-04-11T15:59:28.803Z"
-    },
-    {
-      "id": "a09abfa9-cbfa-4343-9d3c-cd08f515feb2",
-      "taskId": "be630683-0b23-4f07-9475-f85e1bc513de",
-      "type": "manual",
-      "duration": 5640,
-      "completedAt": "2026-04-11T15:59:30.377Z"
-    },
-    {
-      "id": "491846f8-ab53-4983-a62f-9613753e409a",
-      "taskId": "be630683-0b23-4f07-9475-f85e1bc513de",
-      "type": "manual",
-      "duration": 5640,
-      "completedAt": "2026-04-11T15:59:33.073Z"
-    },
-    {
-      "id": "2974af8b-075a-4c7c-b17c-3d4d5316a8ce",
-      "taskId": "be630683-0b23-4f07-9475-f85e1bc513de",
-      "type": "manual",
-      "duration": 5640,
-      "completedAt": "2026-04-11T15:59:33.200Z"
-    },
-    {
-      "id": "7c8e691e-c518-456f-80c7-0373a516aed7",
-      "taskId": "be630683-0b23-4f07-9475-f85e1bc513de",
-      "type": "manual",
-      "duration": 5640,
-      "completedAt": "2026-04-11T15:59:33.388Z"
-    },
-    {
-      "id": "38d67fb4-7f32-4ec2-bb92-147ec9040ecc",
-      "taskId": "be630683-0b23-4f07-9475-f85e1bc513de",
-      "type": "manual",
-      "duration": 5640,
-      "completedAt": "2026-04-11T15:59:33.573Z"
-    },
-    {
-      "id": "ca9cdadd-97de-4d7d-9ece-2d7ebd9c540a",
-      "taskId": "be630683-0b23-4f07-9475-f85e1bc513de",
-      "type": "manual",
-      "duration": 5640,
-      "completedAt": "2026-04-11T15:59:33.887Z"
-    },
-    {
-      "id": "b522ef0b-0afe-43f4-b01e-c042cb8517a1",
-      "taskId": "be630683-0b23-4f07-9475-f85e1bc513de",
-      "type": "manual",
-      "duration": 5640,
-      "completedAt": "2026-04-11T15:59:33.982Z"
-    },
-    {
-      "id": "3557f505-c22f-4516-8e89-faa6058909b5",
-      "taskId": "be630683-0b23-4f07-9475-f85e1bc513de",
-      "type": "manual",
-      "duration": 5640,
-      "completedAt": "2026-04-11T15:59:34.198Z"
-    },
-    {
-      "id": "57ec95ad-25c0-47f5-862e-dc098316e190",
-      "taskId": "be630683-0b23-4f07-9475-f85e1bc513de",
-      "type": "manual",
-      "duration": 5640,
-      "completedAt": "2026-04-11T15:59:34.382Z"
-    },
-    {
-      "id": "6d41dec2-0217-43f3-b535-9d739bf0be3f",
-      "taskId": "19e0f013-e397-4999-8a6f-cedcda178688",
-      "type": "manual",
-      "duration": 60,
-      "completedAt": "2026-04-11T16:04:24.025Z"
-    }
-  ],
-  "notes": [
-    {
-      "id": "c75a1d82-858d-49bb-9ce6-52e9db04d937",
-      "title": "Math Mid Prepare",
-      "content": "\\*\\*Must-cover tests\n\\*\\*\n. Nth-Term Test for Divergence. ✅\n\n. Integral Test. ✅\n\n. Direct Comparison Test. ✅\n\n. Limit Comparison Test. ✅\n\n. Alternating Series Test. ✅\n\n. Absolute Convergence check ✅\n\n. Conditional Convergence check ✅\n\n. Ratio Test. ✅\n\n. Root Test. ✅\n\n**Also know these patterns**\n\n. P-series recognition: ✅\n\n. Geometric-series recognition ❌",
-      "createdAt": "2026-03-14T03:36:42.986Z",
-      "updatedAt": "2026-03-16T01:56:45.261Z"
-    },
-    {
-      "id": "d8dda2d0-334f-4c6d-a164-54efbd5ac730",
-      "title": "Math Mid Prepare - Remind",
-      "content": "* [ ] Learn when to use LCT, DCT, Integral Test",
-      "createdAt": "2026-03-15T03:19:53.478Z",
-      "updatedAt": "2026-03-15T03:19:53.478Z"
-    },
-    {
-      "id": "fecbb0a6-62d5-4cb8-b33e-ff1e93d67be6",
-      "title": "App Upgrade",
-      "content": "# Dashboard Fixes Round 2\n\n* Fix greeting banner (\"Good Morning\") styling\n* Fix Focus Task card — larger buttons matching the screenshot\n* Fix Productivity Pulse — use line/area chart instead of bar squares\n* Fix Completion Trend chart — broken display\n* Fix modal z-index — backup popup overlapped by sidebar\n* Add System Logs filter by event type",
-      "createdAt": "2026-03-16T03:03:34.034Z",
-      "updatedAt": "2026-03-16T03:37:18.460Z"
-    },
-    {
-      "id": "170c6d30-a3e2-4ef1-883f-d1f98042193b",
-      "title": "App update",
-      "content": "### 1. **UI/UX & Aesthetics**\n\n* **`ui-ux-pro-max`** (![]()c:\\\\Users\\\\moamm\\\\OneDrive\\\\Desktop\\\\Test.agents\\\\skills\\\\ui-ux-pro-max\\\\SKILL.md)\n    * **Why**: It provides 50+ design styles and 21 palettes. It is essential for achieving that \"polished, premium Figma-inspired\" look and handling the complex layout of a design tool.\n* **`frontend-ui-dark-ts`** (![]()c:\\\\Users\\\\moamm\\\\OneDrive\\\\Desktop\\\\Test.agents\\\\skills\\\\frontend-ui-dark-ts\\\\SKILL.md)\n    * **Why**: Specifically focused on building high-end dark-themed interfaces with glassmorphism and smooth animations, perfect for the requested UI style.\n* **`frontend-design`** (![]()c:\\\\Users\\\\moamm\\\\OneDrive\\\\Desktop\\\\Test.agents\\\\skills\\\\frontend-design\\\\SKILL.md)\n    * **Why**: Ensures the interface has \"intentional aesthetics\" and a non-generic visual identity, moving away from standard HTML/CSS defaults.\n\n### 2. **Core Component & Interaction Logic**\n\n* **`web-artifacts-builder`** (![]()c:\\\\Users\\\\moamm\\\\OneDrive\\\\Desktop\\\\Test.agents\\\\skills\\\\web-artifacts-builder\\\\SKILL.md)\n    * **Why**: Designed for creating elaborate, multi-component React/Tailwind/shadcn/ui artifacts. This is perfect for building a standalone, complex web tool like an ASCII editor.\n* **`modern-javascript-patterns`** (![]()c:\\\\Users\\\\moamm\\\\OneDrive\\\\Desktop\\\\Test.agents\\\\skills\\\\modern-javascript-patterns\\\\SKILL.md)\n    * **Why**: Crucial for implementing the complex JS event listeners (`mousedown`, `mousemove`, `e.preventDefault()`), undo/redo state management, and the exact character-width calculations required for the ASCII grid.\n* **`javascript-mastery`** (![]()c:\\\\Users\\\\moamm\\\\OneDrive\\\\Desktop\\\\Test.agents\\\\skills\\\\javascript-mastery\\\\SKILL.md)\n    * **Why**: Provides deep knowledge on closures and async patterns which are vital for a performant \"Freehand\" tool and smooth performance while dragging.\n\n### 3. **Canvas & Rendering Specialized**\n\n* **`canvas-design`** (![]()c:\\\\Users\\\\moamm\\\\OneDrive\\\\Desktop\\\\Test.agents\\\\skills\\\\canvas-design\\\\SKILL.md)\n    * **Why**: Although it focuses on static art, its underlying knowledge of canvas API interactions is highly relevant for the rendering engine you need.\n* **`react-flow-node-ts`** (![]()c:\\\\Users\\\\moamm\\\\OneDrive\\\\Desktop\\\\Test.agents\\\\skills\\\\react-flow-node-ts\\\\SKILL.md)\n    * **Why**: Useful if you decide to implement the editor using a node-based architecture for its state, particularly for the \"Select/Move\" and \"Select/Move\" logic.",
-      "createdAt": "2026-03-20T22:41:46.684Z",
-      "updatedAt": "2026-03-20T22:41:46.684Z"
-    },
-    {
-      "id": "ba4351bb-4c89-4284-aecd-46f4eaeea931",
-      "title": "App Emer",
-      "content": "The app stll needs to be responsive, Create a stitch mobile and responsive desig n and implement it, Add teh ASCII Canva,",
-      "createdAt": "2026-03-23T00:21:41.561Z",
-      "updatedAt": "2026-03-23T00:21:41.561Z"
-    },
-    {
-      "id": "b9ec9b84-3eca-4bac-a590-759a16953bf2",
-      "title": "app",
-      "content": "Add homework tap and make it dashboard tap for statics, the homework page should be someth focuses on your tasks and notification\n\n",
-      "createdAt": "2026-03-27T00:57:33.484Z",
-      "updatedAt": "2026-03-27T00:57:33.484Z"
-    }
-  ]
+  }
 }

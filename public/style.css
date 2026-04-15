@@ -2920,3 +2920,242 @@ select:focus-visible {
     font-variant-numeric: tabular-nums;
 }
 
+@media (max-width: 768px) {
+    .sidebar {
+        width: 60px;
+    }
+
+    .sidebar-header {
+        padding: 12px 8px;
+        justify-content: center;
+    }
+
+    .sidebar-nav {
+        padding: 10px 6px;
+    }
+
+    .sidebar .logo-text,
+    .sidebar .nav-label,
+    .sidebar .sidebar-info span,
+    .sidebar-footer {
+        display: none;
+    }
+
+    .nav-btn {
+        justify-content: center;
+        padding: 10px 8px;
+        gap: 0;
+    }
+
+    .main-content {
+        margin-left: 60px;
+        padding: 16px 14px 22px;
+        max-width: none;
+    }
+
+    .view-header,
+    .dashboard-header,
+    .greeting-banner,
+    .manage-toolbar,
+    .timer-task-selector,
+    .timer-controls,
+    .hobby-add-row,
+    .subtask-add-row,
+    .focus-task-actions,
+    .goal-actions,
+    .modal-header,
+    .modal-footer {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .view-header {
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .view-header h1 {
+        font-size: clamp(22px, 6vw, 26px);
+    }
+
+    .greeting-banner {
+        gap: 8px;
+        padding: 18px 0 14px;
+        align-items: flex-start;
+    }
+
+    .greeting-text h2 {
+        font-size: clamp(24px, 7vw, 30px);
+    }
+
+    .greeting-date {
+        align-self: flex-start;
+        font-size: 12px;
+    }
+
+    .dashboard-stats-grid,
+    .bento-grid,
+    .dashboard-trio-grid,
+    .dashboard-extras-grid,
+    .dashboard-main-grid,
+    .notes-container {
+        grid-template-columns: 1fr;
+    }
+
+    .bento-card,
+    .bento-sm,
+    .bento-md,
+    .bento-wide,
+    .bento-full {
+        grid-column: span 1;
+    }
+
+    .bento-card-header {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .search-box {
+        max-width: none;
+        width: 100%;
+    }
+
+    .search-box input {
+        width: 100%;
+    }
+
+    .filter-group {
+        width: 100%;
+    }
+
+    .filter-pills {
+        width: 100%;
+    }
+
+    .filter-pill {
+        flex: 1 1 calc(50% - 6px);
+        justify-content: center;
+    }
+
+    .timer-tabs {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+
+    .timer-tab {
+        flex: 1 1 calc(50% - 6px);
+        min-width: 0;
+    }
+
+    .timer-task-selector {
+        gap: 8px;
+    }
+
+    .timer-task-selector select,
+    .countdown-input input {
+        min-width: 0;
+        width: 100%;
+    }
+
+    .timer-display-container {
+        margin-bottom: 24px;
+    }
+
+    .timer-ring {
+        width: min(72vw, 220px);
+        height: min(72vw, 220px);
+    }
+
+    .timer-time {
+        font-size: clamp(40px, 14vw, 54px);
+    }
+
+    .timer-label {
+        letter-spacing: 2px;
+    }
+
+    .timer-controls {
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .timer-controls .btn {
+        flex: 1 1 140px;
+    }
+
+    .modal,
+    .modal-lg {
+        width: calc(100vw - 20px);
+        max-height: calc(100vh - 20px);
+    }
+
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .modal-footer {
+        gap: 8px;
+    }
+
+    .modal-footer .btn {
+        width: 100%;
+    }
+
+    .goal-header {
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .goal-meta {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .goal-actions,
+    .task-actions,
+    .note-card-actions {
+        opacity: 1;
+    }
+
+    .goal-actions {
+        flex-wrap: wrap;
+        width: 100%;
+    }
+
+    .task-actions {
+        gap: 4px;
+    }
+
+    .goal-progress-header,
+    .status-bar-row,
+    .log-entry {
+        align-items: flex-start;
+    }
+
+    .log-entry {
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .log-time {
+        white-space: normal;
+    }
+
+    .daily-plan-list {
+        max-height: none;
+    }
+
+    .toast-container {
+        left: 12px;
+        right: 12px;
+        bottom: 12px;
+    }
+
+    #mascot-container {
+        display: none;
+    }
+}
+

@@ -2,8 +2,14 @@
 
 var timerAnchorMs = null;
 var stopwatchAnchorMs = null;
-const TIMER_TASK_STORAGE_KEY = 'task_tracker_timer_selected_task';
-const TIMER_STATE_STORAGE_KEY = 'task_tracker_runtime_state_v1';
+
+function getTimerTaskStorageKey() {
+    return typeof getScopedStorageKey === 'function' ? getScopedStorageKey('task_tracker_timer_selected_task') : 'task_tracker_timer_selected_task';
+}
+
+function getTimerStateStorageKey() {
+    return typeof getScopedStorageKey === 'function' ? getScopedStorageKey('task_tracker_runtime_state_v1') : 'task_tracker_runtime_state_v1';
+}
 
 function nowMs() {
     return Date.now();
@@ -35,7 +41,7 @@ function syncActiveTimerWithClock() {
 function persistTimerRuntimeState() {
     try {
         const timerSelect = document.getElementById('timer-task-select');
-        const selectedTaskId = timerSelect ? (timerSelect.value || '') : (localStorage.getItem(TIMER_TASK_STORAGE_KEY) || '');
+        const selectedTaskId = timerSelect ? (timerSelect.value || '') : (localStorage.getItem(getTimerTaskStorageKey()) || '');
         const timerLabel = document.getElementById('timer-label');
 
         const snapshot = {
@@ -54,7 +60,7 @@ function persistTimerRuntimeState() {
             label: timerLabel ? timerLabel.textContent : ''
         };
 
-        localStorage.setItem(TIMER_STATE_STORAGE_KEY, JSON.stringify(snapshot));
+        localStorage.setItem(getTimerStateStorageKey(), JSON.stringify(snapshot));
     } catch (err) {
         console.warn('Failed to persist timer state:', err);
     }
@@ -84,7 +90,7 @@ function resumeTimerInterval() {
 
 function restoreTimerRuntimeState() {
     try {
-        const raw = localStorage.getItem(TIMER_STATE_STORAGE_KEY);
+        const raw = localStorage.getItem(getTimerStateStorageKey());
         if (!raw) return;
 
         const saved = JSON.parse(raw);
@@ -107,7 +113,7 @@ function restoreTimerRuntimeState() {
         stopwatchAnchorMs = Number.isFinite(saved.stopwatchAnchorMs) ? saved.stopwatchAnchorMs : null;
 
         if (saved.selectedTaskId && typeof saved.selectedTaskId === 'string') {
-            localStorage.setItem(TIMER_TASK_STORAGE_KEY, saved.selectedTaskId);
+            localStorage.setItem(getTimerTaskStorageKey(), saved.selectedTaskId);
         }
 
         applyTimerModeUi(timerMode);
@@ -136,7 +142,7 @@ function initTimer() {
     if (timerTaskSelect && !timerTaskSelect._selectionBound) {
         timerTaskSelect._selectionBound = true;
         timerTaskSelect.addEventListener('change', () => {
-            localStorage.setItem(TIMER_TASK_STORAGE_KEY, timerTaskSelect.value || '');
+            localStorage.setItem(getTimerTaskStorageKey(), timerTaskSelect.value || '');
             persistTimerRuntimeState();
             if (typeof renderUpNext === 'function' && typeof getAllTasks === 'function') {
                 renderUpNext(getAllTasks());
@@ -393,7 +399,7 @@ function updatePomodoroInfo() {
 }
 function populateTimerTaskSelect() {
     const select = document.getElementById('timer-task-select');
-    const savedSelection = localStorage.getItem(TIMER_TASK_STORAGE_KEY) || '';
+    const savedSelection = localStorage.getItem(getTimerTaskStorageKey()) || '';
     select.innerHTML = '<option value="">— No task —</option>';
     for (const goal of goals) { for (const task of goal.tasks) { if (task.status !== 'done') { const opt = document.createElement('option'); opt.value = task.id; opt.textContent = `${goal.title} → ${task.title}`; select.appendChild(opt); } } }
 
