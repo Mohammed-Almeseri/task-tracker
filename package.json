@@ -8,6 +8,7 @@
         "test": "jest --verbose --forceExit"
     },
     "dependencies": {
+        "@vercel/speed-insights": "^2.0.0",
         "dotenv": "^17.3.1",
         "express": "^4.21.0",
         "jsdom": "^28.1.0",
