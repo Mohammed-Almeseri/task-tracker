@@ -349,7 +349,7 @@ async function handleSignUp(event) {
     setBusy(true);
     setStatus('Creating your account...', 'info');
     try {
-        const redirectUrl = new URL('confirmed.html', window.location.href).href;
+        const redirectUrl = window.location.origin + '/confirmed.html';
         const { data, error } = await state.supabase.auth.signUp({
             email,
             password,
