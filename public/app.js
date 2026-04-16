@@ -834,7 +834,26 @@ function renderKanban() {
         const container = document.getElementById(`kanban-${status}`);
         const countEl = document.getElementById(`kanban-count-${status}`);
         countEl.textContent = columns[status].length;
-        container.innerHTML = columns[status].map(t => `
+        container.innerHTML = columns[status].map(t => {
+            // Build mobile move buttons based on current status
+            let moveBtns = '';
+            if (status === 'todo') {
+                moveBtns = `<div class="kanban-move-btns">
+                    <button class="kanban-move-btn" onclick="event.stopPropagation(); moveKanbanTask('${t.id}','in-progress')">In Progress →</button>
+                    <button class="kanban-move-btn" onclick="event.stopPropagation(); moveKanbanTask('${t.id}','done')">Done →</button>
+                </div>`;
+            } else if (status === 'in-progress') {
+                moveBtns = `<div class="kanban-move-btns">
+                    <button class="kanban-move-btn" onclick="event.stopPropagation(); moveKanbanTask('${t.id}','todo')">← To Do</button>
+                    <button class="kanban-move-btn" onclick="event.stopPropagation(); moveKanbanTask('${t.id}','done')">Done →</button>
+                </div>`;
+            } else if (status === 'done') {
+                moveBtns = `<div class="kanban-move-btns">
+                    <button class="kanban-move-btn" onclick="event.stopPropagation(); moveKanbanTask('${t.id}','todo')">← To Do</button>
+                    <button class="kanban-move-btn" onclick="event.stopPropagation(); moveKanbanTask('${t.id}','in-progress')">← In Progress</button>
+                </div>`;
+            }
+            return `
             <div class="kanban-task-card" draggable="true" data-task-id="${t.id}" ondragstart="onDragStart(event)" ondragend="onDragEnd(event)">
                 <div class="kanban-task-title">${escHtml(t.title)}</div>
                 <div class="kanban-task-meta">
@@ -842,8 +861,9 @@ function renderKanban() {
                     <span>${ICONS.target} ${escHtml(t.goalTitle)}</span>
                     ${t.dueDate ? `<span>${ICONS.calendar} ${new Date(t.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>` : ''}
                 </div>
-            </div>
-        `).join('');
+                ${moveBtns}
+            </div>`;
+        }).join('');
 
         // Drop zone events
         container.ondragover = (e) => { e.preventDefault(); container.classList.add('drag-over'); };
@@ -862,6 +882,18 @@ async function handleKanbanDrop(e, newStatus) {
     await loadGoals();
 }
 
+// Mobile touch move for kanban
+async function moveKanbanTask(taskId, newStatus) {
+    try {
+        await apiPut(`/api/tasks/${taskId}`, { status: newStatus });
+        await loadGoals();
+        showToast(`Task moved to ${newStatus === 'in-progress' ? 'In Progress' : newStatus === 'todo' ? 'To Do' : 'Done'}`);
+    } catch (err) {
+        console.error('Failed to move task:', err);
+        showToast('Failed to move task', 'error');
+    }
+}
+
 // ==========================================
 // DATA EXPORT
 // ==========================================
@@ -875,7 +907,7 @@ function initExportModal() {
 }
 
 function initBackupButton() {
-    // --- Create Backup ---
+    // --- Create Backup (downloads JSON file) ---
     const btn = document.getElementById('btn-create-backup');
     if (btn) {
         btn.addEventListener('click', async () => {
@@ -883,7 +915,17 @@ function initBackupButton() {
             btn.textContent = 'Creating Backup...';
             try {
                 const res = await apiPost('/api/backup', {});
-                showToast(`Backup created: ${res.file}`);
+                // Download the data as a JSON file
+                const blob = new Blob([JSON.stringify(res.data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `tasktracker-backup-${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showToast('Backup downloaded');
                 logSystemEvent('Backup created');
             } catch (err) {
                 console.error('Backup failed:', err);
@@ -910,9 +952,9 @@ function initBackupButton() {
         reader.onload = async (event) => {
             try {
                 const backupData = JSON.parse(String(event.target.result || '{}'));
-                const result = await apiPost('/api/restore', backupData);
+                await apiPost('/api/restore', backupData);
                 showToast('Backup restored');
-                logSystemEvent(`Restored from backup: ${result.safetyBackup}`);
+                logSystemEvent('Restored from backup');
                 location.reload();
             } catch (err) {
                 console.error('Restore failed:', err);

@@ -560,4 +560,70 @@
     .dashboard-main-grid {
         grid-template-columns: 1fr;
     }
+
+    /* Focus task card mobile */
+    .focus-task-title-text {
+        font-size: 17px;
+    }
+
+    .focus-task-actions-row .btn {
+        min-height: 44px;
+        font-size: 14px;
+    }
+
+    /* Daily checklist mobile */
+    .daily-action-item {
+        padding: 12px 14px;
+    }
+
+    .daily-action-title {
+        font-size: 14px;
+    }
+
+    .daily-action-check {
+        width: 22px;
+        height: 22px;
+    }
+
+    .daily-action-delete {
+        width: 36px;
+        height: 36px;
+    }
+
+    .hobby-add-row input {
+        min-height: 44px;
+        font-size: 16px;
+    }
+
+    .hobby-add-row .btn {
+        min-height: 44px;
+    }
+
+    /* Priority donut mobile */
+    .priority-breakdown-donut {
+        gap: 20px;
+    }
+
+    .donut-ring {
+        width: 120px;
+        height: 120px;
+    }
+
+    .donut-legend-item {
+        font-size: 13px;
+    }
+
+    /* Completion trend chart */
+    .completion-trend-chart {
+        height: 120px;
+    }
+
+    /* Session cards */
+    .session-card {
+        padding: 12px 0;
+    }
+
+    .session-task-name {
+        font-size: 14px;
+    }
 }
