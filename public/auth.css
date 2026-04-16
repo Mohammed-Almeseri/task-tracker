@@ -23,6 +23,11 @@
     box-sizing: border-box;
 }
 
+/* Eliminate 300ms mobile tap delay */
+button, input, a, .auth-tab, .auth-button {
+    touch-action: manipulation;
+}
+
 html {
     min-height: 100%;
 }

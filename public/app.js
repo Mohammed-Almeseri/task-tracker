@@ -147,7 +147,10 @@ function animateValue(element, start, end, duration) {
 
     const fromValue = Number(start) || 0;
     const toValue = Number(end) || 0;
-    const totalDuration = Math.max(Number(duration) || 0, 0);
+
+    // On mobile, skip animation entirely — set value instantly for better INP
+    const isMobile = window.innerWidth <= 768;
+    const totalDuration = isMobile ? 0 : Math.max(Number(duration) || 0, 0);
 
     if (totalDuration === 0) {
         element.textContent = String(Math.round(toValue));
@@ -310,21 +313,36 @@ window.showToast = showToast;
 // ==========================================
 
 function showView(name) {
-    performViewSwitch(name);
+    // Phase 1: Instant visual switch (< 16ms, no blocking)
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    const activeBtn = document.querySelector(`[data-view="${name}"]`);
+    if (activeBtn) activeBtn.classList.add('active');
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    const targetView = document.getElementById(`view-${name}`);
+    if (targetView) targetView.classList.add('active');
+
+    // Phase 2: Data loading deferred to next frame so paint happens first
+    requestAnimationFrame(() => {
+        setTimeout(() => _loadViewData(name), 0);
+    });
+}
+
+async function _loadViewData(name) {
+    try {
+        if (name === 'dashboard') await loadDashboard();
+        if (name === 'timer') populateTimerTaskSelect();
+        if (name === 'manage') renderManageTasks();
+        if (name === 'kanban') renderKanban();
+        if (name === 'notes') await loadNotes();
+        if (name === 'logs') initLogsView();
+        if (name === 'settings') populateSettingsTaskSelect();
+    } catch (e) {
+        console.error('View data load error:', e);
+    }
 }
 
 function performViewSwitch(name) {
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    document.querySelector(`[data-view="${name}"]`).classList.add('active');
-    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    document.getElementById(`view-${name}`).classList.add('active');
-    if (name === 'dashboard') loadDashboard();
-    if (name === 'timer') populateTimerTaskSelect();
-    if (name === 'manage') renderManageTasks();
-    if (name === 'kanban') renderKanban();
-    if (name === 'notes') loadNotes();
-    if (name === 'logs') initLogsView();
-    if (name === 'settings') populateSettingsTaskSelect();
+    showView(name);
 }
 
 function initNavigation() {
@@ -878,19 +896,39 @@ function onDragEnd(e) { e.target.classList.remove('dragging'); draggedTaskId = n
 
 async function handleKanbanDrop(e, newStatus) {
     if (!draggedTaskId) return;
-    await apiPut(`/api/tasks/${draggedTaskId}`, { status: newStatus });
-    await loadGoals();
-}
-
-// Mobile touch move for kanban
-async function moveKanbanTask(taskId, newStatus) {
+    // Optimistic: update local data immediately
+    for (const goal of goals) {
+        const task = goal.tasks.find(t => t.id === draggedTaskId);
+        if (task) { task.status = newStatus; break; }
+    }
+    renderKanban();
     try {
-        await apiPut(`/api/tasks/${taskId}`, { status: newStatus });
-        await loadGoals();
-        showToast(`Task moved to ${newStatus === 'in-progress' ? 'In Progress' : newStatus === 'todo' ? 'To Do' : 'Done'}`);
+        await apiPut(`/api/tasks/${draggedTaskId}`, { status: newStatus });
     } catch (err) {
         console.error('Failed to move task:', err);
-        showToast('Failed to move task', 'error');
+        showToast('Failed to sync — please refresh', 'error');
+        await loadGoals();
+    }
+}
+
+// Mobile touch move for kanban — optimistic UI
+async function moveKanbanTask(taskId, newStatus) {
+    // Optimistic: update local data immediately
+    for (const goal of goals) {
+        const task = goal.tasks.find(t => t.id === taskId);
+        if (task) { task.status = newStatus; break; }
+    }
+    renderKanban();
+    showToast(`Task moved to ${newStatus === 'in-progress' ? 'In Progress' : newStatus === 'todo' ? 'To Do' : 'Done'}`);
+
+    // Sync with server in background
+    try {
+        await apiPut(`/api/tasks/${taskId}`, { status: newStatus });
+    } catch (err) {
+        console.error('Failed to move task:', err);
+        showToast('Failed to sync — please refresh', 'error');
+        // Re-fetch to restore correct state
+        await loadGoals();
     }
 }
 

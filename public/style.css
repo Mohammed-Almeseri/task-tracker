@@ -66,6 +66,14 @@
     box-sizing: border-box;
 }
 
+/* Eliminate 300ms tap delay on all interactive elements */
+a, button, input, select, textarea, label,
+.nav-btn, .btn, .btn-icon, .task-card, .manage-task-card,
+.kanban-task-card, .kanban-move-btn, .goal-header,
+.auth-tab, .auth-button, .filter-pill, .tab-btn {
+    touch-action: manipulation;
+}
+
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     background: var(--bg-primary);
@@ -265,10 +273,12 @@ body {
 
 .view {
     display: none;
+    content-visibility: hidden;
 }
 
 .view.active {
     display: block;
+    content-visibility: visible;
     animation: viewEnter 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -281,6 +291,13 @@ body {
     to {
         opacity: 1;
         transform: translateY(0);
+    }
+}
+
+/* Faster view transition on mobile for better INP */
+@media (max-width: 768px) {
+    .view.active {
+        animation-duration: 0.15s;
     }
 }
 
