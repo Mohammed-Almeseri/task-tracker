@@ -210,7 +210,7 @@ async function loadSupabaseConfig() {
     };
 
     try {
-        const response = await fetch('/api/supabase-config', { cache: 'no-store' });
+        const response = await fetch('/api/supabase-config');
         if (!response.ok) {
             return fallbackConfig;
         }
@@ -276,7 +276,7 @@ async function initializeSupabase() {
         setCurrentAccessToken(data.session.access_token || '');
 
         notifyStatus('Session found. Redirecting to your dashboard...', 'success');
-        window.setTimeout(redirectToDashboard, 350);
+        redirectToDashboard();
         return;
     }
 
@@ -311,7 +311,7 @@ async function handleSignIn(event) {
         setCurrentUserEmail(data?.session?.user?.email || email);
         setCurrentAccessToken(data?.session?.access_token || '');
         notifyStatus('Signed in. Redirecting...', 'success');
-        window.setTimeout(redirectToDashboard, 350);
+        redirectToDashboard();
     } catch (error) {
         notifyStatus(error.message || 'Unable to sign in.', 'error');
     } finally {
@@ -365,7 +365,7 @@ async function handleSignUp(event) {
             setCurrentUserEmail(data.session.user?.email || email);
             setCurrentAccessToken(data.session.access_token || '');
             notifyStatus('Account created. Redirecting...', 'success');
-            window.setTimeout(redirectToDashboard, 350);
+            redirectToDashboard();
             return;
         }
 

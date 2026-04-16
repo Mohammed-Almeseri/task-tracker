@@ -386,7 +386,7 @@ async function initApp() {
     showView(initialView);
 }
 
-window.addEventListener('load', () => {
+document.addEventListener('DOMContentLoaded', () => {
     void initApp();
 });
 
@@ -1084,10 +1084,10 @@ function renderSystemLogs() {
     });
 }
 // ==========================================
-// 3D CORNER MASCOT — Upgraded Sleek Robot
+// 3D CORNER MASCOT — Upgraded Sleek Robot (lazy-loaded)
 // ==========================================
 
-(function initMascot3D() {
+function _doInitMascot3D() {
     const container = document.getElementById('mascot-container');
     if (!container || typeof THREE === 'undefined') return;
 
@@ -1349,8 +1349,17 @@ function renderSystemLogs() {
     }
 
     animateMascot();
+}
+
+// Lazy-load mascot: wait for idle time + THREE.js availability
+(function _waitForThreeAndInit() {
+    function tryInit() {
+        if (typeof THREE === 'undefined') { setTimeout(tryInit, 500); return; }
+        _doInitMascot3D();
+    }
+    if (typeof requestIdleCallback === 'function') {
+        requestIdleCallback(() => setTimeout(tryInit, 800));
+    } else {
+        setTimeout(tryInit, 2000);
+    }
 })();
-
-
-
-

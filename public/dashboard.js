@@ -61,8 +61,10 @@ function getSelectedTimerTaskId() {
 }
 
 async function loadDashboard() {
-    const stats = await apiGet('/api/stats');
-    const sessions = await apiGet('/api/timer-sessions');
+    const [stats, sessions] = await Promise.all([
+        apiGet('/api/stats'),
+        apiGet('/api/timer-sessions')
+    ]);
 
     // Core stats
     const statGoals = document.getElementById('stat-goals');

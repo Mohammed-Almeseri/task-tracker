@@ -223,14 +223,14 @@
             {
               "id": "e355aed4-c794-4366-bda3-85199588d102",
               "title": "LLM",
-              "status": "todo",
+              "status": "in-progress",
               "importance": "medium",
               "tags": [
                 "Career"
               ],
               "dueDate": null,
               "subtasks": [],
-              "updatedAt": "2026-03-10T19:56:22.759Z",
+              "updatedAt": "2026-04-15T19:12:44.993Z",
               "completedAt": null
             }
           ]
@@ -373,15 +373,15 @@
               "goalId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
               "title": "Finish Math HW 4 & Bonux &",
               "description": "",
-              "status": "todo",
+              "status": "done",
               "importance": "medium",
               "tags": [],
               "dueDate": "2026-03-13",
               "subtasks": [],
               "timeSpent": 0,
               "createdAt": "2026-03-11T08:09:32.339Z",
-              "updatedAt": "2026-03-17T03:06:13.835Z",
-              "completedAt": null
+              "updatedAt": "2026-04-15T19:12:48.893Z",
+              "completedAt": "2026-04-15T19:12:48.893Z"
             },
             {
               "id": "a233942d-370f-4d31-8690-fb9e03f2f38c",
@@ -546,7 +546,7 @@
               "goalId": "75c3e982-b56b-4a41-9c43-f61289421fa5",
               "title": "Work on TaskTracker",
               "description": "",
-              "status": "in-progress",
+              "status": "todo",
               "importance": "urgent",
               "tags": [
                 "Coding",
@@ -558,7 +558,7 @@
               "subtasks": [],
               "timeSpent": 59520,
               "createdAt": "2026-04-10T15:19:56.735Z",
-              "updatedAt": "2026-04-11T15:59:34.382Z",
+              "updatedAt": "2026-04-15T19:12:53.552Z",
               "completedAt": null
             }
           ]

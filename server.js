@@ -1,13 +1,13 @@
 // ==========================================
-// TASK TRACKER — Server (Full Feature Set)
+// TASK TRACKER — Server (Vercel-Ready)
 // ==========================================
 
 require('dotenv').config();
 const express = require('express');
 const { AsyncLocalStorage } = require('async_hooks');
-const fs = require('fs');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
+const { supabase, goalToApi, taskToApi, timerSessionToApi, noteToApi } = require('./db');
 
 const DEFAULT_SUPABASE_URL = 'https://wqnrdahctafgdvsprkju.supabase.co';
 const DEFAULT_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndxbnJkYWhjdGFmZ2R2c3Bya2p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNjczNTUsImV4cCI6MjA5MTc0MzM1NX0.cRoE9OOw7xYsQ1BSsAFz1rRhfNQqF98qa8_R7E6bl7g';
@@ -23,7 +23,6 @@ const supabaseConfig = {
 
 const config = {
     port: parseInt(process.env.PORT, 10) || 3000,
-    dataFile: process.env.DATA_FILE || path.join(__dirname, 'data.json'),
     maxBodySize: '1mb',
     allowedStatuses: ['todo', 'in-progress', 'blocked', 'review', 'done'],
     allowedImportance: ['low', 'medium', 'high', 'urgent'],
@@ -49,175 +48,22 @@ const app = express();
 const requestContext = new AsyncLocalStorage();
 const rateLimitState = new Map();
 
-function normalizeUserKey(value) {
-    return String(value || 'anonymous').trim().toLowerCase() || 'anonymous';
-}
+// =====================
+// 2. CONTEXT HELPERS
+// =====================
 
-function getCurrentUserKey() {
+function getCurrentUserId() {
     const store = requestContext.getStore();
-    return normalizeUserKey(store?.userKey);
+    return store?.userId || null;
 }
 
-function getEmptyUserData() {
-    return { goals: [], timerSessions: [], notes: [] };
-}
-
-function normalizeUserData(data) {
-    return {
-        goals: Array.isArray(data?.goals) ? data.goals : [],
-        timerSessions: Array.isArray(data?.timerSessions) ? data.timerSessions : [],
-        notes: Array.isArray(data?.notes) ? data.notes : []
-    };
-}
-
-function normalizeRootData(data) {
-    const root = (data && typeof data === 'object' && !Array.isArray(data)) ? { ...data } : {};
-    if (!Array.isArray(root.goals)) root.goals = [];
-    if (!Array.isArray(root.timerSessions)) root.timerSessions = [];
-    if (!Array.isArray(root.notes)) root.notes = [];
-    if (!root.users || typeof root.users !== 'object' || Array.isArray(root.users)) root.users = {};
-    return root;
-}
-
-function readRootData() {
-    try {
-        const raw = fs.readFileSync(config.dataFile, 'utf-8');
-        return normalizeRootData(JSON.parse(raw));
-    } catch (err) {
-        console.error('  ⚠️  Data file read error, using defaults:', err.message);
-        return normalizeRootData({});
-    }
-}
-
-function writeRootData(data) {
-    const payload = JSON.stringify(data, null, 2);
-    try {
-        const tempFile = config.dataFile + '.tmp';
-        fs.writeFileSync(tempFile, payload, 'utf-8');
-        fs.renameSync(tempFile, config.dataFile);
-    } catch (err) {
-        try {
-            if (fs.existsSync(config.dataFile + '.tmp')) {
-                fs.unlinkSync(config.dataFile + '.tmp');
-            }
-        } catch (cleanupErr) {
-            // Ignore cleanup errors and continue with the fallback write.
-        }
-
-        try {
-            fs.writeFileSync(config.dataFile, payload, 'utf-8');
-        } catch (fallbackErr) {
-            console.error('  ❌ Data file write error:', fallbackErr.message);
-            throw new AppError('Failed to save data', 500);
-        }
-    }
+function getCurrentUserEmail() {
+    const store = requestContext.getStore();
+    return store?.userEmail || null;
 }
 
 // =====================
-// 2. MIDDLEWARE
-// =====================
-
-app.use((req, res, next) => {
-    res.setHeader('X-Content-Type-Options', 'nosniff');
-    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
-    res.setHeader('X-XSS-Protection', '1; mode=block');
-    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-
-    const origin = req.get('Origin');
-    if (origin && allowedOrigins.has(origin)) {
-        res.setHeader('Access-Control-Allow-Origin', origin);
-        res.setHeader('Vary', 'Origin');
-        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-TaskTracker-Token');
-    }
-
-    // Intercept OPTIONS method
-    if (req.method === 'OPTIONS') {
-        return res.sendStatus(200);
-    }
-
-    next();
-});
-
-app.use(express.json({ limit: config.maxBodySize }));
-
-app.use('/api', authenticateApiRequest);
-
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Prevent browser caching of API responses
-app.use('/api', (req, res, next) => {
-    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
-    res.setHeader('Pragma', 'no-cache');
-    res.setHeader('Expires', '0');
-    next();
-});
-
-app.use((req, res, next) => {
-    const start = Date.now();
-    const originalEnd = res.end;
-    res.end = function (...args) {
-        const duration = Date.now() - start;
-        const logLevel = res.statusCode >= 400 ? '⚠️' : '✅';
-        const userKey = getCurrentUserKey();
-        const userLabel = userKey !== 'anonymous' ? ` [${userKey}]` : '';
-        console.log(`  ${logLevel} ${req.method} ${req.path}${userLabel} → ${res.statusCode} (${duration}ms)`);
-        originalEnd.apply(res, args);
-    };
-    next();
-});
-
-// =====================
-// 3. DATA ACCESS LAYER
-// =====================
-
-function readData() {
-    const root = readRootData();
-    const userKey = getCurrentUserKey();
-
-    if (userKey === 'anonymous') {
-        return normalizeUserData(root);
-    }
-
-    if (!root.users[userKey]) {
-        const hasLegacyData = Object.keys(root.users).length === 0 && (root.goals.length > 0 || root.timerSessions.length > 0 || root.notes.length > 0);
-        if (hasLegacyData) {
-            root.users[userKey] = normalizeUserData({
-                goals: root.goals,
-                timerSessions: root.timerSessions,
-                notes: root.notes
-            });
-            root.goals = [];
-            root.timerSessions = [];
-            root.notes = [];
-            writeRootData(root);
-            return normalizeUserData(root.users[userKey]);
-        }
-
-        return getEmptyUserData();
-    }
-
-    return normalizeUserData(root.users[userKey]);
-}
-
-function writeData(data) {
-    const root = readRootData();
-    const userKey = getCurrentUserKey();
-    const normalized = normalizeUserData(data);
-
-    if (userKey === 'anonymous') {
-        root.goals = normalized.goals;
-        root.timerSessions = normalized.timerSessions;
-        root.notes = normalized.notes;
-    } else {
-        root.users[userKey] = normalized;
-    }
-
-    writeRootData(root);
-}
-
-// =====================
-// 4. ERROR CLASSES
+// 3. ERROR CLASSES
 // =====================
 
 class AppError extends Error {
@@ -242,7 +88,7 @@ class ValidationError extends AppError {
 }
 
 // =====================
-// 5. ASYNC HANDLER
+// 4. ASYNC HANDLER
 // =====================
 
 function asyncHandler(fn) {
@@ -252,7 +98,7 @@ function asyncHandler(fn) {
 }
 
 // =====================
-// 6. VALIDATION HELPERS
+// 5. VALIDATION HELPERS
 // =====================
 
 function validateGoalInput(body, isUpdate = false) {
@@ -343,6 +189,10 @@ function validateNoteInput(body, isUpdate = false) {
     };
 }
 
+// =====================
+// 6. AUTHENTICATION
+// =====================
+
 function getSupabaseConfig() {
     return {
         supabaseUrl: supabaseConfig.url,
@@ -408,10 +258,11 @@ async function authenticateApiRequest(req, res, next) {
 
     try {
         const user = await verifySupabaseSession(accessToken);
-        const userKey = normalizeUserKey(user.email);
+        const userId = user.id;
+        const userEmail = (user.email || '').trim().toLowerCase();
 
-        requestContext.run({ userKey }, () => {
-            req.user = { id: user.id || null, email: user.email || null };
+        requestContext.run({ userId, userEmail }, () => {
+            req.user = { id: userId, email: userEmail };
             next();
         });
     } catch (error) {
@@ -421,6 +272,10 @@ async function authenticateApiRequest(req, res, next) {
     }
 }
 
+// =====================
+// 7. RATE LIMITING
+// =====================
+
 function getRequestIp(req) {
     const forwardedFor = String(req.get('X-Forwarded-For') || '').split(',')[0].trim();
     const rawIp = forwardedFor || req.ip || req.socket?.remoteAddress || 'unknown';
@@ -429,8 +284,8 @@ function getRequestIp(req) {
 
 function createRateLimitMiddleware({ windowMs, max, scope, message }) {
     return (req, res, next) => {
-        const userKey = getCurrentUserKey();
-        const identity = userKey !== 'anonymous' ? `user:${userKey}` : `ip:${getRequestIp(req)}`;
+        const userId = getCurrentUserId();
+        const identity = userId ? `user:${userId}` : `ip:${getRequestIp(req)}`;
         const bucketKey = `${scope}:${identity}`;
         const now = Date.now();
 
@@ -482,208 +337,511 @@ const exportRateLimit = createRateLimitMiddleware({
 });
 
 // =====================
-// 7. SERVICE LAYER
+// 8. MIDDLEWARE
+// =====================
+
+app.use((req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+
+    const origin = req.get('Origin');
+    if (origin && allowedOrigins.has(origin)) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+        res.setHeader('Vary', 'Origin');
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-TaskTracker-Token');
+    }
+
+    // Intercept OPTIONS method
+    if (req.method === 'OPTIONS') {
+        return res.sendStatus(200);
+    }
+
+    next();
+});
+
+app.use(express.json({ limit: config.maxBodySize }));
+
+app.use('/api', authenticateApiRequest);
+
+app.use(express.static(path.join(__dirname, 'public'), {
+    maxAge: '1d',
+    etag: true,
+    lastModified: true,
+    setHeaders: (res, filePath) => {
+        if (filePath.endsWith('.html')) {
+            res.setHeader('Cache-Control', 'no-cache');
+        }
+    }
+}));
+
+// Prevent browser caching of API responses
+app.use('/api', (req, res, next) => {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    next();
+});
+
+app.use((req, res, next) => {
+    const start = Date.now();
+    const originalEnd = res.end;
+    res.end = function (...args) {
+        const duration = Date.now() - start;
+        const logLevel = res.statusCode >= 400 ? '⚠️' : '✅';
+        const userEmail = getCurrentUserEmail();
+        const userLabel = userEmail ? ` [${userEmail}]` : '';
+        console.log(`  ${logLevel} ${req.method} ${req.path}${userLabel} → ${res.statusCode} (${duration}ms)`);
+        originalEnd.apply(res, args);
+    };
+    next();
+});
+
+// =====================
+// 9. SERVICE LAYER
 // =====================
 
 const goalService = {
-    getAll() { return readData().goals; },
-    getById(id) {
-        const goal = readData().goals.find(g => g.id === id);
-        if (!goal) throw new NotFoundError('Goal');
-        return goal;
+    async getAll(userId) {
+        const { data: goals, error: goalsErr } = await supabase
+            .from('goals')
+            .select('*')
+            .eq('user_id', userId)
+            .order('created_at');
+
+        if (goalsErr) throw new AppError('Failed to fetch goals: ' + goalsErr.message, 500);
+        if (!goals || goals.length === 0) return [];
+
+        const goalIds = goals.map(g => g.id);
+        const { data: tasks, error: tasksErr } = await supabase
+            .from('tasks')
+            .select('*')
+            .in('goal_id', goalIds)
+            .order('created_at');
+
+        if (tasksErr) throw new AppError('Failed to fetch tasks: ' + tasksErr.message, 500);
+
+        return goals.map(g =>
+            goalToApi(g, (tasks || []).filter(t => t.goal_id === g.id).map(taskToApi))
+        );
     },
-    create(input) {
-        const data = readData();
-        const goal = { id: uuidv4(), title: input.title, description: input.description || '', createdAt: new Date().toISOString(), tasks: [] };
-        data.goals.push(goal);
-        writeData(data);
-        return goal;
+
+    async getById(userId, id) {
+        const { data: goal, error } = await supabase
+            .from('goals')
+            .select('*')
+            .eq('id', id)
+            .eq('user_id', userId)
+            .single();
+
+        if (error || !goal) throw new NotFoundError('Goal');
+
+        const { data: tasks } = await supabase
+            .from('tasks')
+            .select('*')
+            .eq('goal_id', id)
+            .order('created_at');
+
+        return goalToApi(goal, (tasks || []).map(taskToApi));
     },
-    update(id, input) {
-        const data = readData();
-        const idx = data.goals.findIndex(g => g.id === id);
-        if (idx === -1) throw new NotFoundError('Goal');
-        data.goals[idx] = { ...data.goals[idx], ...(input.title !== undefined && { title: input.title }), ...(input.description !== undefined && { description: input.description }) };
-        writeData(data);
-        return data.goals[idx];
+
+    async create(userId, input) {
+        const { data: goal, error } = await supabase
+            .from('goals')
+            .insert({
+                user_id: userId,
+                title: input.title,
+                description: input.description || ''
+            })
+            .select()
+            .single();
+
+        if (error) throw new AppError('Failed to create goal: ' + error.message, 500);
+        return goalToApi(goal, []);
     },
-    delete(id) {
-        const data = readData();
-        const idx = data.goals.findIndex(g => g.id === id);
-        if (idx === -1) throw new NotFoundError('Goal');
-        data.goals.splice(idx, 1);
-        writeData(data);
+
+    async update(userId, id, input) {
+        const updates = {};
+        if (input.title !== undefined) updates.title = input.title;
+        if (input.description !== undefined) updates.description = input.description;
+
+        const { data: goal, error } = await supabase
+            .from('goals')
+            .update(updates)
+            .eq('id', id)
+            .eq('user_id', userId)
+            .select()
+            .single();
+
+        if (error || !goal) throw new NotFoundError('Goal');
+
+        const { data: tasks } = await supabase
+            .from('tasks')
+            .select('*')
+            .eq('goal_id', id)
+            .order('created_at');
+
+        return goalToApi(goal, (tasks || []).map(taskToApi));
+    },
+
+    async delete(userId, id) {
+        const { data, error } = await supabase
+            .from('goals')
+            .delete()
+            .eq('id', id)
+            .eq('user_id', userId)
+            .select('id');
+
+        if (error || !data || data.length === 0) throw new NotFoundError('Goal');
     }
 };
 
 const taskService = {
-    create(goalId, input) {
-        const data = readData();
-        const goal = data.goals.find(g => g.id === goalId);
-        if (!goal) throw new NotFoundError('Goal');
-        const task = {
-            id: uuidv4(), goalId: goal.id, title: input.title,
-            description: input.description || '', status: input.status || 'todo',
-            importance: input.importance || 'low', tags: input.tags || [],
-            dueDate: input.dueDate || null,
-            subtasks: input.subtasks || [],
-            timeSpent: 0, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
-            completedAt: null
-        };
-        goal.tasks.push(task);
-        writeData(data);
-        return task;
+    async create(userId, goalId, input) {
+        // Verify goal exists and belongs to user
+        const { data: goal, error: goalErr } = await supabase
+            .from('goals')
+            .select('id')
+            .eq('id', goalId)
+            .eq('user_id', userId)
+            .single();
+
+        if (goalErr || !goal) throw new NotFoundError('Goal');
+
+        const now = new Date().toISOString();
+        const { data: task, error } = await supabase
+            .from('tasks')
+            .insert({
+                user_id: userId,
+                goal_id: goalId,
+                title: input.title,
+                description: input.description || '',
+                status: input.status || 'todo',
+                importance: input.importance || 'low',
+                tags: input.tags || [],
+                due_date: input.dueDate || null,
+                subtasks: input.subtasks || [],
+                time_spent: 0,
+                created_at: now,
+                updated_at: now,
+                completed_at: null
+            })
+            .select()
+            .single();
+
+        if (error) throw new AppError('Failed to create task: ' + error.message, 500);
+        return taskToApi(task);
     },
-    update(id, input) {
-        const data = readData();
-        let foundTask = null;
-        for (const goal of data.goals) {
-            const idx = goal.tasks.findIndex(t => t.id === id);
-            if (idx !== -1) {
-                const oldStatus = goal.tasks[idx].status;
-                const newStatus = input.status !== undefined ? input.status : oldStatus;
-                goal.tasks[idx] = {
-                    ...goal.tasks[idx],
-                    ...(input.title !== undefined && { title: input.title }),
-                    ...(input.description !== undefined && { description: input.description }),
-                    ...(input.status !== undefined && { status: input.status }),
-                    ...(input.importance !== undefined && { importance: input.importance }),
-                    ...(input.tags !== undefined && { tags: input.tags }),
-                    ...(input.dueDate !== undefined && { dueDate: input.dueDate }),
-                    ...(input.subtasks !== undefined && { subtasks: input.subtasks }),
-                    ...(input.timeSpent !== undefined && { timeSpent: input.timeSpent }),
-                    updatedAt: new Date().toISOString()
-                };
-                // Track completedAt
-                if (newStatus === 'done' && oldStatus !== 'done') {
-                    goal.tasks[idx].completedAt = new Date().toISOString();
-                } else if (newStatus !== 'done' && oldStatus === 'done') {
-                    goal.tasks[idx].completedAt = null;
-                }
-                foundTask = goal.tasks[idx];
-                break;
-            }
+
+    async update(userId, id, input) {
+        // Get current task to check status transition for completedAt
+        const { data: current, error: fetchErr } = await supabase
+            .from('tasks')
+            .select('status')
+            .eq('id', id)
+            .eq('user_id', userId)
+            .single();
+
+        if (fetchErr || !current) throw new NotFoundError('Task');
+
+        const updates = { updated_at: new Date().toISOString() };
+        if (input.title !== undefined) updates.title = input.title;
+        if (input.description !== undefined) updates.description = input.description;
+        if (input.status !== undefined) updates.status = input.status;
+        if (input.importance !== undefined) updates.importance = input.importance;
+        if (input.tags !== undefined) updates.tags = input.tags;
+        if (input.dueDate !== undefined) updates.due_date = input.dueDate;
+        if (input.subtasks !== undefined) updates.subtasks = input.subtasks;
+        if (input.timeSpent !== undefined) updates.time_spent = input.timeSpent;
+
+        // Track completedAt transitions
+        const newStatus = input.status !== undefined ? input.status : current.status;
+        if (newStatus === 'done' && current.status !== 'done') {
+            updates.completed_at = new Date().toISOString();
+        } else if (newStatus !== 'done' && current.status === 'done') {
+            updates.completed_at = null;
         }
-        if (!foundTask) throw new NotFoundError('Task');
-        writeData(data);
-        return foundTask;
+
+        const { data: task, error } = await supabase
+            .from('tasks')
+            .update(updates)
+            .eq('id', id)
+            .eq('user_id', userId)
+            .select()
+            .single();
+
+        if (error || !task) throw new NotFoundError('Task');
+        return taskToApi(task);
     },
-    delete(id) {
-        const data = readData();
-        let found = false;
-        for (const goal of data.goals) {
-            const idx = goal.tasks.findIndex(t => t.id === id);
-            if (idx !== -1) { goal.tasks.splice(idx, 1); found = true; break; }
-        }
-        if (!found) throw new NotFoundError('Task');
-        writeData(data);
+
+    async delete(userId, id) {
+        const { data, error } = await supabase
+            .from('tasks')
+            .delete()
+            .eq('id', id)
+            .eq('user_id', userId)
+            .select('id');
+
+        if (error || !data || data.length === 0) throw new NotFoundError('Task');
     }
 };
 
 const timerService = {
-    getAll() { return readData().timerSessions; },
-    create(input) {
-        const data = readData();
-        const session = { id: uuidv4(), taskId: input.taskId, type: input.type, duration: input.duration, completedAt: new Date().toISOString() };
-        data.timerSessions.push(session);
-        if (session.taskId) {
-            for (const goal of data.goals) {
-                const task = goal.tasks.find(t => t.id === session.taskId);
-                if (task) { task.timeSpent = (task.timeSpent || 0) + session.duration; task.updatedAt = new Date().toISOString(); break; }
-            }
-        }
-        writeData(data);
-        return session;
+    async getAll(userId) {
+        const { data, error } = await supabase
+            .from('timer_sessions')
+            .select('*')
+            .eq('user_id', userId)
+            .order('completed_at');
+
+        if (error) throw new AppError('Failed to fetch timer sessions', 500);
+        return (data || []).map(timerSessionToApi);
     },
-    delete(id) {
-        const data = readData();
-        const index = data.timerSessions.findIndex(session => session.id === id);
-        if (index === -1) throw new NotFoundError('Timer session');
 
-        const [session] = data.timerSessions.splice(index, 1);
-        if (session?.taskId) {
-            for (const goal of data.goals) {
-                const task = goal.tasks.find(t => t.id === session.taskId);
-                if (task) {
-                    const currentTimeSpent = Number(task.timeSpent) || 0;
-                    task.timeSpent = Math.max(0, currentTimeSpent - (Number(session.duration) || 0));
-                    task.updatedAt = new Date().toISOString();
-                    break;
-                }
+    async create(userId, input) {
+        let taskId = null;
+        let currentTask = null;
+
+        // Verify the linked task exists (if provided)
+        if (input.taskId) {
+            const { data: task } = await supabase
+                .from('tasks')
+                .select('id, time_spent')
+                .eq('id', input.taskId)
+                .eq('user_id', userId)
+                .single();
+
+            if (task) {
+                taskId = task.id;
+                currentTask = task;
             }
         }
 
-        writeData(data);
+        const { data: session, error } = await supabase
+            .from('timer_sessions')
+            .insert({
+                user_id: userId,
+                task_id: taskId,
+                type: input.type || 'stopwatch',
+                duration: input.duration || 0,
+                completed_at: new Date().toISOString()
+            })
+            .select()
+            .single();
+
+        if (error) throw new AppError('Failed to create timer session: ' + error.message, 500);
+
+        // Increment task timeSpent
+        if (currentTask) {
+            await supabase
+                .from('tasks')
+                .update({
+                    time_spent: (currentTask.time_spent || 0) + (session.duration || 0),
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', currentTask.id);
+        }
+
+        return timerSessionToApi(session);
+    },
+
+    async delete(userId, id) {
+        // Fetch session first to get duration and task_id
+        const { data: session, error: fetchErr } = await supabase
+            .from('timer_sessions')
+            .select('*')
+            .eq('id', id)
+            .eq('user_id', userId)
+            .single();
+
+        if (fetchErr || !session) throw new NotFoundError('Timer session');
+
+        // Delete the session
+        await supabase.from('timer_sessions').delete().eq('id', id);
+
+        // Decrement task timeSpent if linked
+        if (session.task_id) {
+            const { data: task } = await supabase
+                .from('tasks')
+                .select('time_spent')
+                .eq('id', session.task_id)
+                .single();
+
+            if (task) {
+                await supabase
+                    .from('tasks')
+                    .update({
+                        time_spent: Math.max(0, (task.time_spent || 0) - (session.duration || 0)),
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('id', session.task_id);
+            }
+        }
     }
 };
 
 const noteService = {
-    getAll() { return readData().notes || []; },
-    create(input) {
-        const data = readData();
-        if (!data.notes) data.notes = [];
-        const note = { id: uuidv4(), title: input.title, content: input.content || '', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
-        data.notes.push(note);
-        writeData(data);
-        return note;
+    async getAll(userId) {
+        const { data, error } = await supabase
+            .from('notes')
+            .select('*')
+            .eq('user_id', userId)
+            .order('created_at');
+
+        if (error) throw new AppError('Failed to fetch notes', 500);
+        return (data || []).map(noteToApi);
     },
-    update(id, input) {
-        const data = readData();
-        if (!data.notes) data.notes = [];
-        const idx = data.notes.findIndex(n => n.id === id);
-        if (idx === -1) throw new NotFoundError('Note');
-        data.notes[idx] = { ...data.notes[idx], ...(input.title !== undefined && { title: input.title }), ...(input.content !== undefined && { content: input.content }), updatedAt: new Date().toISOString() };
-        writeData(data);
-        return data.notes[idx];
+
+    async create(userId, input) {
+        const now = new Date().toISOString();
+        const { data: note, error } = await supabase
+            .from('notes')
+            .insert({
+                user_id: userId,
+                title: input.title,
+                content: input.content || '',
+                created_at: now,
+                updated_at: now
+            })
+            .select()
+            .single();
+
+        if (error) throw new AppError('Failed to create note: ' + error.message, 500);
+        return noteToApi(note);
     },
-    delete(id) {
-        const data = readData();
-        if (!data.notes) data.notes = [];
-        const idx = data.notes.findIndex(n => n.id === id);
-        if (idx === -1) throw new NotFoundError('Note');
-        data.notes.splice(idx, 1);
-        writeData(data);
+
+    async update(userId, id, input) {
+        const updates = { updated_at: new Date().toISOString() };
+        if (input.title !== undefined) updates.title = input.title;
+        if (input.content !== undefined) updates.content = input.content;
+
+        const { data: note, error } = await supabase
+            .from('notes')
+            .update(updates)
+            .eq('id', id)
+            .eq('user_id', userId)
+            .select()
+            .single();
+
+        if (error || !note) throw new NotFoundError('Note');
+        return noteToApi(note);
+    },
+
+    async delete(userId, id) {
+        const { data, error } = await supabase
+            .from('notes')
+            .delete()
+            .eq('id', id)
+            .eq('user_id', userId)
+            .select('id');
+
+        if (error || !data || data.length === 0) throw new NotFoundError('Note');
     }
 };
 
 const backupService = {
-    createBackup() {
-        const data = readData();
-        const backupDir = path.join(__dirname, 'backups');
-        if (!fs.existsSync(backupDir)) {
-            fs.mkdirSync(backupDir, { recursive: true });
-        }
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        const filename = `backup_data_${timestamp}.json`;
-        const filepath = path.join(backupDir, filename);
-        fs.writeFileSync(filepath, JSON.stringify(data, null, 2), 'utf-8');
-        return `backups/${filename}`;
+    async createBackup(userId) {
+        const goals = await goalService.getAll(userId);
+        const timerSessions = await timerService.getAll(userId);
+        const notes = await noteService.getAll(userId);
+        return { goals, timerSessions, notes };
     },
-    restoreBackup(body) {
-        // Validate structure
+
+    async restoreBackup(userId, body) {
         if (!body || typeof body !== 'object') {
             throw new ValidationError('Backup data must be a JSON object');
         }
         if (!Array.isArray(body.goals)) {
             throw new ValidationError('Backup data must contain a "goals" array');
         }
-        // Create safety backup before overwriting
-        const safetyFile = this.createBackup();
-        // Normalize optional arrays
-        const restored = {
-            goals: body.goals,
-            timerSessions: Array.isArray(body.timerSessions) ? body.timerSessions : [],
-            notes: Array.isArray(body.notes) ? body.notes : []
-        };
-        writeData(restored);
-        return { safetyBackup: safetyFile };
+
+        // Delete existing data (order matters for FK constraints)
+        await supabase.from('timer_sessions').delete().eq('user_id', userId);
+        await supabase.from('tasks').delete().eq('user_id', userId);
+        await supabase.from('goals').delete().eq('user_id', userId);
+        await supabase.from('notes').delete().eq('user_id', userId);
+
+        // Insert goals + tasks
+        for (const goal of body.goals) {
+            const { data: newGoal, error: goalErr } = await supabase
+                .from('goals')
+                .insert({
+                    id: goal.id || uuidv4(),
+                    user_id: userId,
+                    title: goal.title,
+                    description: goal.description || '',
+                    created_at: goal.createdAt || new Date().toISOString()
+                })
+                .select()
+                .single();
+
+            if (goalErr || !newGoal) continue;
+
+            if (Array.isArray(goal.tasks)) {
+                for (const task of goal.tasks) {
+                    await supabase.from('tasks').insert({
+                        id: task.id || uuidv4(),
+                        goal_id: newGoal.id,
+                        user_id: userId,
+                        title: task.title,
+                        description: task.description || '',
+                        status: task.status || 'todo',
+                        importance: task.importance || 'low',
+                        tags: task.tags || [],
+                        due_date: task.dueDate || null,
+                        subtasks: task.subtasks || [],
+                        time_spent: task.timeSpent || 0,
+                        created_at: task.createdAt || new Date().toISOString(),
+                        updated_at: task.updatedAt || new Date().toISOString(),
+                        completed_at: task.completedAt || null
+                    });
+                }
+            }
+        }
+
+        // Insert timer sessions
+        if (Array.isArray(body.timerSessions)) {
+            for (const session of body.timerSessions) {
+                // Try with task_id; fall back to null if FK fails
+                const row = {
+                    id: session.id || uuidv4(),
+                    user_id: userId,
+                    task_id: session.taskId || null,
+                    type: session.type || 'stopwatch',
+                    duration: session.duration || 0,
+                    completed_at: session.completedAt || new Date().toISOString()
+                };
+                const { error } = await supabase.from('timer_sessions').insert(row);
+                if (error && row.task_id) {
+                    row.task_id = null;
+                    await supabase.from('timer_sessions').insert(row);
+                }
+            }
+        }
+
+        // Insert notes
+        if (Array.isArray(body.notes)) {
+            for (const note of body.notes) {
+                await supabase.from('notes').insert({
+                    id: note.id || uuidv4(),
+                    user_id: userId,
+                    title: note.title,
+                    content: note.content || '',
+                    created_at: note.createdAt || new Date().toISOString(),
+                    updated_at: note.updatedAt || new Date().toISOString()
+                });
+            }
+        }
     }
 };
 
 const statsService = {
-    getStats() {
-        const data = readData();
-        const allTasks = data.goals.flatMap(g => g.tasks);
+    async getStats(userId) {
+        const goals = await goalService.getAll(userId);
+        const timerSessionsList = await timerService.getAll(userId);
+        const allTasks = goals.flatMap(g => g.tasks);
         const doneTasks = allTasks.filter(t => t.status === 'done');
 
         // Streaks
@@ -744,13 +902,13 @@ const statsService = {
         });
 
         // Time distribution by goal
-        const timeByGoal = data.goals.map(g => ({
+        const timeByGoal = goals.map(g => ({
             title: g.title,
             time: g.tasks.reduce((sum, t) => sum + (t.timeSpent || 0), 0)
         })).filter(g => g.time > 0);
 
         return {
-            totalGoals: data.goals.length,
+            totalGoals: goals.length,
             totalTasks: allTasks.length,
             tasksByStatus: {
                 todo: allTasks.filter(t => t.status === 'todo').length,
@@ -766,8 +924,8 @@ const statsService = {
                 urgent: allTasks.filter(t => t.importance === 'urgent').length
             },
             totalTimeSpent: allTasks.reduce((sum, t) => sum + (t.timeSpent || 0), 0),
-            totalTimerSessions: (data.timerSessions || []).length,
-            goalsProgress: data.goals.map(g => ({
+            totalTimerSessions: timerSessionsList.length,
+            goalsProgress: goals.map(g => ({
                 id: g.id, title: g.title, total: g.tasks.length,
                 done: g.tasks.filter(t => t.status === 'done').length,
                 percent: g.tasks.length > 0 ? Math.round((g.tasks.filter(t => t.status === 'done').length / g.tasks.length) * 100) : 0
@@ -784,11 +942,11 @@ const statsService = {
 };
 
 // =====================
-// 8. ROUTES
+// 10. ROUTES
 // =====================
 
 // Auth
-app.get('/api/supabase-config', asyncHandler(async (req, res) => { res.json(getSupabaseConfig()); }));
+app.get('/api/supabase-config', asyncHandler(async (req, res) => { res.setHeader('Cache-Control', 'public, max-age=3600'); res.json(getSupabaseConfig()); }));
 app.post('/api/auth/session', authSessionRateLimit, asyncHandler(async (req, res) => {
     const user = await verifySupabaseSession(req.body?.accessToken || extractAccessToken(req));
     res.json({
@@ -800,54 +958,95 @@ app.post('/api/auth/session', authSessionRateLimit, asyncHandler(async (req, res
 app.delete('/api/auth/session', asyncHandler(async (req, res) => { res.status(204).end(); }));
 
 // Goals
-app.get('/api/goals', asyncHandler(async (req, res) => { res.json(goalService.getAll()); }));
-app.get('/api/goals/:id', asyncHandler(async (req, res) => { res.json(goalService.getById(req.params.id)); }));
-app.post('/api/goals', asyncHandler(async (req, res) => { res.status(201).json(goalService.create(validateGoalInput(req.body))); }));
-app.put('/api/goals/:id', asyncHandler(async (req, res) => { res.json(goalService.update(req.params.id, validateGoalInput(req.body, true))); }));
-app.delete('/api/goals/:id', asyncHandler(async (req, res) => { goalService.delete(req.params.id); res.status(204).end(); }));
+app.get('/api/goals', asyncHandler(async (req, res) => {
+    res.json(await goalService.getAll(getCurrentUserId()));
+}));
+app.get('/api/goals/:id', asyncHandler(async (req, res) => {
+    res.json(await goalService.getById(getCurrentUserId(), req.params.id));
+}));
+app.post('/api/goals', asyncHandler(async (req, res) => {
+    res.status(201).json(await goalService.create(getCurrentUserId(), validateGoalInput(req.body)));
+}));
+app.put('/api/goals/:id', asyncHandler(async (req, res) => {
+    res.json(await goalService.update(getCurrentUserId(), req.params.id, validateGoalInput(req.body, true)));
+}));
+app.delete('/api/goals/:id', asyncHandler(async (req, res) => {
+    await goalService.delete(getCurrentUserId(), req.params.id);
+    res.status(204).end();
+}));
 
 // Tasks
-app.post('/api/goals/:id/tasks', asyncHandler(async (req, res) => { res.status(201).json(taskService.create(req.params.id, validateTaskInput(req.body))); }));
-app.put('/api/tasks/:id', asyncHandler(async (req, res) => { res.json(taskService.update(req.params.id, validateTaskInput(req.body, true))); }));
-app.delete('/api/tasks/:id', asyncHandler(async (req, res) => { taskService.delete(req.params.id); res.status(204).end(); }));
+app.post('/api/goals/:id/tasks', asyncHandler(async (req, res) => {
+    res.status(201).json(await taskService.create(getCurrentUserId(), req.params.id, validateTaskInput(req.body)));
+}));
+app.put('/api/tasks/:id', asyncHandler(async (req, res) => {
+    res.json(await taskService.update(getCurrentUserId(), req.params.id, validateTaskInput(req.body, true)));
+}));
+app.delete('/api/tasks/:id', asyncHandler(async (req, res) => {
+    await taskService.delete(getCurrentUserId(), req.params.id);
+    res.status(204).end();
+}));
 
 // Timer Sessions
-app.post('/api/timer-sessions', asyncHandler(async (req, res) => { res.status(201).json(timerService.create(validateTimerSessionInput(req.body))); }));
-app.get('/api/timer-sessions', asyncHandler(async (req, res) => { res.json(timerService.getAll()); }));
-app.delete('/api/timer-sessions/:id', asyncHandler(async (req, res) => { timerService.delete(req.params.id); res.status(204).end(); }));
+app.post('/api/timer-sessions', asyncHandler(async (req, res) => {
+    res.status(201).json(await timerService.create(getCurrentUserId(), validateTimerSessionInput(req.body)));
+}));
+app.get('/api/timer-sessions', asyncHandler(async (req, res) => {
+    res.json(await timerService.getAll(getCurrentUserId()));
+}));
+app.delete('/api/timer-sessions/:id', asyncHandler(async (req, res) => {
+    await timerService.delete(getCurrentUserId(), req.params.id);
+    res.status(204).end();
+}));
 
 // Notes
-app.get('/api/notes', asyncHandler(async (req, res) => { res.json(noteService.getAll()); }));
-app.post('/api/notes', asyncHandler(async (req, res) => { res.status(201).json(noteService.create(validateNoteInput(req.body))); }));
-app.put('/api/notes/:id', asyncHandler(async (req, res) => { res.json(noteService.update(req.params.id, validateNoteInput(req.body, true))); }));
-app.delete('/api/notes/:id', asyncHandler(async (req, res) => { noteService.delete(req.params.id); res.status(204).end(); }));
+app.get('/api/notes', asyncHandler(async (req, res) => {
+    res.json(await noteService.getAll(getCurrentUserId()));
+}));
+app.post('/api/notes', asyncHandler(async (req, res) => {
+    res.status(201).json(await noteService.create(getCurrentUserId(), validateNoteInput(req.body)));
+}));
+app.put('/api/notes/:id', asyncHandler(async (req, res) => {
+    res.json(await noteService.update(getCurrentUserId(), req.params.id, validateNoteInput(req.body, true)));
+}));
+app.delete('/api/notes/:id', asyncHandler(async (req, res) => {
+    await noteService.delete(getCurrentUserId(), req.params.id);
+    res.status(204).end();
+}));
 
 // Stats
-app.get('/api/stats', asyncHandler(async (req, res) => { res.json(statsService.getStats()); }));
+app.get('/api/stats', asyncHandler(async (req, res) => {
+    res.json(await statsService.getStats(getCurrentUserId()));
+}));
 
-// Backup
+// Backup — returns data as JSON (no filesystem on Vercel)
 app.post('/api/backup', backupRestoreRateLimit, asyncHandler(async (req, res) => {
-    const backupFile = backupService.createBackup();
-    res.status(201).json({ message: 'Backup created successfully', file: backupFile });
+    const data = await backupService.createBackup(getCurrentUserId());
+    res.status(201).json({ message: 'Backup created successfully', data });
 }));
 
 // Restore
 app.post('/api/restore', backupRestoreRateLimit, asyncHandler(async (req, res) => {
-    const result = backupService.restoreBackup(req.body);
-    res.json({ message: 'Data restored successfully', safetyBackup: result.safetyBackup });
+    await backupService.restoreBackup(getCurrentUserId(), req.body);
+    res.json({ message: 'Data restored successfully' });
 }));
 
 // Data Export
 app.get('/api/export/json', exportRateLimit, asyncHandler(async (req, res) => {
-    const data = readData();
+    const userId = getCurrentUserId();
+    const goals = await goalService.getAll(userId);
+    const timerSessions = await timerService.getAll(userId);
+    const notes = await noteService.getAll(userId);
+    const data = { goals, timerSessions, notes };
     res.setHeader('Content-Disposition', 'attachment; filename=tasktracker-export.json');
     res.json(data);
 }));
 
 app.get('/api/export/csv', exportRateLimit, asyncHandler(async (req, res) => {
-    const data = readData();
+    const userId = getCurrentUserId();
+    const goals = await goalService.getAll(userId);
     const allTasks = [];
-    for (const goal of data.goals) {
+    for (const goal of goals) {
         for (const task of goal.tasks) {
             allTasks.push({ goalTitle: goal.title, ...task });
         }
@@ -866,7 +1065,7 @@ app.get('/api/export/csv', exportRateLimit, asyncHandler(async (req, res) => {
 }));
 
 // =====================
-// 9. ERROR HANDLING
+// 11. ERROR HANDLING
 // =====================
 
 app.use('/api/*', (req, res) => { res.status(404).json({ error: `Route not found: ${req.method} ${req.path}` }); });
@@ -879,13 +1078,13 @@ app.use((err, req, res, _next) => {
 });
 
 // =====================
-// 10. STARTUP
+// 12. STARTUP
 // =====================
 
 if (require.main === module) {
     const server = app.listen(config.port, () => {
         console.log(`\n  🚀 Task Tracker running at http://localhost:${config.port}`);
-        console.log(`  📁 Data file: ${config.dataFile}`);
+        console.log(`  🗄️  Database: Supabase PostgreSQL`);
         console.log(`  🛡️  Security headers: enabled`);
         console.log(`  ✅ Full feature set: goals, tasks, subtasks, notes, kanban, export\n`);
     });
@@ -899,7 +1098,6 @@ if (require.main === module) {
     process.on('SIGTERM', () => shutdown('SIGTERM'));
     process.on('SIGINT', () => shutdown('SIGINT'));
     process.on('unhandledRejection', (reason) => { console.error('  ❌ Unhandled Promise Rejection:', reason); });
-    process.on('uncaughtException', (err) => { require('fs').writeFileSync('bug.txt', err.stack); shutdown('uncaughtException'); });
 }
 
-module.exports = { app, config, readData, writeData };
+module.exports = { app, config };
