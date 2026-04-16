@@ -145,6 +145,9 @@ app.use('/api', authenticateApiRequest);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Serve Vercel Speed Insights script
+app.use('/speed-insights', express.static(path.join(__dirname, 'node_modules/@vercel/speed-insights/dist')));
+
 // Prevent browser caching of API responses
 app.use('/api', (req, res, next) => {
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
