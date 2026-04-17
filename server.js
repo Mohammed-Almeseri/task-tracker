@@ -9,13 +9,14 @@ const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 const { supabase, goalToApi, taskToApi, timerSessionToApi, noteToApi } = require('./db');
 
-const DEFAULT_SUPABASE_URL = 'https://wqnrdahctafgdvsprkju.supabase.co';
-const DEFAULT_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndxbnJkYWhjdGFmZ2R2c3Bya2p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNjczNTUsImV4cCI6MjA5MTc0MzM1NX0.cRoE9OOw7xYsQ1BSsAFz1rRhfNQqF98qa8_R7E6bl7g';
-
 const supabaseConfig = {
-    url: String(process.env.SUPABASE_URL || DEFAULT_SUPABASE_URL).trim().replace(/\/$/, ''),
-    anonKey: String(process.env.SUPABASE_ANON_KEY || DEFAULT_SUPABASE_ANON_KEY).trim()
+    url: String(process.env.SUPABASE_URL || '').trim().replace(/\/$/, ''),
+    anonKey: String(process.env.SUPABASE_ANON_KEY || '').trim()
 };
+
+if (!supabaseConfig.url || !supabaseConfig.anonKey) {
+    console.warn('  ⚠️  SUPABASE_URL or SUPABASE_ANON_KEY not set — auth will fail until configured.');
+}
 
 // =====================
 // 1. CONFIGURATION

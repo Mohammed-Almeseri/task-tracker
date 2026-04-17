@@ -2,8 +2,6 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 
 const AUTH_EMAIL_STORAGE_KEY = 'task_tracker_current_email';
 const AUTH_TOKEN_STORAGE_KEY = 'task_tracker_supabase_access_token';
-const DEFAULT_SUPABASE_URL = 'https://wqnrdahctafgdvsprkju.supabase.co';
-const DEFAULT_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndxbnJkYWhjdGFmZ2R2c3Bya2p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNjczNTUsImV4cCI6MjA5MTc0MzM1NX0.cRoE9OOw7xYsQ1BSsAFz1rRhfNQqF98qa8_R7E6bl7g';
 const REQUEST_LABEL = 'Send reset link';
 const REQUEST_BUSY_LABEL = 'Sending...';
 const UPDATE_LABEL = 'Update password';
@@ -217,8 +215,8 @@ function clearResetAuthStorage() {
 
 async function loadSupabaseConfig() {
     const fallbackConfig = {
-        supabaseUrl: window.SUPABASE_URL || window.__SUPABASE_URL__ || DEFAULT_SUPABASE_URL,
-        supabaseAnonKey: window.SUPABASE_ANON_KEY || window.__SUPABASE_ANON_KEY__ || DEFAULT_SUPABASE_ANON_KEY
+        supabaseUrl: window.SUPABASE_URL || window.__SUPABASE_URL__ || '',
+        supabaseAnonKey: window.SUPABASE_ANON_KEY || window.__SUPABASE_ANON_KEY__ || ''
     };
 
     try {
@@ -245,7 +243,7 @@ async function initializeSupabase() {
     const config = await loadSupabaseConfig();
 
     if (!config.supabaseUrl || !config.supabaseAnonKey) {
-        setStatus('Supabase is not configured yet. Check the URL and anon key.', 'error');
+        setStatus('Supabase is not configured for this deployment. Set SUPABASE_URL and SUPABASE_ANON_KEY in Vercel.', 'error');
         return;
     }
 
@@ -317,7 +315,7 @@ async function handleResetRequest(event) {
     event.preventDefault();
 
     if (!state.supabase) {
-        setStatus('Supabase is not configured yet. Check the URL and anon key.', 'error');
+        setStatus('Supabase is not configured for this deployment. Set SUPABASE_URL and SUPABASE_ANON_KEY in Vercel.', 'error');
         return;
     }
 
@@ -357,7 +355,7 @@ async function handlePasswordUpdate(event) {
     event.preventDefault();
 
     if (!state.supabase) {
-        setStatus('Supabase is not configured yet. Check the URL and anon key.', 'error');
+        setStatus('Supabase is not configured for this deployment. Set SUPABASE_URL and SUPABASE_ANON_KEY in Vercel.', 'error');
         return;
     }
 
