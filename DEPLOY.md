@@ -96,3 +96,30 @@ npx vercel --prod     # production deploy
 | **Tables not found** | Run `supabase-schema.sql` in the SQL Editor |
 | **Data missing after deploy** | Run `node migrate-data.js` to move data.json → Supabase |
 | **Static files 404** | Verify `public/` folder is included (`vercel.json` has `includeFiles`) |
+
+---
+
+## Future Updates
+
+When you make changes to your code in the future and want to deploy those updates, follow these exact steps in your terminal:
+
+**1. Stage your changes:**
+```bash
+git add .
+```
+
+**2. Commit your changes:**
+```bash
+git commit -m "Describe what you changed here"
+```
+
+**3. Push to GitHub:**
+```bash
+git push
+```
+
+**4. Deploy to Vercel (Production):**
+```bash
+npx vercel --prod
+```
+*(Note: If you have linked your Vercel project to GitHub, pushing to the `main` branch will automatically trigger a Vercel deployment. In this case, step 4 is not strictly necessary!)*

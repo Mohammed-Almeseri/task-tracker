@@ -157,6 +157,17 @@ function wasAccountDeleted() {
     return params.get('deleted') === '1';
 }
 
+function wasPasswordReset() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('reset') === '1';
+}
+
+function clearTransientLoginParams() {
+    if (window.history && typeof window.history.replaceState === 'function') {
+        window.history.replaceState({}, '', window.location.pathname);
+    }
+}
+
 function setMode(mode) {
     state.mode = mode;
     const isSignIn = mode === 'signin';
@@ -419,9 +430,11 @@ async function bootstrap() {
     await initializeSupabase();
     if (wasAccountDeleted()) {
         notifyStatus('Your account was deleted successfully. You can create a new one if needed.', 'success');
-        if (window.history && typeof window.history.replaceState === 'function') {
-            window.history.replaceState({}, '', window.location.pathname);
-        }
+        clearTransientLoginParams();
+    }
+    if (wasPasswordReset()) {
+        notifyStatus('Your password was updated. Sign in with your new password.', 'success');
+        clearTransientLoginParams();
     }
 }
 
