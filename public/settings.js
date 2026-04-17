@@ -19,6 +19,39 @@ function clearSupabaseAuthStorage() {
     keysToRemove.forEach((key) => localStorage.removeItem(key));
 }
 
+function clearCurrentAccountScopedStorage() {
+    const currentUserKey = typeof getCurrentUserKey === 'function'
+        ? getCurrentUserKey()
+        : String(localStorage.getItem(SETTINGS_AUTH_EMAIL_STORAGE_KEY) || '').trim().toLowerCase();
+
+    const keysToRemove = [];
+    const legacyKeys = [
+        'task_tracker_settings',
+        'task_tracker_hobbies_v1',
+        'task_tracker_timer_selected_task',
+        'task_tracker_runtime_state_v1',
+        'task_tracker_system_logs_v1'
+    ];
+
+    for (let index = 0; index < localStorage.length; index += 1) {
+        const key = localStorage.key(index);
+        if (!key) {
+            continue;
+        }
+
+        if (legacyKeys.includes(key)) {
+            keysToRemove.push(key);
+            continue;
+        }
+
+        if (currentUserKey && key.endsWith(`:${currentUserKey}`)) {
+            keysToRemove.push(key);
+        }
+    }
+
+    keysToRemove.forEach((key) => localStorage.removeItem(key));
+}
+
 async function clearAuthSession() {
     const accessToken = String(localStorage.getItem(SETTINGS_AUTH_TOKEN_STORAGE_KEY) || '').trim();
     localStorage.removeItem(SETTINGS_AUTH_EMAIL_STORAGE_KEY);
@@ -37,6 +70,53 @@ async function clearAuthSession() {
 }
 
 window.clearAuthSession = clearAuthSession;
+
+async function deleteAccount() {
+    const accessToken = String(localStorage.getItem(SETTINGS_AUTH_TOKEN_STORAGE_KEY) || '').trim();
+    const deleteButton = document.getElementById('btn-delete-account');
+
+    if (!accessToken) {
+        showToast('Your session has expired. Please sign in again.', 'error');
+        window.location.replace('login.html');
+        return;
+    }
+
+    if (deleteButton) {
+        deleteButton.disabled = true;
+    }
+
+    try {
+        const response = await fetch('/api/account', {
+            method: 'DELETE',
+            cache: 'no-store',
+            headers: buildAuthHeaders()
+        });
+
+        if (response.status === 401) {
+            await clearAuthSession();
+            window.location.replace('login.html');
+            return;
+        }
+
+        if (!response.ok) {
+            const payload = await response.json().catch(() => ({}));
+            throw new Error(payload.error || 'Failed to delete account');
+        }
+
+        clearCurrentAccountScopedStorage();
+        await clearAuthSession();
+        window.location.replace('login.html?deleted=1');
+    } catch (error) {
+        console.error('Delete account failed:', error);
+        showToast(error.message || 'Failed to delete account', 'error');
+    } finally {
+        if (deleteButton) {
+            deleteButton.disabled = false;
+        }
+    }
+}
+
+window.deleteAccount = deleteAccount;
 
 function loadSettings() {
     const saved = localStorage.getItem(getSettingsStorageKey('task_tracker_settings'));
@@ -105,6 +185,13 @@ function initSettingsView() {
     const btnReset = document.getElementById('btn-reset-data');
     if (btnReset) {
         btnReset.addEventListener('click', resetAppData);
+    }
+
+    const btnDeleteAccount = document.getElementById('btn-delete-account');
+    if (btnDeleteAccount) {
+        btnDeleteAccount.addEventListener('click', () => {
+            showConfirmModal('Delete your account, login, and all saved data? This cannot be undone.', deleteAccount);
+        });
     }
 
     const btnLogout = document.getElementById('btn-logout');

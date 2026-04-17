@@ -152,6 +152,11 @@ function getInitialMode() {
     return params.get('mode') === 'signup' ? 'signup' : 'signin';
 }
 
+function wasAccountDeleted() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('deleted') === '1';
+}
+
 function setMode(mode) {
     state.mode = mode;
     const isSignIn = mode === 'signin';
@@ -412,6 +417,12 @@ async function bootstrap() {
     initializePointerLight();
     setMode(getInitialMode());
     await initializeSupabase();
+    if (wasAccountDeleted()) {
+        notifyStatus('Your account was deleted successfully. You can create a new one if needed.', 'success');
+        if (window.history && typeof window.history.replaceState === 'function') {
+            window.history.replaceState({}, '', window.location.pathname);
+        }
+    }
 }
 
 document.addEventListener('DOMContentLoaded', bootstrap);

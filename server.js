@@ -837,6 +837,42 @@ const backupService = {
     }
 };
 
+const accountService = {
+    async deleteAccount(userId) {
+        if (!userId) {
+            throw new AppError('Unauthorized', 401);
+        }
+
+        // Remove owned app data first so the auth delete only runs after cleanup succeeds.
+        const deletions = [
+            { table: 'timer_sessions', label: 'timer sessions' },
+            { table: 'notes', label: 'notes' },
+            { table: 'goals', label: 'goals' }
+        ];
+
+        for (const { table, label } of deletions) {
+            const { error } = await supabase
+                .from(table)
+                .delete()
+                .eq('user_id', userId);
+
+            if (error) {
+                throw new AppError(`Failed to delete ${label}: ${error.message}`, 500);
+            }
+        }
+
+        const { error: authDeleteError } = await supabase.auth.admin.deleteUser(userId);
+        const authNotFound = authDeleteError && (
+            authDeleteError.status === 404 ||
+            /not found/i.test(authDeleteError.message || '')
+        );
+
+        if (authDeleteError && !authNotFound) {
+            throw new AppError(`Failed to delete Supabase account: ${authDeleteError.message}`, 500);
+        }
+    }
+};
+
 const statsService = {
     async getStats(userId) {
         const goals = await goalService.getAll(userId);
@@ -956,6 +992,10 @@ app.post('/api/auth/session', authSessionRateLimit, asyncHandler(async (req, res
     });
 }));
 app.delete('/api/auth/session', asyncHandler(async (req, res) => { res.status(204).end(); }));
+app.delete('/api/account', asyncHandler(async (req, res) => {
+    await accountService.deleteAccount(getCurrentUserId());
+    res.json({ message: 'Account deleted successfully' });
+}));
 
 // Goals
 app.get('/api/goals', asyncHandler(async (req, res) => {
