@@ -507,7 +507,7 @@ function initHobbiesControls() {
         writeHobbiesState(state);
         input.value = '';
         renderDailyPlan(getAllTasks());
-        showToast('Hobby added');
+        showToast('Routine added');
     };
 
     addBtn._hobbyBound = true;
@@ -542,7 +542,7 @@ function deleteHobby(hobbyId) {
     renderDailyPlan(getAllTasks());
 
     if (typeof showToast === 'function') {
-        showToast('Hobby deleted');
+        showToast('Routine deleted');
     }
 }
 
@@ -552,7 +552,7 @@ function renderDailyPlan(tasks) {
 
     const hobbyState = getDailyHobbiesState();
     if (hobbyState.items.length === 0) {
-        container.innerHTML = '<div class="empty-state-small text-muted" style="text-align:left;">No hobbies yet. Add one to get started.</div>';
+        container.innerHTML = '<div class="empty-state-small text-muted" style="text-align:left;">No daily routines yet. Add one to get started.</div>';
         return;
     }
 
@@ -561,7 +561,7 @@ function renderDailyPlan(tasks) {
         return `
         <div class="daily-action-item ${isDone ? 'done' : ''}" onclick="toggleHobbyDone('${hobby.id}')" style="cursor:pointer;">
             <div class="daily-action-left">
-                <button class="daily-action-delete" type="button" aria-label="Delete hobby" title="Delete hobby" onclick="event.stopPropagation(); deleteHobby('${hobby.id}')">&times;</button>
+                <button class="daily-action-delete" type="button" aria-label="Delete routine" title="Delete routine" onclick="event.stopPropagation(); deleteHobby('${hobby.id}')">&times;</button>
                 <div class="daily-action-check"></div>
                 <div class="daily-action-title">${escHtml(hobby.title)}</div>
             </div>

@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TaskTracker — Personal Productivity</title>
+    <meta name="theme-color" content="#09090b">
     <script>
         (function () {
             try {
@@ -48,6 +49,14 @@
                     </svg></span>
                 <span class="logo-text">TaskTracker</span>
             </div>
+            <button class="sidebar-toggle" id="btn-sidebar-toggle" type="button" aria-label="Collapse sidebar"
+                aria-controls="sidebar" aria-pressed="false" title="Collapse sidebar">
+                <svg class="sidebar-toggle-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    aria-hidden="true">
+                    <path d="M15 6l-6 6 6 6"></path>
+                </svg>
+            </button>
         </div>
         <nav class="sidebar-nav">
             <button class="nav-btn active" data-view="dashboard" id="nav-dashboard" aria-label="Dashboard"
@@ -222,13 +231,13 @@
                     </div>
                 </div>
 
-                <!-- Hobbies -->
+                <!-- Daily Routines -->
                 <div class="bento-card">
                     <div class="bento-card-header">
-                        <h3>Hobbies 🎨</h3>
+                        <h3>Daily Routines 🎨</h3>
                     </div>
                     <div class="hobby-add-row">
-                        <input id="hobby-input" type="text" maxlength="80" placeholder="Add a hobby..." aria-label="Add hobby">
+                        <input id="hobby-input" type="text" maxlength="80" placeholder="Add a daily routine..." aria-label="Add daily routine">
                         <button class="btn btn-secondary btn-small" id="btn-add-hobby">Add</button>
                     </div>
                     <div id="daily-plan-container" class="daily-plan-list">
@@ -650,6 +659,14 @@
                                 <button class="btn-color-preset" onclick="setAccentColor('rose')"
                                     style="background: #f43f5e;" title="Rose" aria-label="Rose accent"></button>
                             </div>
+                        </div>
+                        <div class="form-group" style="margin-top: 1rem;">
+                            <label for="theme-mode-select">Theme</label>
+                            <select id="theme-mode-select" class="form-control">
+                                <option value="dark">Dark</option>
+                                <option value="light">Light</option>
+                            </select>
+                            <p class="text-sm opacity-60" style="margin-top: 0.4rem;">Choose the overall app appearance.</p>
                         </div>
                         <div class="settings-actions" style="margin-top: 1.5rem; display: grid; gap: 0.75rem;">
                             <button class="btn btn-secondary" id="btn-save-profile" style="width: 100%;">

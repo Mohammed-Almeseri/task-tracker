@@ -91,23 +91,51 @@ function renderNotes() {
     `).join('');
 }
 
+function createNoteEditor(editorContainer) {
+    const useDarkTheme = !settings || settings.theme !== 'light';
+
+    editorContainer.classList.toggle('toastui-editor-dark', useDarkTheme);
+
+    noteEditor = new window.toastui.Editor({
+        el: editorContainer,
+        initialEditType: 'wysiwyg',
+        previewStyle: 'vertical',
+        height: '400px',
+        hideModeSwitch: true,
+        ...(useDarkTheme ? { theme: 'dark' } : {}),
+        toolbarItems: [
+            ['heading', 'bold', 'italic', 'strike'],
+            ['hr', 'quote'],
+            ['ul', 'ol', 'task']
+        ]
+    });
+}
+
+window.syncNoteEditorTheme = function () {
+    const editorContainer = document.querySelector('#note-editor-container');
+    if (!editorContainer || !window.toastui || typeof window.toastui.Editor !== 'function') {
+        return;
+    }
+
+    const markdown = noteEditor && typeof noteEditor.getMarkdown === 'function' ? noteEditor.getMarkdown() : '';
+
+    if (noteEditor && typeof noteEditor.destroy === 'function') {
+        noteEditor.destroy();
+    }
+
+    editorContainer.innerHTML = '';
+    createNoteEditor(editorContainer);
+
+    if (markdown && typeof noteEditor.setMarkdown === 'function') {
+        noteEditor.setMarkdown(markdown);
+    }
+};
+
 function initNoteModal() {
     const editorContainer = document.querySelector('#note-editor-container');
 
     if (window.toastui && typeof window.toastui.Editor === 'function') {
-        noteEditor = new window.toastui.Editor({
-            el: editorContainer,
-            initialEditType: 'wysiwyg',
-            previewStyle: 'vertical',
-            height: '400px',
-            theme: 'dark',
-            hideModeSwitch: true,
-            toolbarItems: [
-                ['heading', 'bold', 'italic', 'strike'],
-                ['hr', 'quote'],
-                ['ul', 'ol', 'task']
-            ]
-        });
+        createNoteEditor(editorContainer);
     } else {
         editorContainer.innerHTML = '<textarea id="note-editor-fallback" style="width:100%;min-height:400px;resize:vertical;border:0;background:transparent;color:inherit;font:inherit;padding:16px;box-sizing:border-box;outline:none;" placeholder="Write your note here..."></textarea>';
         const fallbackEditor = editorContainer.querySelector('#note-editor-fallback');

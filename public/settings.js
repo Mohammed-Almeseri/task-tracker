@@ -139,10 +139,40 @@ function applyThemeSettings() {
     const root = document.documentElement;
     const color = settings.accents[settings.accentColor] || settings.accents.purple;
     root.style.setProperty('--accent', color);
+    const theme = settings.theme === 'light' ? 'light' : 'dark';
+    root.dataset.theme = theme;
+    root.style.colorScheme = theme;
+
+    if (document.body) {
+        document.body.classList.toggle('sidebar-collapsed', Boolean(settings.sidebarCollapsed));
+    }
+
+    const themeMeta = document.querySelector('meta[name="theme-color"]');
+    if (themeMeta) {
+        themeMeta.setAttribute('content', theme === 'light' ? '#f4f7fb' : '#09090b');
+    }
 
     const nameInput = document.getElementById('user-name-input');
     if (nameInput) {
         nameInput.value = settings.profileName;
+    }
+
+    const themeSelect = document.getElementById('theme-mode-select');
+    if (themeSelect) {
+        themeSelect.value = theme;
+    }
+
+    const sidebarToggle = document.getElementById('btn-sidebar-toggle');
+    if (sidebarToggle) {
+        const isCollapsed = Boolean(settings.sidebarCollapsed);
+        sidebarToggle.setAttribute('aria-pressed', String(isCollapsed));
+        sidebarToggle.setAttribute('aria-label', isCollapsed ? 'Expand sidebar' : 'Collapse sidebar');
+        sidebarToggle.title = isCollapsed ? 'Expand sidebar' : 'Collapse sidebar';
+    }
+
+    const noteEditorContainer = document.getElementById('note-editor-container');
+    if (noteEditorContainer) {
+        noteEditorContainer.classList.toggle('toastui-editor-dark', theme !== 'light');
     }
 
     const greeting = document.getElementById('dashboard-greeting');
@@ -165,6 +195,20 @@ window.setAccentColor = (colorName) => {
     showToast(`Accent color updated to ${colorName}`);
 };
 
+window.setThemeMode = (themeName) => {
+    settings.theme = themeName === 'light' ? 'light' : 'dark';
+    saveSettings();
+    if (typeof syncNoteEditorTheme === 'function') {
+        syncNoteEditorTheme();
+    }
+    showToast(`Theme updated to ${settings.theme}`);
+};
+
+window.toggleSidebarCollapsed = () => {
+    settings.sidebarCollapsed = !settings.sidebarCollapsed;
+    saveSettings();
+};
+
 function initSettingsView() {
     const btnLog = document.getElementById('btn-log-manual-time');
     if (btnLog) btnLog.addEventListener('click', saveManualTime);
@@ -180,6 +224,11 @@ function initSettingsView() {
                 showToast('Profile updated');
             }
         });
+    }
+
+    const themeModeSelect = document.getElementById('theme-mode-select');
+    if (themeModeSelect) {
+        themeModeSelect.addEventListener('change', () => setThemeMode(themeModeSelect.value));
     }
 
     const btnReset = document.getElementById('btn-reset-data');

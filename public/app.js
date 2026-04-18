@@ -100,6 +100,8 @@ const ICONS = {
 var defaultSettings = {
     profileName: 'User',
     accentColor: 'purple',
+    theme: 'dark',
+    sidebarCollapsed: false,
     accents: {
         purple: '#8b5cf6',
         blue: '#3b82f6',
@@ -353,6 +355,18 @@ function initNavigation() {
     });
 }
 
+function initSidebarControls() {
+    const toggleButton = document.getElementById('btn-sidebar-toggle');
+    if (!toggleButton || toggleButton._sidebarToggleBound) return;
+
+    toggleButton._sidebarToggleBound = true;
+    toggleButton.addEventListener('click', () => {
+        if (typeof toggleSidebarCollapsed === 'function') {
+            toggleSidebarCollapsed();
+        }
+    });
+}
+
 // ==========================================
 // CONFIRM MODAL
 // ==========================================
@@ -379,10 +393,12 @@ async function initApp() {
         return;
     }
 
-    initNavigation();
-
     if (typeof loadSettings === 'function') {
         loadSettings();
+    }
+    initNavigation();
+    if (typeof initSidebarControls === 'function') {
+        initSidebarControls();
     }
     if (typeof initGoalModal === 'function') initGoalModal();
     if (typeof initTaskModal === 'function') initTaskModal();
