@@ -67,6 +67,7 @@ window.toggleNoteCheckbox = async function (noteId, index, isChecked) {
 
 function renderNotes() {
     const container = document.getElementById('notes-container');
+    if (!container) return;
     if (notes.length === 0) {
         container.innerHTML = `
             <div class="empty-state" id="empty-notes">
@@ -89,6 +90,30 @@ function renderNotes() {
             <div class="note-card-date">${new Date(note.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
         </div>
     `).join('');
+}
+
+function upsertNoteInState(note) {
+    if (!note || !note.id) return false;
+
+    const existingIndex = notes.findIndex(existingNote => existingNote.id === note.id);
+    if (existingIndex === -1) {
+        notes = [...notes, note];
+        return true;
+    }
+
+    notes = notes.map(existingNote => (
+        existingNote.id === note.id
+            ? { ...existingNote, ...note }
+            : existingNote
+    ));
+    return true;
+}
+
+function removeNoteFromState(noteId) {
+    const nextNotes = notes.filter(note => note.id !== noteId);
+    const removed = nextNotes.length !== notes.length;
+    notes = nextNotes;
+    return removed;
 }
 
 function createNoteEditor(editorContainer) {
@@ -182,17 +207,38 @@ async function saveNote() {
     const title = document.getElementById('note-title-input').value.trim();
     const content = noteEditor.getMarkdown();
     if (!title) { document.getElementById('note-title-input').focus(); return; }
+    const releaseButton = setButtonBusy('modal-note-save', 'Saving...');
     try {
-        if (editingNote && currentNoteId) { await apiPut(`/api/notes/${currentNoteId}`, { title, content }); showToast('Note updated'); logSystemEvent('Note updated'); }
-        else { await apiPost('/api/notes', { title, content }); showToast('Note created'); logSystemEvent('Note created'); }
+        const savedNote = editingNote && currentNoteId
+            ? await apiPut(`/api/notes/${currentNoteId}`, { title, content })
+            : await apiPost('/api/notes', { title, content });
+        const noteApplied = upsertNoteInState(savedNote);
+        if (!noteApplied && typeof loadNotes === 'function') {
+            await loadNotes();
+        } else {
+            renderNotes();
+        }
         closeNoteModal();
-        await loadNotes();
+        showToast(editingNote ? 'Note updated' : 'Note created');
+        logSystemEvent(editingNote ? 'Note updated' : 'Note created');
     } catch (err) {
         console.error('Failed to save note:', err);
         showToast('Failed to save note', 'error');
+    } finally {
+        releaseButton();
     }
 }
 
 function deleteNote(noteId) {
-    showConfirmModal('Delete this note?', async () => { await apiDelete(`/api/notes/${noteId}`); await loadNotes(); showToast('Note deleted'); logSystemEvent('Note deleted'); });
+    showConfirmModal('Delete this note?', async () => {
+        await apiDelete(`/api/notes/${noteId}`);
+        const removed = removeNoteFromState(noteId);
+        if (!removed && typeof loadNotes === 'function') {
+            await loadNotes();
+        } else {
+            renderNotes();
+        }
+        showToast('Note deleted');
+        logSystemEvent('Note deleted');
+    });
 }

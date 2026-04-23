@@ -455,11 +455,20 @@ async function completeTaskFromDashboard(taskId) {
     if (!task) return;
 
     try {
-        await apiPut(`/api/tasks/${taskId}`, { status: 'done' });
+        const updatedTask = await apiPut(`/api/tasks/${taskId}`, { status: 'done' });
+        const taskApplied = typeof upsertTaskInState === 'function' ? upsertTaskInState(updatedTask) : false;
+        if (!taskApplied && typeof loadGoals === 'function') {
+            await loadGoals();
+        } else {
+            if (typeof refreshTaskViews === 'function') {
+                refreshTaskViews();
+            }
+        }
+        if (typeof refreshDashboardData === 'function') {
+            void refreshDashboardData();
+        }
         showToast(`Task "${task.title}" marked as done`);
         logSystemEvent('Task completed from dashboard');
-        await loadGoals();
-        await loadDashboard();
     } catch (err) {
         console.error('Failed to complete task from dashboard:', err);
         showToast('Failed to complete task', 'error');

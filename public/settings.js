@@ -308,6 +308,7 @@ function populateSettingsTaskSelect() {
     const select = document.getElementById('manual-task-select');
     if (!select) return;
 
+    const savedSelection = select.value || '';
     select.innerHTML = '<option value="">— Select a task —</option>';
     for (const goal of goals) {
         for (const task of goal.tasks) {
@@ -318,6 +319,10 @@ function populateSettingsTaskSelect() {
                 select.appendChild(option);
             }
         }
+    }
+
+    if (savedSelection && Array.from(select.options).some(option => option.value === savedSelection)) {
+        select.value = savedSelection;
     }
 }
 
@@ -337,6 +342,7 @@ async function saveManualTime() {
         return;
     }
 
+    const releaseButton = setButtonBusy('btn-log-manual-time', 'Logging...');
     try {
         const durationSecs = durationMins * 60;
         await apiPost('/api/timer-sessions', {
@@ -345,14 +351,26 @@ async function saveManualTime() {
             duration: durationSecs
         });
 
+        const taskApplied = typeof adjustTaskTimeSpent === 'function'
+            ? adjustTaskTimeSpent(taskId, durationSecs)
+            : false;
+        if (!taskApplied && typeof loadGoals === 'function') {
+            await loadGoals();
+        } else if (typeof refreshTaskViews === 'function') {
+            refreshTaskViews();
+        }
+        if (typeof refreshDashboardData === 'function') {
+            void refreshDashboardData();
+        }
         showToast(`Logged ${durationMins}m to task`);
         logSystemEvent('Manual time logged');
         if (durationInput) {
             durationInput.value = '';
         }
-        await loadGoals();
     } catch (error) {
         console.error('Failed to log time:', error);
         showToast('Failed to log time', 'error');
+    } finally {
+        releaseButton();
     }
 }

@@ -451,6 +451,213 @@ async function apiDelete(url) {
     if (res.status === 401) { clearCurrentAuthSession(); redirectToLogin(); throw new Error('Unauthorized'); }
 }
 
+var dashboardRefreshPromise = null;
+var dashboardRefreshQueued = false;
+
+function setButtonBusy(buttonId, busyText) {
+    const button = document.getElementById(buttonId);
+    if (!button) return () => {};
+
+    const originalText = button.textContent;
+    button.disabled = true;
+    if (busyText) {
+        button.textContent = busyText;
+    }
+
+    return () => {
+        button.disabled = false;
+        button.textContent = originalText;
+    };
+}
+
+function findGoalIndex(goalId) {
+    return goals.findIndex(goal => goal.id === goalId);
+}
+
+function findTaskLocation(taskId) {
+    for (let goalIndex = 0; goalIndex < goals.length; goalIndex += 1) {
+        const taskIndex = goals[goalIndex].tasks.findIndex(task => task.id === taskId);
+        if (taskIndex !== -1) {
+            return { goalIndex, taskIndex };
+        }
+    }
+
+    return null;
+}
+
+function upsertGoalInState(goal) {
+    if (!goal || !goal.id) return false;
+
+    const nextGoal = {
+        ...goal,
+        tasks: Array.isArray(goal.tasks) ? goal.tasks : []
+    };
+    const goalIndex = findGoalIndex(goal.id);
+
+    if (goalIndex === -1) {
+        goals = [...goals, nextGoal];
+        return true;
+    }
+
+    goals = goals.map((existingGoal, index) => (
+        index === goalIndex
+            ? { ...existingGoal, ...nextGoal }
+            : existingGoal
+    ));
+    return true;
+}
+
+function removeGoalFromState(goalId) {
+    const nextGoals = goals.filter(goal => goal.id !== goalId);
+    const removed = nextGoals.length !== goals.length;
+    goals = nextGoals;
+    return removed;
+}
+
+function upsertTaskInState(task) {
+    if (!task || !task.id || !task.goalId) return false;
+
+    const existingLocation = findTaskLocation(task.id);
+    const targetGoalIndex = findGoalIndex(task.goalId);
+    if (targetGoalIndex === -1) return false;
+
+    goals = goals.map((goal, index) => {
+        const isCurrentGoal = existingLocation && index === existingLocation.goalIndex;
+        const isTargetGoal = index === targetGoalIndex;
+        if (!isCurrentGoal && !isTargetGoal) {
+            return goal;
+        }
+
+        const nextTasks = Array.isArray(goal.tasks) ? [...goal.tasks] : [];
+
+        if (isCurrentGoal && isTargetGoal) {
+            nextTasks[existingLocation.taskIndex] = {
+                ...nextTasks[existingLocation.taskIndex],
+                ...task
+            };
+            return { ...goal, tasks: nextTasks };
+        }
+
+        if (isCurrentGoal) {
+            nextTasks.splice(existingLocation.taskIndex, 1);
+            return { ...goal, tasks: nextTasks };
+        }
+
+        if (isTargetGoal) {
+            const taskIndex = nextTasks.findIndex(existingTask => existingTask.id === task.id);
+            if (taskIndex === -1) {
+                nextTasks.push(task);
+            } else {
+                nextTasks[taskIndex] = { ...nextTasks[taskIndex], ...task };
+            }
+        }
+
+        return { ...goal, tasks: nextTasks };
+    });
+
+    return true;
+}
+
+function removeTaskFromState(taskId) {
+    let removed = false;
+
+    goals = goals.map(goal => {
+        if (!Array.isArray(goal.tasks) || goal.tasks.length === 0) {
+            return goal;
+        }
+
+        const nextTasks = goal.tasks.filter(task => task.id !== taskId);
+        if (nextTasks.length === goal.tasks.length) {
+            return goal;
+        }
+
+        removed = true;
+        return { ...goal, tasks: nextTasks };
+    });
+
+    return removed;
+}
+
+function adjustTaskTimeSpent(taskId, deltaSeconds) {
+    const location = findTaskLocation(taskId);
+    const delta = Number(deltaSeconds) || 0;
+    if (!location || !delta) return false;
+
+    const goal = goals[location.goalIndex];
+    const task = goal.tasks[location.taskIndex];
+    return upsertTaskInState({
+        ...task,
+        timeSpent: Math.max(0, (Number(task.timeSpent) || 0) + delta)
+    });
+}
+
+function refreshTaskSelectors() {
+    if (typeof populateGoalSelector === 'function' && document.getElementById('task-goal-select')) {
+        populateGoalSelector();
+    }
+
+    if (typeof populateTimerTaskSelect === 'function' && document.getElementById('timer-task-select')) {
+        populateTimerTaskSelect();
+    }
+
+    if (typeof populateSettingsTaskSelect === 'function') {
+        populateSettingsTaskSelect();
+    }
+}
+
+function refreshTaskViews() {
+    if (typeof renderGoals === 'function') {
+        renderGoals();
+    }
+
+    const manageView = document.getElementById('view-manage');
+    if (manageView && manageView.classList.contains('active') && typeof renderManageTasks === 'function') {
+        renderManageTasks();
+    }
+
+    const kanbanView = document.getElementById('view-kanban');
+    if (kanbanView && kanbanView.classList.contains('active') && typeof renderKanban === 'function') {
+        renderKanban();
+    }
+
+    const dashboardView = document.getElementById('view-dashboard');
+    if (dashboardView && dashboardView.classList.contains('active') && typeof renderUpNext === 'function' && typeof getAllTasks === 'function') {
+        const allTasks = getAllTasks();
+        renderUpNext(allTasks);
+        if (typeof renderDailyPlan === 'function') {
+            renderDailyPlan(allTasks);
+        }
+    }
+
+    refreshTaskSelectors();
+}
+
+function refreshDashboardData() {
+    if (typeof loadDashboard !== 'function') {
+        return Promise.resolve();
+    }
+
+    if (dashboardRefreshPromise) {
+        dashboardRefreshQueued = true;
+        return dashboardRefreshPromise;
+    }
+
+    dashboardRefreshQueued = false;
+    dashboardRefreshPromise = loadDashboard()
+        .catch((error) => {
+            console.error('Dashboard refresh failed:', error);
+        })
+        .finally(() => {
+            dashboardRefreshPromise = null;
+            if (dashboardRefreshQueued) {
+                dashboardRefreshQueued = false;
+                void refreshDashboardData();
+            }
+        });
+
+    return dashboardRefreshPromise;
+}
+
 // ==========================================
 // GOALS & TASKS
 // ==========================================
@@ -462,10 +669,12 @@ async function loadGoals() {
     if (manageView && manageView.classList.contains('active')) renderManageTasks();
     const kanbanView = document.getElementById('view-kanban');
     if (kanbanView && kanbanView.classList.contains('active')) renderKanban();
+    refreshTaskSelectors();
 }
 
 function renderGoals() {
     const container = document.getElementById('goals-container');
+    if (!container) return;
     if (goals.length === 0) {
         container.innerHTML = `
             <div class="empty-state" id="empty-goals">
@@ -601,19 +810,42 @@ async function saveGoal() {
     const title = document.getElementById('goal-title-input').value.trim();
     const description = document.getElementById('goal-desc-input').value.trim();
     if (!title) { document.getElementById('goal-title-input').focus(); return; }
+    const releaseButton = setButtonBusy('modal-goal-save', 'Saving...');
     try {
-        if (editingGoal && currentGoalId) { await apiPut(`/api/goals/${currentGoalId}`, { title, description }); showToast('Goal updated successfully'); logSystemEvent('Goal updated'); }
-        else { await apiPost('/api/goals', { title, description }); showToast('Goal created successfully'); logSystemEvent('Goal created'); }
+        const savedGoal = editingGoal && currentGoalId
+            ? await apiPut(`/api/goals/${currentGoalId}`, { title, description })
+            : await apiPost('/api/goals', { title, description });
+        const goalApplied = upsertGoalInState(savedGoal);
         closeGoalModal();
-        await loadGoals();
+        if (!goalApplied && typeof loadGoals === 'function') {
+            await loadGoals();
+        } else {
+            refreshTaskViews();
+        }
+        void refreshDashboardData();
+        showToast(editingGoal ? 'Goal updated successfully' : 'Goal created successfully');
+        logSystemEvent(editingGoal ? 'Goal updated' : 'Goal created');
     } catch (err) {
         console.error('Failed to save goal:', err);
         showToast('Failed to save goal', 'error');
+    } finally {
+        releaseButton();
     }
 }
 
 function deleteGoal(goalId) {
-    showConfirmModal('Delete this goal and all its tasks?', async () => { await apiDelete(`/api/goals/${goalId}`); await loadGoals(); showToast('Goal deleted'); logSystemEvent('Goal deleted'); });
+    showConfirmModal('Delete this goal and all its tasks?', async () => {
+        await apiDelete(`/api/goals/${goalId}`);
+        const removed = removeGoalFromState(goalId);
+        if (!removed && typeof loadGoals === 'function') {
+            await loadGoals();
+        } else {
+            refreshTaskViews();
+        }
+        void refreshDashboardData();
+        showToast('Goal deleted');
+        logSystemEvent('Goal deleted');
+    });
 }
 
 // ---- Task Modal ----
@@ -662,11 +894,17 @@ function openAddTaskFromManage() {
 
 function populateGoalSelector() {
     const select = document.getElementById('task-goal-select');
+    if (!select) return;
+    const savedSelection = select.value || '';
     select.innerHTML = '<option value="">— Select a goal —</option>';
     for (const goal of goals) {
         const opt = document.createElement('option');
         opt.value = goal.id; opt.textContent = goal.title;
         select.appendChild(opt);
+    }
+
+    if (savedSelection && Array.from(select.options).some(option => option.value === savedSelection)) {
+        select.value = savedSelection;
     }
 }
 
@@ -704,31 +942,50 @@ async function saveTask() {
     const dueDate = document.getElementById('task-duedate-input').value || null;
     const subtasks = modalSubtasks;
     if (!title) { document.getElementById('task-title-input').focus(); return; }
+    let goalId = currentGoalId;
+    if (!editingTask && openedFromManage) {
+        goalId = document.getElementById('task-goal-select').value;
+        if (!goalId) { document.getElementById('task-goal-select').focus(); return; }
+    }
+    const releaseButton = setButtonBusy('modal-task-save', 'Saving...');
     try {
+        let savedTask;
         if (editingTask && currentTaskId) {
-            await apiPut(`/api/tasks/${currentTaskId}`, { title, description, importance, status, tags, dueDate, subtasks });
-            showToast('Task updated successfully');
-            logSystemEvent('Task updated');
+            savedTask = await apiPut(`/api/tasks/${currentTaskId}`, { title, description, importance, status, tags, dueDate, subtasks });
         } else {
-            let goalId = currentGoalId;
-            if (openedFromManage) {
-                goalId = document.getElementById('task-goal-select').value;
-                if (!goalId) { document.getElementById('task-goal-select').focus(); return; }
-            }
-            await apiPost(`/api/goals/${goalId}/tasks`, { title, description, importance, status, tags, dueDate, subtasks });
-            showToast('Task created successfully');
-            logSystemEvent('Task created');
+            savedTask = await apiPost(`/api/goals/${goalId}/tasks`, { title, description, importance, status, tags, dueDate, subtasks });
         }
+        const taskApplied = upsertTaskInState(savedTask);
         closeTaskModal();
-        await loadGoals();
+        if (!taskApplied && typeof loadGoals === 'function') {
+            await loadGoals();
+        } else {
+            refreshTaskViews();
+        }
+        void refreshDashboardData();
+        showToast(editingTask ? 'Task updated successfully' : 'Task created successfully');
+        logSystemEvent(editingTask ? 'Task updated' : 'Task created');
     } catch (err) {
         console.error('Failed to save task:', err);
         showToast('Failed to save task', 'error');
+    } finally {
+        releaseButton();
     }
 }
 
 function deleteTask(taskId) {
-    showConfirmModal('Delete this task?', async () => { await apiDelete(`/api/tasks/${taskId}`); await loadGoals(); showToast('Task deleted'); logSystemEvent('Task deleted'); });
+    showConfirmModal('Delete this task?', async () => {
+        await apiDelete(`/api/tasks/${taskId}`);
+        const removed = removeTaskFromState(taskId);
+        if (!removed && typeof loadGoals === 'function') {
+            await loadGoals();
+        } else {
+            refreshTaskViews();
+        }
+        void refreshDashboardData();
+        showToast('Task deleted');
+        logSystemEvent('Task deleted');
+    });
 }
 
 // ---- Subtasks in modal ----
@@ -795,6 +1052,7 @@ function getAllTasks() {
 function renderManageTasks() {
     const container = document.getElementById('manage-tasks-list');
     const summaryBar = document.getElementById('filtered-count');
+    if (!container || !summaryBar) return;
     let tasks = getAllTasks();
     if (filterStatus !== 'all') tasks = tasks.filter(t => t.status === filterStatus);
     if (filterImportance !== 'all') tasks = tasks.filter(t => t.importance === filterImportance);
@@ -849,6 +1107,7 @@ function renderManageTasks() {
 
 function renderKanban() {
     const select = document.getElementById('kanban-goal-select');
+    if (!select) return;
     select.innerHTML = '<option value="">— All Goals —</option>';
     goals.forEach(g => { const opt = document.createElement('option'); opt.value = g.id; opt.textContent = g.title; select.appendChild(opt); });
     select.value = kanbanGoalFilter;
@@ -867,6 +1126,7 @@ function renderKanban() {
     ['todo', 'in-progress', 'done'].forEach(status => {
         const container = document.getElementById(`kanban-${status}`);
         const countEl = document.getElementById(`kanban-count-${status}`);
+        if (!container || !countEl) return;
         countEl.textContent = columns[status].length;
         container.innerHTML = columns[status].map(t => {
             // Build mobile move buttons based on current status
@@ -919,7 +1179,14 @@ async function handleKanbanDrop(e, newStatus) {
     }
     renderKanban();
     try {
-        await apiPut(`/api/tasks/${draggedTaskId}`, { status: newStatus });
+        const savedTask = await apiPut(`/api/tasks/${draggedTaskId}`, { status: newStatus });
+        const taskApplied = upsertTaskInState(savedTask);
+        if (!taskApplied && typeof loadGoals === 'function') {
+            await loadGoals();
+        } else {
+            refreshTaskViews();
+        }
+        void refreshDashboardData();
     } catch (err) {
         console.error('Failed to move task:', err);
         showToast('Failed to sync — please refresh', 'error');
@@ -939,7 +1206,14 @@ async function moveKanbanTask(taskId, newStatus) {
 
     // Sync with server in background
     try {
-        await apiPut(`/api/tasks/${taskId}`, { status: newStatus });
+        const savedTask = await apiPut(`/api/tasks/${taskId}`, { status: newStatus });
+        const taskApplied = upsertTaskInState(savedTask);
+        if (!taskApplied && typeof loadGoals === 'function') {
+            await loadGoals();
+        } else {
+            refreshTaskViews();
+        }
+        void refreshDashboardData();
     } catch (err) {
         console.error('Failed to move task:', err);
         showToast('Failed to sync — please refresh', 'error');

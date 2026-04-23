@@ -399,18 +399,34 @@ function updatePomodoroInfo() {
 }
 function populateTimerTaskSelect() {
     const select = document.getElementById('timer-task-select');
+    if (!select) return;
     const savedSelection = localStorage.getItem(getTimerTaskStorageKey()) || '';
     select.innerHTML = '<option value="">— No task —</option>';
     for (const goal of goals) { for (const task of goal.tasks) { if (task.status !== 'done') { const opt = document.createElement('option'); opt.value = task.id; opt.textContent = `${goal.title} → ${task.title}`; select.appendChild(opt); } } }
 
     if (savedSelection && Array.from(select.options).some(option => option.value === savedSelection)) {
         select.value = savedSelection;
+    } else if (savedSelection) {
+        localStorage.removeItem(getTimerTaskStorageKey());
     }
 
     persistTimerRuntimeState();
 }
 async function logTimerSession(type, duration) {
-    const taskId = document.getElementById('timer-task-select').value || null;
+    const timerTaskSelect = document.getElementById('timer-task-select');
+    const taskId = timerTaskSelect ? timerTaskSelect.value || null : null;
     await apiPost('/api/timer-sessions', { taskId, type, duration });
-    if (taskId) await loadGoals();
+    if (taskId) {
+        const taskApplied = typeof adjustTaskTimeSpent === 'function'
+            ? adjustTaskTimeSpent(taskId, duration)
+            : false;
+        if (!taskApplied && typeof loadGoals === 'function') {
+            await loadGoals();
+        } else if (typeof refreshTaskViews === 'function') {
+            refreshTaskViews();
+        }
+    }
+    if (typeof refreshDashboardData === 'function') {
+        void refreshDashboardData();
+    }
 }
