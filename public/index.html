@@ -107,6 +107,115 @@
             </button>
             <button class="nav-btn" data-view="notes" id="nav-notes" aria-label="Notes">
                 <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskTracker — Personal Productivity</title>
+    <meta name="theme-color" content="#09090b">
+    <script>
+        (function () {
+            try {
+                const isAuthPage = window.location.pathname.endsWith('login.html') || window.location.pathname.endsWith('forgot-password.html');
+                const accessToken = String(localStorage.getItem('task_tracker_supabase_access_token') || '').trim();
+                if (!isAuthPage && !accessToken) {
+                    window.location.replace('login.html');
+                }
+            } catch (error) {
+                window.location.replace('login.html');
+            }
+        }());
+    </script>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="new_styles.css">
+    <!-- Preconnect to external origins for faster resource loading -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://uicdn.toast.com">
+    <!-- Font with display=swap (non-blocking) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <!-- Toast UI editor CSS loaded async via media trick -->
+    <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/theme/toastui-editor-dark.min.css" media="print" onload="this.media='all'">
+    <script defer src="/_vercel/insights/script.js"></script>
+    <script defer src="/_vercel/speed-insights/script.js"></script>
+</head>
+
+<body>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <span class="logo-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                    </svg></span>
+                <span class="logo-text">TaskTracker</span>
+            </div>
+            <button class="sidebar-toggle" id="btn-sidebar-toggle" type="button" aria-label="Collapse sidebar"
+                aria-controls="sidebar" aria-pressed="false" title="Collapse sidebar">
+                <svg class="sidebar-toggle-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    aria-hidden="true">
+                    <path d="M15 6l-6 6 6 6"></path>
+                </svg>
+            </button>
+        </div>
+        <nav class="sidebar-nav">
+            <button class="nav-btn active" data-view="dashboard" id="nav-dashboard" aria-label="Dashboard"
+                aria-current="page">
+                <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7" rx="1" />
+                        <rect x="14" y="3" width="7" height="7" rx="1" />
+                        <rect x="3" y="14" width="7" height="7" rx="1" />
+                        <rect x="14" y="14" width="7" height="7" rx="1" />
+                    </svg></span>
+                <span class="nav-label">Dashboard</span>
+            </button>
+            <button class="nav-btn" data-view="goals" id="nav-goals" aria-label="Goals">
+                <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <circle cx="12" cy="12" r="6" />
+                        <circle cx="12" cy="12" r="2" />
+                    </svg></span>
+                <span class="nav-label">Goals</span>
+            </button>
+            <button class="nav-btn" data-view="manage" id="nav-manage" aria-label="Tasks Management">
+                <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                        <path d="M2 17l10 5 10-5" />
+                        <path d="M2 12l10 5 10-5" />
+                    </svg></span>
+                <span class="nav-label">Tasks</span>
+            </button>
+            <button class="nav-btn" data-view="kanban" id="nav-kanban" aria-label="Kanban Board">
+                <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="5" height="18" rx="1" />
+                        <rect x="10" y="3" width="5" height="12" rx="1" />
+                        <rect x="17" y="3" width="5" height="7" rx="1" />
+                    </svg></span>
+                <span class="nav-label">Kanban</span>
+            </button>
+            <button class="nav-btn" data-view="timer" id="nav-timer" aria-label="Focus Timer">
+                <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12 6 12 12 16 14" />
+                    </svg></span>
+                <span class="nav-label">Timer</span>
+            </button>
+            <button class="nav-btn" data-view="notes" id="nav-notes" aria-label="Notes">
+                <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
                         <polyline points="14 2 14 8 20 8" />
@@ -114,6 +223,17 @@
                         <line x1="16" y1="17" x2="8" y2="17" />
                     </svg></span>
                 <span class="nav-label">Notes</span>
+            </button>
+            <button class="nav-btn" id="btn-announcement" aria-label="Announcements">
+                <span class="nav-icon" style="position: relative;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                    </svg>
+                    <span style="position: absolute; top: -2px; right: -2px; width: 6px; height: 6px; background: var(--urgent, #f43f5e); border-radius: 50%; box-shadow: 0 0 6px #f43f5e; animation: dot-pulse 2s infinite;"></span>
+                </span>
+                <span class="nav-label">Announcements</span>
             </button>
             <button class="nav-btn" data-view="settings" id="nav-settings" aria-label="Settings">
                 <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -143,10 +263,6 @@
                 </svg>
                 Export
             </button>
-            <div class="sidebar-info">
-                <span class="info-dot"></span>
-                <span>Local Only</span>
-            </div>
         </div>
     </aside>
 
@@ -161,10 +277,13 @@
             </div>
             <div>
                 <div class="mobile-brand-name">TaskTracker</div>
-                <div class="mobile-brand-status"><span class="mobile-dot-live"></span>Local Only</div>
             </div>
         </div>
         <div class="mobile-top-actions">
+            <button class="mobile-icon-btn" id="btn-mobile-announcement" aria-label="Announcements">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                <span style="position: absolute; top: 8px; right: 8px; width: 6px; height: 6px; background: var(--urgent, #f43f5e); border-radius: 50%; box-shadow: 0 0 6px #f43f5e; animation: dot-pulse 2s infinite;"></span>
+            </button>
             <button class="mobile-icon-btn" data-view="settings" aria-label="Settings">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
             </button>
