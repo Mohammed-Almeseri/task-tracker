@@ -1,0 +1,547 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>TaskTracker — Mobile Dashboard</title>
+<style>
+  /* ============================================================
+     Design tokens — purple / pink on near-black (matches desktop)
+     ============================================================ */
+  :root {
+    --bg: #0b0b14;
+    --bg-2: #0f0d1a;
+    --surface: #15121f;
+    --surface-2: #1a1628;
+    --border: #2a2440;
+    --text: #f1edff;
+    --muted: #8a83a6;
+
+    --purple: #a855f7;
+    --pink: #ec4899;
+    --mint: #2dd4a8;
+    --amber: #f59e0b;
+    --red: #ef4444;
+    --blue: #38bdf8;
+
+    --grad-brand: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+    --grad-card: linear-gradient(160deg, rgba(30,24,48,.9), rgba(18,14,30,.9));
+    --grad-focus: linear-gradient(150deg, rgba(168,85,247,.35), rgba(236,72,153,.18));
+    --grad-bg: radial-gradient(120% 80% at 0% 0%, rgba(168,85,247,.18), transparent 60%),
+               radial-gradient(100% 80% at 100% 0%, rgba(236,72,153,.12), transparent 60%);
+
+    --shadow-card: 0 8px 30px -12px rgba(0,0,0,.6);
+    --shadow-glow: 0 10px 30px -8px rgba(168,85,247,.55);
+    --shadow-pink: 0 8px 24px -6px rgba(236,72,153,.55);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    background-image: var(--grad-bg);
+    background-attachment: fixed;
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.4;
+  }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+  input { font-family: inherit; }
+
+  /* ============================================================
+     Layout
+     ============================================================ */
+  .app { max-width: 440px; margin: 0 auto; min-height: 100%; padding-bottom: 110px; }
+
+  /* Top bar */
+  .topbar {
+    position: sticky; top: 0; z-index: 30;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 18px;
+    background: rgba(11,11,20,.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(42,36,64,.5);
+  }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand-logo {
+    width: 34px; height: 34px; border-radius: 11px;
+    background: var(--grad-brand);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: var(--shadow-glow);
+    color: white;
+  }
+  .brand-name {
+    font-weight: 800; font-size: 14px; letter-spacing: .2px;
+    background: var(--grad-brand); -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .brand-status { font-size: 9px; color: var(--muted); display: flex; align-items: center; gap: 5px; }
+  .dot-live { width: 6px; height: 6px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 6px var(--mint); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+  .top-actions { display: flex; gap: 8px; }
+  .icon-btn {
+    position: relative;
+    width: 36px; height: 36px; border-radius: 11px;
+    background: rgba(42,36,64,.5);
+    border: 1px solid rgba(42,36,64,.8);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted);
+    transition: background .2s, color .2s;
+  }
+  .icon-btn:hover { background: rgba(42,36,64,.8); color: var(--text); }
+  .icon-btn .badge {
+    position: absolute; top: 6px; right: 6px;
+    width: 8px; height: 8px; border-radius: 50%; background: var(--pink);
+    box-shadow: 0 0 0 2px var(--bg);
+  }
+
+  /* Greeting */
+  .greeting { padding: 18px 18px 8px; }
+  .greeting h1 {
+    margin: 0; font-size: 30px; font-weight: 800; letter-spacing: -.5px;
+    background: var(--grad-brand); -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .greeting p { margin: 4px 0 0; font-size: 12px; color: var(--muted); }
+
+  /* Sections */
+  section { padding: 0 14px; margin-bottom: 16px; }
+  .card {
+    background: var(--grad-card);
+    border: 1px solid rgba(42,36,64,.7);
+    border-radius: 18px;
+    padding: 16px;
+    box-shadow: var(--shadow-card);
+  }
+  .card h3 { margin: 0 0 14px; font-size: 13px; font-weight: 600; letter-spacing: .2px; }
+  .card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .card-head h3 { margin: 0; }
+  .pill {
+    font-size: 9px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase;
+    padding: 4px 9px; border-radius: 999px;
+    background: rgba(168,85,247,.18); color: var(--purple);
+  }
+
+  /* Stats grid */
+  .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .stat {
+    background: var(--grad-card);
+    border: 1px solid rgba(42,36,64,.7);
+    border-radius: 16px;
+    padding: 14px;
+    box-shadow: var(--shadow-card);
+  }
+  .stat .ico { width: 20px; height: 20px; margin-bottom: 8px; }
+  .stat .val { font-size: 20px; font-weight: 800; line-height: 1; }
+  .stat .lab { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-top: 6px; }
+  .ico.purple { color: var(--purple); }
+  .ico.pink   { color: var(--pink); }
+  .ico.mint   { color: var(--mint); }
+  .ico.amber  { color: var(--amber); }
+
+  /* Focus task */
+  .focus {
+    position: relative; overflow: hidden;
+    background: var(--grad-focus), var(--grad-card);
+    border: 1px solid rgba(168,85,247,.3);
+    border-radius: 22px;
+    padding: 18px;
+    box-shadow: var(--shadow-glow);
+  }
+  .focus::after {
+    content: ""; position: absolute; top: -40px; right: -40px;
+    width: 140px; height: 140px; border-radius: 50%;
+    background: rgba(236,72,153,.18); filter: blur(40px);
+  }
+  .focus > * { position: relative; z-index: 1; }
+  .focus-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+  .focus-head .left { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+  .focus-title { font-size: 17px; font-weight: 700; margin: 0 0 4px; }
+  .focus-sub { font-size: 11px; color: var(--muted); margin: 0 0 14px; }
+  .stopwatch-row { display: flex; justify-content: space-between; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 8px; }
+  .stopwatch-row .time { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .progress { height: 4px; background: rgba(0,0,0,.3); border-radius: 999px; overflow: hidden; margin-bottom: 14px; }
+  .progress > i { display: block; height: 100%; background: var(--grad-brand); }
+  .focus-actions { display: flex; gap: 8px; }
+  .btn {
+    height: 40px; border-radius: 12px; padding: 0 14px;
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    font-size: 13px; font-weight: 600;
+  }
+  .btn-icon { width: 40px; padding: 0; background: rgba(42,36,64,.7); color: var(--text); }
+  .btn-primary { flex: 1; background: var(--grad-brand); color: white; box-shadow: var(--shadow-pink); }
+  .btn-primary:hover { opacity: .92; }
+
+  /* Daily Routines */
+  .routine-input { display: flex; gap: 8px; margin-bottom: 12px; }
+  .routine-input input {
+    flex: 1; height: 38px; padding: 0 12px;
+    background: rgba(42,36,64,.4); border: 1px solid rgba(42,36,64,.6);
+    border-radius: 12px; color: var(--text); font-size: 13px; outline: none;
+  }
+  .routine-input input::placeholder { color: var(--muted); }
+  .routine-input input:focus { border-color: var(--purple); }
+  .routine-input button { height: 38px; width: 38px; border-radius: 12px; background: var(--grad-brand); color: white; }
+  .routine-list { display: flex; flex-direction: column; gap: 8px; }
+  .routine {
+    display: flex; align-items: center; gap: 10px;
+    background: rgba(42,36,64,.3); border-radius: 12px; padding: 10px 12px;
+    font-size: 13px;
+  }
+  .routine .x { color: var(--muted); }
+  .routine .x:hover { color: var(--red); }
+  .routine input[type=checkbox] { accent-color: var(--purple); width: 16px; height: 16px; }
+
+  /* Priority breakdown */
+  .priority-row { display: flex; align-items: center; gap: 18px; }
+  .priority-donut { position: relative; width: 110px; height: 110px; flex-shrink: 0; }
+  .priority-donut svg { transform: rotate(-90deg); }
+  .priority-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .priority-center .n { font-size: 22px; font-weight: 800; }
+  .priority-center .l { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
+  .priority-legend { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+  .legend-row { display: flex; justify-content: space-between; font-size: 12px; }
+  .legend-left { display: flex; align-items: center; gap: 8px; color: var(--muted); }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .legend-row b { font-weight: 700; color: var(--text); }
+
+  /* Productivity Pulse */
+  .pulse-svg { width: 100%; height: 130px; display: block; }
+  .pulse-axis { display: flex; justify-content: space-between; font-size: 10px; color: var(--muted); margin-top: 4px; }
+
+  /* Tasks by status */
+  .tbs { display: flex; flex-direction: column; gap: 12px; }
+  .tbs-row .top { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px; }
+  .tbs-row .top span:first-child { color: var(--muted); }
+  .tbs-row .top b { font-weight: 700; }
+  .tbs-bar { height: 6px; background: rgba(42,36,64,.5); border-radius: 999px; overflow: hidden; }
+  .tbs-bar > i { display: block; height: 100%; border-radius: 999px; }
+
+  /* Goals progress */
+  .goals { display: flex; flex-direction: column; gap: 14px; }
+  .goal-row .top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+  .goal-row .top span { font-size: 13px; font-weight: 600; }
+  .goal-row .top b {
+    font-size: 13px; font-weight: 800;
+    background: var(--grad-brand); -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .goal-bar { height: 6px; background: rgba(42,36,64,.5); border-radius: 999px; overflow: hidden; margin-bottom: 4px; }
+  .goal-bar > i { display: block; height: 100%; background: var(--grad-brand); border-radius: 999px; }
+  .goal-row small { font-size: 10px; color: var(--muted); }
+
+  /* Recent sessions */
+  .sessions { display: flex; flex-direction: column; gap: 12px; }
+  .session { display: flex; align-items: center; gap: 12px; }
+  .session-ico {
+    width: 36px; height: 36px; border-radius: 12px; flex-shrink: 0;
+    background: rgba(42,36,64,.5); display: flex; align-items: center; justify-content: center;
+    color: var(--purple);
+  }
+  .session-body { flex: 1; min-width: 0; }
+  .session-title { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .session-date { font-size: 10px; color: var(--muted); }
+  .session-time { font-size: 13px; font-weight: 700; color: var(--pink); }
+
+  /* ============================================================
+     Bottom Nav — clean filled circle for active tab (no half-circle)
+     ============================================================ */
+  .bottom-nav {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+    padding: 8px 12px calc(env(safe-area-inset-bottom, 0px) + 12px);
+    pointer-events: none;
+  }
+  .bottom-nav-inner {
+    pointer-events: auto;
+    max-width: 440px; margin: 0 auto;
+    background: rgba(21,18,31,.9);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(42,36,64,.7);
+    border-radius: 22px;
+    box-shadow: var(--shadow-card);
+  }
+  .bottom-nav ul {
+    list-style: none; margin: 0; padding: 0;
+    display: grid; grid-template-columns: repeat(6, 1fr);
+  }
+  .nav-btn {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    width: 100%; padding: 10px 4px;
+  }
+  .nav-icon-wrap {
+    width: 38px; height: 38px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted);
+    transition: all .25s ease;
+  }
+  .nav-label { font-size: 9.5px; color: var(--muted); font-weight: 600; transition: color .2s; }
+  .nav-btn[aria-current="page"] .nav-icon-wrap {
+    background: var(--grad-brand);
+    color: white;
+    box-shadow: var(--shadow-pink);
+    transform: translateY(-2px);
+  }
+  .nav-btn[aria-current="page"] .nav-label { color: var(--pink); }
+
+  /* tiny svg sizing helpers */
+  .i { width: 18px; height: 18px; stroke-width: 2; }
+  .i-sm { width: 14px; height: 14px; stroke-width: 2; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Top bar -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-logo">
+        <svg class="i" viewBox="0 0 24 24" fill="white" stroke="white" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      </div>
+      <div>
+        <div class="brand-name">TaskTracker</div>
+        <div class="brand-status"><span class="dot-live"></span>Local Only</div>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button class="icon-btn" aria-label="Notifications">
+        <svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+        <span class="badge"></span>
+      </button>
+      <button class="icon-btn" aria-label="Settings">
+        <svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Greeting -->
+  <div class="greeting">
+    <h1>Good morning</h1>
+    <p>Rise and grind — let's make today count</p>
+  </div>
+
+  <!-- Stats -->
+  <section>
+    <div class="stats">
+      <div class="stat">
+        <svg class="i ico pink" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+        <div class="val">4</div><div class="lab">Goals</div>
+      </div>
+      <div class="stat">
+        <svg class="i ico purple" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h10M7 13h10M7 17h6"/></svg>
+        <div class="val">28</div><div class="lab">Tasks</div>
+      </div>
+      <div class="stat">
+        <svg class="i ico mint" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+        <div class="val">21</div><div class="lab">Completed</div>
+      </div>
+      <div class="stat">
+        <svg class="i ico amber" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <div class="val">34h 40m</div><div class="lab">Time Tracked</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Focus task -->
+  <section>
+    <div class="focus">
+      <div class="focus-head">
+        <div class="left">
+          <svg class="i-sm" viewBox="0 0 24 24" fill="none" stroke="#ec4899" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 5 5.6.8-4 4 1 5.6L12 14.8 6.9 17.4l1-5.6-4-4 5.6-.8z"/></svg>
+          <span>Focus Task</span>
+        </div>
+        <span class="pill">To Do</span>
+      </div>
+      <h3 class="focus-title">Test time complexity</h3>
+      <p class="focus-sub">📁 App</p>
+      <div class="stopwatch-row"><span>Stopwatch paused</span><span class="time">00:00</span></div>
+      <div class="progress"><i style="width:0%"></i></div>
+      <div class="focus-actions">
+        <button class="btn btn-icon" aria-label="More">
+          <svg class="i" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+        </button>
+        <button class="btn btn-primary">
+          <svg class="i-sm" viewBox="0 0 24 24" fill="white"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+          Start
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Daily Routines -->
+  <section>
+    <div class="card">
+      <h3>Daily Routines 🎨</h3>
+      <div class="routine-input">
+        <input id="routine-text" placeholder="Add a daily routine..." />
+        <button onclick="addRoutine()" aria-label="Add">
+          <svg class="i" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+      </div>
+      <div class="routine-list" id="routine-list">
+        <div class="routine">
+          <button class="x" aria-label="Remove" onclick="this.parentElement.remove()">
+            <svg class="i-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+          <input type="checkbox" />
+          <span>Pray</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Priority Breakdown -->
+  <section>
+    <div class="card">
+      <h3>Priority Breakdown</h3>
+      <div class="priority-row">
+        <div class="priority-donut">
+          <svg width="110" height="110" viewBox="0 0 110 110">
+            <circle cx="55" cy="55" r="42" fill="none" stroke="#1f1a30" stroke-width="11"/>
+            <!-- segments computed: total 28 -->
+            <circle cx="55" cy="55" r="42" fill="none" stroke="#ef4444" stroke-width="11" stroke-linecap="round" stroke-dasharray="9.4 254" stroke-dashoffset="0"/>
+            <circle cx="55" cy="55" r="42" fill="none" stroke="#f59e0b" stroke-width="11" stroke-linecap="round" stroke-dasharray="65.9 254" stroke-dashoffset="-11.4"/>
+            <circle cx="55" cy="55" r="42" fill="none" stroke="#a855f7" stroke-width="11" stroke-linecap="round" stroke-dasharray="160 254" stroke-dashoffset="-79.3"/>
+            <circle cx="55" cy="55" r="42" fill="none" stroke="#2dd4a8" stroke-width="11" stroke-linecap="round" stroke-dasharray="28.2 254" stroke-dashoffset="-241.3"/>
+          </svg>
+          <div class="priority-center"><span class="n">28</span><span class="l">total</span></div>
+        </div>
+        <div class="priority-legend">
+          <div class="legend-row"><div class="legend-left"><span class="legend-dot" style="background:#ef4444"></span>Urgent</div><b>1</b></div>
+          <div class="legend-row"><div class="legend-left"><span class="legend-dot" style="background:#f59e0b"></span>High</div><b>7</b></div>
+          <div class="legend-row"><div class="legend-left"><span class="legend-dot" style="background:#a855f7"></span>Medium</div><b>17</b></div>
+          <div class="legend-row"><div class="legend-left"><span class="legend-dot" style="background:#2dd4a8"></span>Low</div><b>3</b></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Productivity Pulse -->
+  <section>
+    <div class="card">
+      <div class="card-head"><h3>Productivity Pulse</h3><span class="pill">Weekly</span></div>
+      <svg class="pulse-svg" viewBox="0 0 300 130" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="pf" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#a855f7" stop-opacity=".5"/>
+            <stop offset="100%" stop-color="#a855f7" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <path d="M 0 125 C 25 125 25 10 50 10 C 75 10 75 120 100 120 C 125 120 125 122 150 122 C 175 122 175 95 200 95 C 225 95 225 120 250 120 C 275 120 275 125 300 125 L 300 130 L 0 130 Z" fill="url(#pf)"/>
+        <path d="M 0 125 C 25 125 25 10 50 10 C 75 10 75 120 100 120 C 125 120 125 122 150 122 C 175 122 175 95 200 95 C 225 95 225 120 250 120 C 275 120 275 125 300 125" fill="none" stroke="#a855f7" stroke-width="2.5" stroke-linecap="round"/>
+        <g fill="#ec4899">
+          <circle cx="0" cy="125" r="3"/><circle cx="50" cy="10" r="3"/><circle cx="100" cy="120" r="3"/><circle cx="150" cy="122" r="3"/><circle cx="200" cy="95" r="3"/><circle cx="250" cy="120" r="3"/><circle cx="300" cy="125" r="3"/>
+        </g>
+      </svg>
+      <div class="pulse-axis"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
+    </div>
+  </section>
+
+  <!-- Tasks by status -->
+  <section>
+    <div class="card">
+      <h3>Tasks by Status</h3>
+      <div class="tbs">
+        <div class="tbs-row"><div class="top"><span>To Do</span><b>7</b></div><div class="tbs-bar"><i style="width:25%;background:#7c83ff"></i></div></div>
+        <div class="tbs-row"><div class="top"><span>In Progress</span><b>0</b></div><div class="tbs-bar"><i style="width:0%;background:#38bdf8"></i></div></div>
+        <div class="tbs-row"><div class="top"><span>Blocked</span><b>0</b></div><div class="tbs-bar"><i style="width:0%;background:#ef4444"></i></div></div>
+        <div class="tbs-row"><div class="top"><span>Review</span><b>0</b></div><div class="tbs-bar"><i style="width:0%;background:#f59e0b"></i></div></div>
+        <div class="tbs-row"><div class="top"><span>Done</span><b>21</b></div><div class="tbs-bar"><i style="width:75%;background:#2dd4a8"></i></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Goals Progress -->
+  <section>
+    <div class="card">
+      <h3>Goals Progress</h3>
+      <div class="goals">
+        <div class="goal-row"><div class="top"><span>App</span><b>50%</b></div><div class="goal-bar"><i style="width:50%"></i></div><small>4 of 8 tasks done</small></div>
+        <div class="goal-row"><div class="top"><span>AI Engineer</span><b>33%</b></div><div class="goal-bar"><i style="width:33%"></i></div><small>1 of 3 tasks done</small></div>
+        <div class="goal-row"><div class="top"><span>University</span><b>94%</b></div><div class="goal-bar"><i style="width:94%"></i></div><small>16 of 17 tasks done</small></div>
+        <div class="goal-row"><div class="top"><span>Final Exams</span><b>0%</b></div><div class="goal-bar"><i style="width:0%"></i></div><small>0 of 0 tasks done</small></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Recent Sessions -->
+  <section>
+    <div class="card">
+      <h3>Recent Sessions</h3>
+      <div class="sessions">
+        <div class="session"><div class="session-ico"><svg class="i-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="session-body"><div class="session-title">Test time complexity</div><div class="session-date">4/23/2026</div></div><span class="session-time">1m</span></div>
+        <div class="session"><div class="session-ico"><svg class="i-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="session-body"><div class="session-title">Intro to Database HW</div><div class="session-date">4/23/2026</div></div><span class="session-time">47m</span></div>
+        <div class="session"><div class="session-ico"><svg class="i-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="session-body"><div class="session-title">Intro to Database Quiz</div><div class="session-date">4/23/2026</div></div><span class="session-time">7m</span></div>
+        <div class="session"><div class="session-ico"><svg class="i-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="session-body"><div class="session-title">Finish New Trends assignment</div><div class="session-date">4/23/2026</div></div><span class="session-time">25m</span></div>
+        <div class="session"><div class="session-ico"><svg class="i-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="session-body"><div class="session-title">Work on TaskTracker</div><div class="session-date">4/20/2026</div></div><span class="session-time">8h</span></div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- Bottom navigation -->
+<nav class="bottom-nav" aria-label="Primary">
+  <div class="bottom-nav-inner">
+    <ul>
+      <li><button class="nav-btn" aria-current="page" data-tab="dashboard">
+        <span class="nav-icon-wrap"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg></span>
+        <span class="nav-label">Dashboard</span>
+      </button></li>
+      <li><button class="nav-btn" data-tab="goals">
+        <span class="nav-icon-wrap"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>
+        <span class="nav-label">Goals</span>
+      </button></li>
+      <li><button class="nav-btn" data-tab="tasks">
+        <span class="nav-icon-wrap"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg></span>
+        <span class="nav-label">Tasks</span>
+      </button></li>
+      <li><button class="nav-btn" data-tab="kanban">
+        <span class="nav-icon-wrap"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="6" height="14"/><rect x="10" y="3" width="6" height="10"/><rect x="17" y="3" width="4" height="7"/></svg></span>
+        <span class="nav-label">Kanban</span>
+      </button></li>
+      <li><button class="nav-btn" data-tab="timer">
+        <span class="nav-icon-wrap"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 2h6"/></svg></span>
+        <span class="nav-label">Timer</span>
+      </button></li>
+      <li><button class="nav-btn" data-tab="notes">
+        <span class="nav-icon-wrap"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg></span>
+        <span class="nav-label">Notes</span>
+      </button></li>
+    </ul>
+  </div>
+</nav>
+
+<script>
+  // Bottom nav active state
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.nav-btn').forEach(b => b.removeAttribute('aria-current'));
+      btn.setAttribute('aria-current', 'page');
+    });
+  });
+
+  // Daily routines add
+  function addRoutine() {
+    const input = document.getElementById('routine-text');
+    const v = input.value.trim();
+    if (!v) return;
+    const list = document.getElementById('routine-list');
+    const row = document.createElement('div');
+    row.className = 'routine';
+    row.innerHTML = `
+      <button class="x" aria-label="Remove" onclick="this.parentElement.remove()">
+        <svg class="i-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+      <input type="checkbox" />
+      <span></span>
+    `;
+    row.querySelector('span').textContent = v;
+    list.appendChild(row);
+    input.value = '';
+  }
+  document.getElementById('routine-text').addEventListener('keydown', e => {
+    if (e.key === 'Enter') addRoutine();
+  });
+</script>
+</body>
+</html>

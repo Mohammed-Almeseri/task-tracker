@@ -545,7 +545,6 @@ a {
 
     .auth-button-primary {
         width: 100%;
-        max-width: 280px;
         min-height: 48px;
         font-size: 0.95rem;
     }

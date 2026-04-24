@@ -316,9 +316,12 @@ window.showToast = showToast;
 
 function showView(name) {
     // Phase 1: Instant visual switch (< 16ms, no blocking)
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    const activeBtn = document.querySelector(`[data-view="${name}"]`);
-    if (activeBtn) activeBtn.classList.add('active');
+    document.querySelectorAll('.nav-btn, .mobile-nav-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll(`[data-view="${name}"]`).forEach(b => {
+        if (b.classList.contains('nav-btn') || b.classList.contains('mobile-nav-btn')) {
+            b.classList.add('active');
+        }
+    });
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     const targetView = document.getElementById(`view-${name}`);
     if (targetView) targetView.classList.add('active');
@@ -352,7 +355,7 @@ function performViewSwitch(name) {
 }
 
 function initNavigation() {
-    document.querySelectorAll('.nav-btn[data-view]').forEach(btn => {
+    document.querySelectorAll('.nav-btn[data-view], .mobile-nav-btn[data-view], .mobile-icon-btn[data-view]').forEach(btn => {
         if (btn._navBound) return;
         btn._navBound = true;
         btn.addEventListener('click', () => showView(btn.dataset.view));
