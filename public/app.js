@@ -390,6 +390,16 @@ function showConfirmModal(message, onConfirm) {
     document.getElementById('modal-confirm').classList.add('open');
 }
 
+function initNotificationButtons() {
+    document.querySelectorAll('.notification-trigger').forEach(btn => {
+        if (btn._notificationBound) return;
+        btn._notificationBound = true;
+        btn.addEventListener('click', () => {
+            showToast('Early access: this is nowhere near the final product yet.', 'info');
+        });
+    });
+}
+
 function closeConfirmModal() {
     pendingDeleteFn = null;
     document.getElementById('modal-confirm').classList.remove('open');
@@ -404,6 +414,7 @@ async function initApp() {
         loadSettings();
     }
     initNavigation();
+    initNotificationButtons();
     if (typeof initSidebarControls === 'function') {
         initSidebarControls();
     }

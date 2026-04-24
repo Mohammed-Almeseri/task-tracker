@@ -296,6 +296,13 @@ body {
     font-size: 12px;
 }
 
+.btn-notification {
+    width: 100%;
+    justify-content: center;
+    gap: 8px;
+    font-size: 12px;
+}
+
 .sidebar-info {
     display: flex;
     align-items: center;
@@ -319,7 +326,8 @@ body.sidebar-collapsed .logo {
 body.sidebar-collapsed .logo-text,
 body.sidebar-collapsed .nav-label,
 body.sidebar-collapsed .sidebar-info span:last-child,
-body.sidebar-collapsed .btn-export span:last-child {
+body.sidebar-collapsed .btn-export span:last-child,
+body.sidebar-collapsed .btn-notification span:last-child {
     display: none;
 }
 
@@ -3163,8 +3171,9 @@ select:focus-visible {
         top: 0;
         z-index: 30;
         align-items: center;
-        justify-content: space-between;
-        padding: 12px 18px;
+        justify-content: flex-start;
+        gap: 12px;
+        padding: 12px 14px;
         margin: 0 -14px 16px -14px; /* offset main-content padding */
         background: rgba(28, 24, 42, 0.75);
         backdrop-filter: blur(20px);
@@ -3181,6 +3190,12 @@ select:focus-visible {
         display: flex;
         align-items: center;
         gap: 10px;
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .mobile-brand > div {
+        min-width: 0;
     }
 
     .mobile-brand-logo {
@@ -3203,6 +3218,10 @@ select:focus-visible {
         -webkit-background-clip: text;
         background-clip: text;
         color: transparent;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     .mobile-brand-status {
@@ -3211,6 +3230,10 @@ select:focus-visible {
         display: flex;
         align-items: center;
         gap: 5px;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     .mobile-dot-live {
@@ -3225,6 +3248,8 @@ select:focus-visible {
     .mobile-top-actions {
         display: flex;
         gap: 8px;
+        margin-left: auto;
+        flex-shrink: 0;
     }
 
     .mobile-icon-btn {
@@ -3275,10 +3300,10 @@ select:focus-visible {
         border: 1px solid rgba(82, 70, 114, 0.7);
         border-radius: 22px;
         box-shadow: 0 8px 30px -12px rgba(0, 0, 0, 0.6);
-        display: flex;
-        justify-content: space-between;
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
         padding: 4px;
-        overflow-x: auto;
+        overflow-x: hidden;
         scrollbar-width: none;
     }
     
@@ -3297,7 +3322,8 @@ select:focus-visible {
         flex-direction: column;
         align-items: center;
         gap: 4px;
-        min-width: 52px;
+        min-width: 0;
+        width: 100%;
         flex: 1;
         padding: 4px 2px;
         background: none;
@@ -3321,6 +3347,12 @@ select:focus-visible {
         color: var(--text-muted);
         font-weight: 600;
         transition: color 0.2s;
+        display: block;
+        width: 100%;
+        text-align: center;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     .mobile-nav-btn.active .mobile-nav-icon-wrap {
@@ -3637,6 +3669,10 @@ select:focus-visible {
 @media (max-width: 380px) {
     .bento-grid {
         grid-template-columns: 1fr;
+    }
+    
+    .mobile-brand-status {
+        display: none;
     }
     
     .timer-ring {
