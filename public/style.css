@@ -3627,8 +3627,7 @@ select:focus-visible {
 
 /* Extra small screens */
 @media (max-width: 380px) {
-    .bento-grid,
-    .dashboard-stats-grid {
+    .bento-grid {
         grid-template-columns: 1fr;
     }
     
