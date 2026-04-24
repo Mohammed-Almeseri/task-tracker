@@ -18,6 +18,13 @@ if (!supabaseConfig.url || !supabaseConfig.anonKey) {
     console.warn('  ⚠️  SUPABASE_URL or SUPABASE_ANON_KEY not set — auth will fail until configured.');
 }
 
+// Security guard: prevent accidental exposure of the service role key as the anon key
+const serviceRoleKey = String(process.env.SUPABASE_SERVICE_ROLE_KEY || '').trim();
+if (serviceRoleKey && supabaseConfig.anonKey && serviceRoleKey === supabaseConfig.anonKey) {
+    console.error('  🛑 FATAL: SUPABASE_ANON_KEY equals SUPABASE_SERVICE_ROLE_KEY — this would expose admin access to the browser. Aborting.');
+    process.exit(1);
+}
+
 // =====================
 // 1. CONFIGURATION
 // =====================
@@ -46,6 +53,7 @@ const allowedOrigins = new Set([
 ]);
 
 const app = express();
+app.disable('x-powered-by');
 const requestContext = new AsyncLocalStorage();
 const rateLimitState = new Map();
 
@@ -341,16 +349,36 @@ const exportRateLimit = createRateLimitMiddleware({
     message: 'Too many export requests. Please wait and try again.'
 });
 
+const globalApiRateLimit = createRateLimitMiddleware({
+    windowMs: 60 * 1000,
+    max: 200,
+    scope: 'global-api',
+    message: 'Too many requests. Please slow down and try again.'
+});
+
 // =====================
 // 8. MIDDLEWARE
 // =====================
 
 app.use((req, res, next) => {
+    // --- Security Headers ---
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('X-Frame-Options', 'SAMEORIGIN');
-    res.setHeader('X-XSS-Protection', '1; mode=block');
+    res.setHeader('X-XSS-Protection', '0'); // Disabled — CSP supersedes the legacy XSS auditor
     res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    res.setHeader('Strict-Transport-Security', 'max-age=63072000; includeSubDomains');
+    res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+    res.setHeader('Content-Security-Policy', [
+        "default-src 'self'",
+        "script-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://uicdn.toast.com https://unpkg.com 'unsafe-inline'",
+        "style-src 'self' https://fonts.googleapis.com https://uicdn.toast.com https://cdnjs.cloudflare.com 'unsafe-inline'",
+        "font-src 'self' https://fonts.gstatic.com",
+        "img-src 'self' data: blob:",
+        "connect-src 'self' https://*.supabase.co",
+        "frame-ancestors 'none'"
+    ].join('; '));
 
+    // --- CORS ---
     const origin = req.get('Origin');
     if (origin && allowedOrigins.has(origin)) {
         res.setHeader('Access-Control-Allow-Origin', origin);
@@ -369,7 +397,7 @@ app.use((req, res, next) => {
 
 app.use(express.json({ limit: config.maxBodySize }));
 
-app.use('/api', authenticateApiRequest);
+app.use('/api', globalApiRateLimit, authenticateApiRequest);
 
 app.use(express.static(path.join(__dirname, 'public'), {
     maxAge: '1d',
@@ -761,6 +789,34 @@ const backupService = {
             throw new ValidationError('Backup data must contain a "goals" array');
         }
 
+        // Enforce restore limits to prevent abuse
+        const MAX_GOALS = 100;
+        const MAX_TASKS_PER_GOAL = 200;
+        const MAX_TIMER_SESSIONS = 2000;
+        const MAX_NOTES = 500;
+        const MAX_FIELD_LEN = 10000;
+
+        if (body.goals.length > MAX_GOALS) {
+            throw new ValidationError(`Restore limited to ${MAX_GOALS} goals (received ${body.goals.length})`);
+        }
+        for (const goal of body.goals) {
+            if (goal.title && goal.title.length > MAX_FIELD_LEN) throw new ValidationError('Goal title exceeds maximum length');
+            if (Array.isArray(goal.tasks) && goal.tasks.length > MAX_TASKS_PER_GOAL) {
+                throw new ValidationError(`Each goal limited to ${MAX_TASKS_PER_GOAL} tasks`);
+            }
+        }
+        if (Array.isArray(body.timerSessions) && body.timerSessions.length > MAX_TIMER_SESSIONS) {
+            throw new ValidationError(`Restore limited to ${MAX_TIMER_SESSIONS} timer sessions`);
+        }
+        if (Array.isArray(body.notes) && body.notes.length > MAX_NOTES) {
+            throw new ValidationError(`Restore limited to ${MAX_NOTES} notes`);
+        }
+        if (Array.isArray(body.notes)) {
+            for (const note of body.notes) {
+                if (note.content && note.content.length > MAX_FIELD_LEN) throw new ValidationError('Note content exceeds maximum length');
+            }
+        }
+
         // Delete existing data (order matters for FK constraints)
         await supabase.from('timer_sessions').delete().eq('user_id', userId);
         await supabase.from('tasks').delete().eq('user_id', userId);
@@ -1127,7 +1183,7 @@ app.get('/api/export/csv', exportRateLimit, asyncHandler(async (req, res) => {
 // 11. ERROR HANDLING
 // =====================
 
-app.use('/api/*', (req, res) => { res.status(404).json({ error: `Route not found: ${req.method} ${req.path}` }); });
+app.use('/api/*', (req, res) => { res.status(404).json({ error: 'API route not found' }); });
 
 app.use((err, req, res, _next) => {
     const statusCode = err.statusCode || 500;
