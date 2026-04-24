@@ -515,8 +515,13 @@ a {
     }
 
     .auth-card {
-        border-radius: 24px;
-        padding: clamp(20px, 5vw, 28px);
+        border-radius: 28px;
+        padding: clamp(28px, 6vw, 36px);
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(168, 85, 247, 0.25);
+        box-shadow: 0 16px 40px -12px rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
     }
 
     .auth-card-top {
