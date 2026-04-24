@@ -208,21 +208,40 @@ async function saveNote() {
     const content = noteEditor.getMarkdown();
     if (!title) { document.getElementById('note-title-input').focus(); return; }
     const releaseButton = setButtonBusy('modal-note-save', 'Saving...');
-    try {
-        const savedNote = editingNote && currentNoteId
-            ? await apiPut(`/api/notes/${currentNoteId}`, { title, content })
-            : await apiPost('/api/notes', { title, content });
-        const noteApplied = upsertNoteInState(savedNote);
-        if (!noteApplied && typeof loadNotes === 'function') {
-            await loadNotes();
-        } else {
-            renderNotes();
+    const isEditing = editingNote && currentNoteId;
+    const noteId = isEditing ? currentNoteId : createClientId('note');
+    const snapshot = snapshotNotesState();
+    const now = new Date().toISOString();
+    const optimisticNote = isEditing
+        ? {
+            ...(notes.find(note => note.id === currentNoteId) || {}),
+            title,
+            content,
+            updatedAt: now
         }
-        closeNoteModal();
-        showToast(editingNote ? 'Note updated' : 'Note created');
-        logSystemEvent(editingNote ? 'Note updated' : 'Note created');
+        : {
+            id: noteId,
+            title,
+            content,
+            createdAt: now,
+            updatedAt: now
+        };
+
+    upsertNoteInState(optimisticNote);
+    renderNotes();
+    closeNoteModal();
+    try {
+        const savedNote = isEditing
+            ? await apiPut(`/api/notes/${currentNoteId}`, { title, content })
+            : await apiPost('/api/notes', { id: noteId, title, content });
+        upsertNoteInState(savedNote);
+        renderNotes();
+        showToast(isEditing ? 'Note updated' : 'Note created');
+        logSystemEvent(isEditing ? 'Note updated' : 'Note created');
     } catch (err) {
         console.error('Failed to save note:', err);
+        restoreNotesState(snapshot);
+        renderNotes();
         showToast('Failed to save note', 'error');
     } finally {
         releaseButton();
@@ -231,14 +250,18 @@ async function saveNote() {
 
 function deleteNote(noteId) {
     showConfirmModal('Delete this note?', async () => {
-        await apiDelete(`/api/notes/${noteId}`);
-        const removed = removeNoteFromState(noteId);
-        if (!removed && typeof loadNotes === 'function') {
-            await loadNotes();
-        } else {
+        const snapshot = snapshotNotesState();
+        removeNoteFromState(noteId);
+        renderNotes();
+        try {
+            await apiDelete(`/api/notes/${noteId}`);
+            showToast('Note deleted');
+            logSystemEvent('Note deleted');
+        } catch (err) {
+            console.error('Failed to delete note:', err);
+            restoreNotesState(snapshot);
             renderNotes();
+            showToast('Failed to delete note', 'error');
         }
-        showToast('Note deleted');
-        logSystemEvent('Note deleted');
     });
 }

@@ -323,6 +323,10 @@ function showView(name) {
     const targetView = document.getElementById(`view-${name}`);
     if (targetView) targetView.classList.add('active');
 
+    if (name === 'dashboard' && typeof renderDashboardInstant === 'function') {
+        renderDashboardInstant();
+    }
+
     // Phase 2: Data loading deferred to next frame so paint happens first
     requestAnimationFrame(() => {
         setTimeout(() => _loadViewData(name), 0);
@@ -453,6 +457,8 @@ async function apiDelete(url) {
 
 var dashboardRefreshPromise = null;
 var dashboardRefreshQueued = false;
+var dashboardRefreshDebounceTimer = null;
+var _pendingRefreshTaskViews = false;
 
 function setButtonBusy(buttonId, busyText) {
     const button = document.getElementById(buttonId);
@@ -605,7 +611,8 @@ function refreshTaskSelectors() {
     }
 }
 
-function refreshTaskViews() {
+function _doRefreshTaskViews() {
+    _pendingRefreshTaskViews = false;
     if (typeof renderGoals === 'function') {
         renderGoals();
     }
@@ -629,14 +636,22 @@ function refreshTaskViews() {
         }
     }
 
+    if (dashboardView && dashboardView.classList.contains('active') && typeof renderDashboardInstant === 'function') {
+        renderDashboardInstant();
+    }
+
     refreshTaskSelectors();
 }
 
-function refreshDashboardData() {
-    if (typeof loadDashboard !== 'function') {
-        return Promise.resolve();
-    }
+function refreshTaskViews() {
+    // Coalesce multiple calls within the same frame into one render
+    if (_pendingRefreshTaskViews) return;
+    _pendingRefreshTaskViews = true;
+    // Use microtask so all synchronous state updates settle first, then render once
+    queueMicrotask(_doRefreshTaskViews);
+}
 
+function _executeRefreshDashboardData() {
     if (dashboardRefreshPromise) {
         dashboardRefreshQueued = true;
         return dashboardRefreshPromise;
@@ -651,11 +666,87 @@ function refreshDashboardData() {
             dashboardRefreshPromise = null;
             if (dashboardRefreshQueued) {
                 dashboardRefreshQueued = false;
-                void refreshDashboardData();
+                void _executeRefreshDashboardData();
             }
         });
 
     return dashboardRefreshPromise;
+}
+
+function refreshDashboardData() {
+    if (typeof loadDashboard !== 'function') {
+        return Promise.resolve();
+    }
+
+    // Debounce: wait 800ms of quiet before hitting the server.
+    // This lets rapid mutations (timer log + task update) coalesce into one fetch.
+    if (dashboardRefreshDebounceTimer) {
+        clearTimeout(dashboardRefreshDebounceTimer);
+    }
+
+    return new Promise((resolve) => {
+        dashboardRefreshDebounceTimer = setTimeout(() => {
+            dashboardRefreshDebounceTimer = null;
+            // Use requestIdleCallback so the fetch doesn't block user interactions
+            const scheduleRefresh = typeof requestIdleCallback === 'function'
+                ? requestIdleCallback
+                : (cb) => setTimeout(cb, 0);
+            scheduleRefresh(() => {
+                _executeRefreshDashboardData().then(resolve).catch(resolve);
+            });
+        }, 800);
+    });
+}
+
+function cloneSerializable(value) {
+    if (typeof structuredClone === 'function') {
+        return structuredClone(value);
+    }
+
+    return JSON.parse(JSON.stringify(value));
+}
+
+function createClientId(prefix) {
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+        return crypto.randomUUID();
+    }
+
+    return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function snapshotGoalsState() {
+    return cloneSerializable(goals);
+}
+
+function restoreGoalsState(snapshot) {
+    goals = cloneSerializable(snapshot);
+}
+
+function snapshotNotesState() {
+    return cloneSerializable(notes);
+}
+
+function restoreNotesState(snapshot) {
+    notes = cloneSerializable(snapshot);
+}
+
+function buildOptimisticTaskFromInput(baseTask, updates, now = new Date().toISOString()) {
+    const nextTask = {
+        ...baseTask,
+        ...updates
+    };
+
+    if (updates.status !== undefined) {
+        if (updates.status === 'done' && baseTask.status !== 'done') {
+            nextTask.completedAt = now;
+        } else if (updates.status !== 'done' && baseTask.status === 'done') {
+            nextTask.completedAt = null;
+        } else if (updates.status === 'done') {
+            nextTask.completedAt = baseTask.completedAt || now;
+        }
+    }
+
+    return nextTask;
 }
 
 // ==========================================
@@ -669,6 +760,10 @@ async function loadGoals() {
     if (manageView && manageView.classList.contains('active')) renderManageTasks();
     const kanbanView = document.getElementById('view-kanban');
     if (kanbanView && kanbanView.classList.contains('active')) renderKanban();
+    const dashboardView = document.getElementById('view-dashboard');
+    if (dashboardView && dashboardView.classList.contains('active') && typeof renderDashboardInstant === 'function') {
+        renderDashboardInstant();
+    }
     refreshTaskSelectors();
 }
 
@@ -811,22 +906,31 @@ async function saveGoal() {
     const description = document.getElementById('goal-desc-input').value.trim();
     if (!title) { document.getElementById('goal-title-input').focus(); return; }
     const releaseButton = setButtonBusy('modal-goal-save', 'Saving...');
+    const isEditing = editingGoal && currentGoalId;
+    const goalId = isEditing ? currentGoalId : createClientId('goal');
+    const snapshot = snapshotGoalsState();
+    const now = new Date().toISOString();
+    const existingGoal = isEditing ? goals.find(goal => goal.id === currentGoalId) : null;
+    const optimisticGoal = isEditing && existingGoal
+        ? { ...existingGoal, title, description }
+        : { id: goalId, title, description, createdAt: now, tasks: [] };
+
+    upsertGoalInState(optimisticGoal);
+    closeGoalModal();
+    refreshTaskViews();
     try {
-        const savedGoal = editingGoal && currentGoalId
+        const savedGoal = isEditing
             ? await apiPut(`/api/goals/${currentGoalId}`, { title, description })
-            : await apiPost('/api/goals', { title, description });
-        const goalApplied = upsertGoalInState(savedGoal);
-        closeGoalModal();
-        if (!goalApplied && typeof loadGoals === 'function') {
-            await loadGoals();
-        } else {
-            refreshTaskViews();
-        }
+            : await apiPost('/api/goals', { id: goalId, title, description });
+        // Silently merge server data — no re-render needed, optimistic UI was correct
+        upsertGoalInState(savedGoal);
         void refreshDashboardData();
         showToast(editingGoal ? 'Goal updated successfully' : 'Goal created successfully');
         logSystemEvent(editingGoal ? 'Goal updated' : 'Goal created');
     } catch (err) {
         console.error('Failed to save goal:', err);
+        restoreGoalsState(snapshot);
+        refreshTaskViews();
         showToast('Failed to save goal', 'error');
     } finally {
         releaseButton();
@@ -835,16 +939,20 @@ async function saveGoal() {
 
 function deleteGoal(goalId) {
     showConfirmModal('Delete this goal and all its tasks?', async () => {
-        await apiDelete(`/api/goals/${goalId}`);
-        const removed = removeGoalFromState(goalId);
-        if (!removed && typeof loadGoals === 'function') {
-            await loadGoals();
-        } else {
+        const snapshot = snapshotGoalsState();
+        removeGoalFromState(goalId);
+        refreshTaskViews();
+        try {
+            await apiDelete(`/api/goals/${goalId}`);
+            void refreshDashboardData();
+            showToast('Goal deleted');
+            logSystemEvent('Goal deleted');
+        } catch (err) {
+            console.error('Failed to delete goal:', err);
+            restoreGoalsState(snapshot);
             refreshTaskViews();
+            showToast('Failed to delete goal', 'error');
         }
-        void refreshDashboardData();
-        showToast('Goal deleted');
-        logSystemEvent('Goal deleted');
     });
 }
 
@@ -948,25 +1056,53 @@ async function saveTask() {
         if (!goalId) { document.getElementById('task-goal-select').focus(); return; }
     }
     const releaseButton = setButtonBusy('modal-task-save', 'Saving...');
+    const isEditing = editingTask && currentTaskId;
+    const taskId = isEditing ? currentTaskId : createClientId('task');
+    const snapshot = snapshotGoalsState();
+    const now = new Date().toISOString();
+    const currentTask = isEditing
+        ? getAllTasks().find(task => task.id === currentTaskId)
+        : null;
+    const optimisticTask = isEditing && currentTask
+        ? buildOptimisticTaskFromInput(currentTask, { title, description, importance, status, tags, dueDate, subtasks })
+        : {
+            id: taskId,
+            goalId,
+            title,
+            description,
+            status,
+            importance,
+            tags,
+            dueDate,
+            subtasks: cloneSerializable(subtasks),
+            timeSpent: 0,
+            createdAt: now,
+            updatedAt: now,
+            completedAt: status === 'done' ? now : null
+        };
+    if (!isEditing) {
+        optimisticTask.goalId = goalId;
+    }
+
+    upsertTaskInState(optimisticTask);
+    closeTaskModal();
+    refreshTaskViews();
     try {
         let savedTask;
-        if (editingTask && currentTaskId) {
+        if (isEditing) {
             savedTask = await apiPut(`/api/tasks/${currentTaskId}`, { title, description, importance, status, tags, dueDate, subtasks });
         } else {
-            savedTask = await apiPost(`/api/goals/${goalId}/tasks`, { title, description, importance, status, tags, dueDate, subtasks });
+            savedTask = await apiPost(`/api/goals/${goalId}/tasks`, { id: taskId, title, description, importance, status, tags, dueDate, subtasks });
         }
-        const taskApplied = upsertTaskInState(savedTask);
-        closeTaskModal();
-        if (!taskApplied && typeof loadGoals === 'function') {
-            await loadGoals();
-        } else {
-            refreshTaskViews();
-        }
+        // Silently merge server data — no re-render needed, optimistic UI was correct
+        upsertTaskInState(savedTask);
         void refreshDashboardData();
         showToast(editingTask ? 'Task updated successfully' : 'Task created successfully');
         logSystemEvent(editingTask ? 'Task updated' : 'Task created');
     } catch (err) {
         console.error('Failed to save task:', err);
+        restoreGoalsState(snapshot);
+        refreshTaskViews();
         showToast('Failed to save task', 'error');
     } finally {
         releaseButton();
@@ -975,16 +1111,20 @@ async function saveTask() {
 
 function deleteTask(taskId) {
     showConfirmModal('Delete this task?', async () => {
-        await apiDelete(`/api/tasks/${taskId}`);
-        const removed = removeTaskFromState(taskId);
-        if (!removed && typeof loadGoals === 'function') {
-            await loadGoals();
-        } else {
+        const snapshot = snapshotGoalsState();
+        removeTaskFromState(taskId);
+        refreshTaskViews();
+        try {
+            await apiDelete(`/api/tasks/${taskId}`);
+            void refreshDashboardData();
+            showToast('Task deleted');
+            logSystemEvent('Task deleted');
+        } catch (err) {
+            console.error('Failed to delete task:', err);
+            restoreGoalsState(snapshot);
             refreshTaskViews();
+            showToast('Failed to delete task', 'error');
         }
-        void refreshDashboardData();
-        showToast('Task deleted');
-        logSystemEvent('Task deleted');
     });
 }
 
@@ -1172,53 +1312,48 @@ function onDragEnd(e) { e.target.classList.remove('dragging'); draggedTaskId = n
 
 async function handleKanbanDrop(e, newStatus) {
     if (!draggedTaskId) return;
-    // Optimistic: update local data immediately
-    for (const goal of goals) {
-        const task = goal.tasks.find(t => t.id === draggedTaskId);
-        if (task) { task.status = newStatus; break; }
+    const snapshot = snapshotGoalsState();
+    const task = getAllTasks().find(t => t.id === draggedTaskId);
+    if (!task) return;
+
+    if (typeof upsertTaskInState === 'function') {
+        upsertTaskInState(buildOptimisticTaskFromInput(task, { status: newStatus }));
     }
-    renderKanban();
+    refreshTaskViews();
+
     try {
         const savedTask = await apiPut(`/api/tasks/${draggedTaskId}`, { status: newStatus });
-        const taskApplied = upsertTaskInState(savedTask);
-        if (!taskApplied && typeof loadGoals === 'function') {
-            await loadGoals();
-        } else {
-            refreshTaskViews();
-        }
+        if (typeof upsertTaskInState === 'function') upsertTaskInState(savedTask);
         void refreshDashboardData();
     } catch (err) {
         console.error('Failed to move task:', err);
+        restoreGoalsState(snapshot);
+        refreshTaskViews();
         showToast('Failed to sync — please refresh', 'error');
-        await loadGoals();
     }
 }
 
 // Mobile touch move for kanban — optimistic UI
 async function moveKanbanTask(taskId, newStatus) {
-    // Optimistic: update local data immediately
-    for (const goal of goals) {
-        const task = goal.tasks.find(t => t.id === taskId);
-        if (task) { task.status = newStatus; break; }
+    const snapshot = snapshotGoalsState();
+    const task = getAllTasks().find(t => t.id === taskId);
+    if (!task) return;
+
+    if (typeof upsertTaskInState === 'function') {
+        upsertTaskInState(buildOptimisticTaskFromInput(task, { status: newStatus }));
     }
-    renderKanban();
+    refreshTaskViews();
     showToast(`Task moved to ${newStatus === 'in-progress' ? 'In Progress' : newStatus === 'todo' ? 'To Do' : 'Done'}`);
 
-    // Sync with server in background
     try {
         const savedTask = await apiPut(`/api/tasks/${taskId}`, { status: newStatus });
-        const taskApplied = upsertTaskInState(savedTask);
-        if (!taskApplied && typeof loadGoals === 'function') {
-            await loadGoals();
-        } else {
-            refreshTaskViews();
-        }
+        if (typeof upsertTaskInState === 'function') upsertTaskInState(savedTask);
         void refreshDashboardData();
     } catch (err) {
         console.error('Failed to move task:', err);
+        restoreGoalsState(snapshot);
+        refreshTaskViews();
         showToast('Failed to sync — please refresh', 'error');
-        // Re-fetch to restore correct state
-        await loadGoals();
     }
 }
 

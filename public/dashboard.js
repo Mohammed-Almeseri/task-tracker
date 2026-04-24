@@ -2,6 +2,7 @@
 
 let completionTrendChartInstance = null;
 let productivityChartInstance = null;
+var dashboardSessions = [];
 
 function getHobbiesStorageKey() {
     return typeof getScopedStorageKey === 'function' ? getScopedStorageKey('task_tracker_hobbies_v1') : 'task_tracker_hobbies_v1';
@@ -60,46 +61,186 @@ function getSelectedTimerTaskId() {
     return localStorage.getItem(getDashboardTimerTaskStorageKey()) || '';
 }
 
-async function loadDashboard() {
-    const [stats, sessions] = await Promise.all([
-        apiGet('/api/stats'),
-        apiGet('/api/timer-sessions')
-    ]);
+function cloneSerializable(value) {
+    if (typeof structuredClone === 'function') {
+        return structuredClone(value);
+    }
 
-    // Core stats
-    const statGoals = document.getElementById('stat-goals');
-    if (statGoals) animateValue(statGoals, 0, stats.totalGoals, 1200);
+    return JSON.parse(JSON.stringify(value));
+}
 
-    const statTasks = document.getElementById('stat-tasks');
-    if (statTasks) animateValue(statTasks, 0, stats.totalTasks, 1200);
+function setDashboardSessionsCache(sessions) {
+    dashboardSessions = Array.isArray(sessions) ? cloneSerializable(sessions) : [];
+}
 
-    const statDone = document.getElementById('stat-done');
-    if (statDone) animateValue(statDone, 0, stats.tasksByStatus.done, 1200);
+function addDashboardSession(session) {
+    if (!session || !session.id) return false;
+    dashboardSessions = [...dashboardSessions.filter(entry => entry.id !== session.id), cloneSerializable(session)];
+    return true;
+}
+
+function removeDashboardSession(sessionId) {
+    const nextSessions = dashboardSessions.filter(session => session.id !== sessionId);
+    const removed = nextSessions.length !== dashboardSessions.length;
+    dashboardSessions = nextSessions;
+    return removed;
+}
+
+function getDashboardTaskList(goalList = goals) {
+    const safeGoals = Array.isArray(goalList) ? goalList : [];
+    return safeGoals.flatMap(goal =>
+        (Array.isArray(goal.tasks) ? goal.tasks : []).map(task => ({
+            ...task,
+            goalTitle: goal.title,
+            goalId: goal.id
+        }))
+    );
+}
+
+function buildDashboardStatsSnapshot(goalList = goals, sessionList = dashboardSessions) {
+    const safeGoals = Array.isArray(goalList) ? goalList : [];
+    const safeSessions = Array.isArray(sessionList) ? sessionList : [];
+    const allTasks = getDashboardTaskList(safeGoals);
+    const doneTasks = allTasks.filter(task => task.status === 'done');
+
+    const completionDates = doneTasks
+        .filter(task => task.completedAt)
+        .map(task => String(task.completedAt).split('T')[0]);
+
+    const uniqueDays = [...new Set(completionDates)].sort().reverse();
+    let streak = 0;
+    const today = new Date().toISOString().split('T')[0];
+    let checkDate = new Date(today);
+    for (let i = 0; i < 365; i += 1) {
+        const dateStr = checkDate.toISOString().split('T')[0];
+        if (uniqueDays.includes(dateStr)) {
+            streak += 1;
+            checkDate.setDate(checkDate.getDate() - 1);
+        } else if (i === 0) {
+            checkDate.setDate(checkDate.getDate() - 1);
+            continue;
+        } else {
+            break;
+        }
+    }
+
+    const heatmapData = {};
+    const heatStart = new Date();
+    heatStart.setDate(heatStart.getDate() - 364);
+    for (let i = 0; i < 365; i += 1) {
+        const day = new Date(heatStart);
+        day.setDate(day.getDate() + i);
+        heatmapData[day.toISOString().split('T')[0]] = 0;
+    }
+    completionDates.forEach((date) => {
+        if (heatmapData[date] !== undefined) {
+            heatmapData[date] += 1;
+        }
+    });
+
+    const completionTrend = [];
+    for (let i = 29; i >= 0; i -= 1) {
+        const day = new Date();
+        day.setDate(day.getDate() - i);
+        const key = day.toISOString().split('T')[0];
+        completionTrend.push({ date: key, count: completionDates.filter(date => date === key).length });
+    }
+
+    const completedWithTimes = doneTasks.filter(task => task.completedAt && task.createdAt);
+    let avgCompletionMs = 0;
+    if (completedWithTimes.length > 0) {
+        const totalMs = completedWithTimes.reduce((sum, task) => sum + (new Date(task.completedAt) - new Date(task.createdAt)), 0);
+        avgCompletionMs = totalMs / completedWithTimes.length;
+    }
+
+    const todayStr = new Date().toISOString().split('T')[0];
+    const todayTasks = allTasks.filter(task => {
+        const isDueToday = task.dueDate && task.dueDate.split('T')[0] === todayStr;
+        const isInProgress = task.status === 'in-progress';
+        return isDueToday || isInProgress;
+    });
+
+    const timeByGoal = safeGoals
+        .map(goal => ({
+            title: goal.title,
+            time: (Array.isArray(goal.tasks) ? goal.tasks : []).reduce((sum, task) => sum + (task.timeSpent || 0), 0)
+        }))
+        .filter(goal => goal.time > 0);
+
+    return {
+        totalGoals: safeGoals.length,
+        totalTasks: allTasks.length,
+        tasksByStatus: {
+            todo: allTasks.filter(task => task.status === 'todo').length,
+            'in-progress': allTasks.filter(task => task.status === 'in-progress').length,
+            blocked: allTasks.filter(task => task.status === 'blocked').length,
+            review: allTasks.filter(task => task.status === 'review').length,
+            done: doneTasks.length
+        },
+        tasksByImportance: {
+            low: allTasks.filter(task => task.importance === 'low').length,
+            medium: allTasks.filter(task => task.importance === 'medium').length,
+            high: allTasks.filter(task => task.importance === 'high').length,
+            urgent: allTasks.filter(task => task.importance === 'urgent').length
+        },
+        totalTimeSpent: allTasks.reduce((sum, task) => sum + (task.timeSpent || 0), 0),
+        totalTimerSessions: safeSessions.length,
+        goalsProgress: safeGoals.map(goal => ({
+            id: goal.id,
+            title: goal.title,
+            total: Array.isArray(goal.tasks) ? goal.tasks.length : 0,
+            done: (Array.isArray(goal.tasks) ? goal.tasks : []).filter(task => task.status === 'done').length,
+            percent: (Array.isArray(goal.tasks) ? goal.tasks : []).length > 0
+                ? Math.round(((Array.isArray(goal.tasks) ? goal.tasks : []).filter(task => task.status === 'done').length / (Array.isArray(goal.tasks) ? goal.tasks : []).length) * 100)
+                : 0
+        })),
+        streak,
+        heatmapData,
+        completionTrend,
+        avgCompletionMs,
+        todayFocus: todayTasks.length,
+        todayTasks: todayTasks.map(task => ({
+            id: task.id,
+            title: task.title,
+            status: task.status,
+            importance: task.importance,
+            dueDate: task.dueDate
+        })),
+        timeByGoal
+    };
+}
+
+function setStatValue(element, value, instant = false) {
+    if (!element) return;
+
+    if (instant || typeof animateValue !== 'function') {
+        element.textContent = String(value);
+        return;
+    }
+
+    animateValue(element, 0, Number(value) || 0, 1200);
+}
+
+function renderDashboardStats(stats, sessions, instant = false) {
+    const allTasksForGami = getDashboardTaskList();
+    initHobbiesControls();
+    if (typeof renderUpNext === 'function') renderUpNext(allTasksForGami);
+    if (typeof renderDailyPlan === 'function') renderDailyPlan(allTasksForGami);
+    if (typeof renderProductivityPulse === 'function') renderProductivityPulse(Array.isArray(sessions) ? sessions : dashboardSessions);
+
+    setStatValue(document.getElementById('stat-goals'), stats.totalGoals, instant);
+    setStatValue(document.getElementById('stat-tasks'), stats.totalTasks, instant);
+    setStatValue(document.getElementById('stat-done'), stats.tasksByStatus.done, instant);
 
     const statTime = document.getElementById('stat-time');
     if (statTime) statTime.textContent = formatDuration(stats.totalTimeSpent);
 
-    const statStreak = document.getElementById('stat-streak');
-    if (statStreak) animateValue(statStreak, 0, stats.streak, 1200);
-
-    // Gamification UI
+    setStatValue(document.getElementById('stat-streak'), stats.streak, instant);
     const statStreakFront = document.getElementById('stat-streak-front');
-    if (statStreakFront) animateValue(statStreakFront, 0, stats.streak || 0, 1200);
+    setStatValue(statStreakFront, stats.streak || 0, instant);
+    setStatValue(document.getElementById('stat-focus'), stats.todayFocus, instant);
+    setStatValue(document.getElementById('stat-sessions'), stats.totalTimerSessions, instant);
 
-    // Call gamification functions
-    const allTasksForGami = getAllTasks();
-    initHobbiesControls();
-    if (typeof renderUpNext === 'function') renderUpNext(allTasksForGami);
-    if (typeof renderDailyPlan === 'function') renderDailyPlan(allTasksForGami);
-    if (typeof renderProductivityPulse === 'function') renderProductivityPulse(sessions);
-
-    const statFocus = document.getElementById('stat-focus');
-    if (statFocus) animateValue(statFocus, 0, stats.todayFocus, 1200);
-
-    const statSessions = document.getElementById('stat-sessions');
-    if (statSessions) animateValue(statSessions, 0, stats.totalTimerSessions, 1200);
-
-    // Avg completion time
     const statAvg = document.getElementById('stat-avg');
     if (statAvg) {
         if (stats.avgCompletionMs > 0) {
@@ -110,76 +251,83 @@ async function loadDashboard() {
         }
     }
 
-    // Completion trend chart
     renderCompletionTrend(stats.completionTrend);
-
-    // Priority breakdown
     renderPriorityBreakdown(stats.tasksByImportance, stats.totalTasks);
-
-    // Time distribution
     renderTimeDistribution(stats.timeByGoal);
-
-    // Heatmap
     renderHeatmap(stats.heatmapData);
 
-    // Goals progress
     const progressList = document.getElementById('goals-progress-list');
-    if (stats.goalsProgress.length === 0) { progressList.innerHTML = '<div class="empty-state-small">No goals yet</div>'; }
-    else {
-        progressList.innerHTML = stats.goalsProgress.map(g => `
-          <div class="goal-progress-card">
-            <div class="goal-progress-header">
-              <span class="goal-progress-title">${escHtml(g.title)}</span>
-              <span class="goal-progress-percent">${g.percent}%</span>
-            </div>
-            <div class="progress-bar"><div class="progress-bar-fill" style="width:${g.percent}%"></div></div>
-            <div class="goal-progress-meta"><span>${g.done} of ${g.total} tasks done</span></div>
-          </div>`).join('');
+    if (progressList) {
+        if (stats.goalsProgress.length === 0) {
+            progressList.innerHTML = '<div class="empty-state-small">No goals yet</div>';
+        } else {
+            progressList.innerHTML = stats.goalsProgress.map(goal => `
+              <div class="goal-progress-card">
+                <div class="goal-progress-header">
+                  <span class="goal-progress-title">${escHtml(goal.title)}</span>
+                  <span class="goal-progress-percent">${goal.percent}%</span>
+                </div>
+                <div class="progress-bar"><div class="progress-bar-fill" style="width:${goal.percent}%"></div></div>
+                <div class="goal-progress-meta"><span>${goal.done} of ${goal.total} tasks done</span></div>
+              </div>`).join('');
+        }
     }
 
-    // Status bars
     const total = stats.totalTasks || 1;
-    ['todo', 'in-progress', 'blocked', 'review', 'done'].forEach(s => {
-        const count = stats.tasksByStatus[s] || 0;
-        const bar = document.getElementById(`bar-${s}`);
-        const countEl = document.getElementById(`count-${s}`);
+    ['todo', 'in-progress', 'blocked', 'review', 'done'].forEach(status => {
+        const count = stats.tasksByStatus[status] || 0;
+        const bar = document.getElementById(`bar-${status}`);
+        const countEl = document.getElementById(`count-${status}`);
         if (bar) bar.style.width = `${(count / total) * 100}%`;
         if (countEl) countEl.textContent = count;
     });
 
-    // Recent sessions
     const recentContainer = document.getElementById('recent-sessions');
-    if (sessions.length === 0) { recentContainer.innerHTML = '<div class="empty-state-small">No sessions yet</div>'; }
-    else {
-        const recent = sessions.slice(-8).reverse();
-        recentContainer.innerHTML = recent.map(s => {
-            const typeIcon = s.type === 'pomodoro' ? ICONS.timer : s.type === 'countdown' ? ICONS.hourglass : ICONS.clock;
-            const taskName = findTaskName(s.taskId) || 'No task linked';
-            const date = new Date(s.completedAt).toLocaleDateString();
-            return `<div class="session-card"><div class="session-type">${typeIcon}</div><div class="session-info"><div class="session-task-name">${escHtml(taskName)}</div><div class="session-date">${date}</div></div><div class="session-duration">${formatDuration(s.duration)}</div></div>`;
-        }).join('');
+    if (recentContainer) {
+        if (sessions.length === 0) {
+            recentContainer.innerHTML = '<div class="empty-state-small">No sessions yet</div>';
+        } else {
+            const recent = sessions.slice(-8).reverse();
+            recentContainer.innerHTML = recent.map(session => {
+                const typeIcon = session.type === 'pomodoro' ? ICONS.timer : session.type === 'countdown' ? ICONS.hourglass : ICONS.clock;
+                const taskName = findTaskName(session.taskId) || 'No task linked';
+                const date = new Date(session.completedAt).toLocaleDateString();
+                return `<div class="session-card"><div class="session-type">${typeIcon}</div><div class="session-info"><div class="session-task-name">${escHtml(taskName)}</div><div class="session-date">${date}</div></div><div class="session-duration">${formatDuration(session.duration)}</div></div>`;
+            }).join('');
+        }
     }
+}
+
+function renderDashboardInstant() {
+    renderDashboardStats(buildDashboardStatsSnapshot(), dashboardSessions, true);
+}
+
+async function loadDashboard() {
+    const [stats, sessions] = await Promise.all([
+        apiGet('/api/stats'),
+        apiGet('/api/timer-sessions')
+    ]);
+    setDashboardSessionsCache(sessions);
+    renderDashboardStats(stats, dashboardSessions, false);
 }
 
 function renderCompletionTrend(trend) {
     const container = document.getElementById('completion-trend-chart');
     if (!container) return;
 
-    // Ensure a canvas exists inside the container
-    let canvas = container.querySelector('canvas#completion-trend-canvas');
-    if (!canvas) {
-        container.innerHTML = '<canvas id="completion-trend-canvas"></canvas>';
-        canvas = container.querySelector('canvas#completion-trend-canvas');
-    }
-
     if (!trend || trend.length === 0) {
+        if (completionTrendChartInstance) {
+            completionTrendChartInstance.destroy();
+            completionTrendChartInstance = null;
+        }
         container.innerHTML = '<div class="empty-state-small">No data yet</div>';
         return;
     }
 
-    if (completionTrendChartInstance) {
-        completionTrendChartInstance.destroy();
-        completionTrendChartInstance = null;
+    let canvas = container.querySelector('canvas#completion-trend-canvas');
+    if (!canvas) {
+        container.innerHTML = '<canvas id="completion-trend-canvas"></canvas>';
+        canvas = container.querySelector('canvas#completion-trend-canvas');
     }
 
     if (!window.Chart) return;
@@ -192,6 +340,13 @@ function renderCompletionTrend(trend) {
 
     Chart.defaults.color = '#8b8b9e';
     Chart.defaults.font.family = 'Inter';
+
+    if (completionTrendChartInstance) {
+        completionTrendChartInstance.data.labels = labels;
+        completionTrendChartInstance.data.datasets[0].data = data;
+        completionTrendChartInstance.update('none');
+        return;
+    }
 
     completionTrendChartInstance = new Chart(canvas.getContext('2d'), {
         type: 'line',
@@ -454,15 +609,20 @@ async function completeTaskFromDashboard(taskId) {
     const task = getAllTasks().find(t => t.id === taskId);
     if (!task) return;
 
+    const snapshot = typeof snapshotGoalsState === 'function' ? snapshotGoalsState() : null;
+    const optimisticTask = buildOptimisticTaskFromInput(task, { status: 'done' });
+    if (typeof upsertTaskInState === 'function') {
+        upsertTaskInState(optimisticTask);
+    }
+    if (typeof refreshTaskViews === 'function') {
+        refreshTaskViews();
+    }
+
     try {
         const updatedTask = await apiPut(`/api/tasks/${taskId}`, { status: 'done' });
-        const taskApplied = typeof upsertTaskInState === 'function' ? upsertTaskInState(updatedTask) : false;
-        if (!taskApplied && typeof loadGoals === 'function') {
-            await loadGoals();
-        } else {
-            if (typeof refreshTaskViews === 'function') {
-                refreshTaskViews();
-            }
+        // Silently merge server data — no re-render needed, optimistic UI was correct
+        if (typeof upsertTaskInState === 'function') {
+            upsertTaskInState(updatedTask);
         }
         if (typeof refreshDashboardData === 'function') {
             void refreshDashboardData();
@@ -471,6 +631,12 @@ async function completeTaskFromDashboard(taskId) {
         logSystemEvent('Task completed from dashboard');
     } catch (err) {
         console.error('Failed to complete task from dashboard:', err);
+        if (snapshot) {
+            restoreGoalsState(snapshot);
+            if (typeof refreshTaskViews === 'function') {
+                refreshTaskViews();
+            }
+        }
         showToast('Failed to complete task', 'error');
     }
 }
@@ -583,7 +749,6 @@ function renderProductivityPulse(sessions) {
     const canvas = document.getElementById('productivity-chart');
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
     const last7Days = [];
     const dataPoints = [];
 
@@ -598,62 +763,66 @@ function renderProductivityPulse(sessions) {
         dataPoints.push(Math.round(sum / 60)); // minutes
     }
 
+    if (!window.Chart) return;
+
+    Chart.defaults.color = '#8b8b9e';
+    Chart.defaults.font.family = 'Inter';
+
     if (productivityChartInstance) {
-        productivityChartInstance.destroy();
+        productivityChartInstance.data.labels = last7Days;
+        productivityChartInstance.data.datasets[0].data = dataPoints;
+        productivityChartInstance.update('none');
+        return;
     }
 
-    if (window.Chart) {
-        Chart.defaults.color = '#8b8b9e';
-        Chart.defaults.font.family = 'Inter';
-        productivityChartInstance = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: last7Days,
-                datasets: [{
-                    label: 'Minutes Focused',
-                    data: dataPoints,
-                    borderColor: '#8b5cf6',
-                    backgroundColor: (context) => {
-                        const chart = context.chart;
-                        const { ctx: c, chartArea } = chart;
-                        if (!chartArea) return 'rgba(139, 92, 246, 0.15)';
-                        const gradient = c.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-                        gradient.addColorStop(0, 'rgba(139, 92, 246, 0.35)');
-                        gradient.addColorStop(1, 'rgba(139, 92, 246, 0.02)');
-                        return gradient;
-                    },
-                    borderWidth: 2.5,
-                    pointRadius: 4,
-                    pointBackgroundColor: '#8b5cf6',
-                    pointBorderColor: '#1a1a2e',
-                    pointBorderWidth: 2,
-                    pointHoverRadius: 6,
-                    tension: 0.45,
-                    fill: true
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: (ctx) => ` ${ctx.parsed.y} min focused`
-                        }
-                    }
+    productivityChartInstance = new Chart(canvas.getContext('2d'), {
+        type: 'line',
+        data: {
+            labels: last7Days,
+            datasets: [{
+                label: 'Minutes Focused',
+                data: dataPoints,
+                borderColor: '#8b5cf6',
+                backgroundColor: (context) => {
+                    const chart = context.chart;
+                    const { ctx: c, chartArea } = chart;
+                    if (!chartArea) return 'rgba(139, 92, 246, 0.15)';
+                    const gradient = c.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+                    gradient.addColorStop(0, 'rgba(139, 92, 246, 0.35)');
+                    gradient.addColorStop(1, 'rgba(139, 92, 246, 0.02)');
+                    return gradient;
                 },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: { color: 'rgba(255,255,255,0.05)' },
-                        ticks: { maxTicksLimit: 5 }
-                    },
-                    x: { grid: { display: false } }
+                borderWidth: 2.5,
+                pointRadius: 4,
+                pointBackgroundColor: '#8b5cf6',
+                pointBorderColor: '#1a1a2e',
+                pointBorderWidth: 2,
+                pointHoverRadius: 6,
+                tension: 0.45,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: (ctx) => ` ${ctx.parsed.y} min focused`
+                    }
                 }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(255,255,255,0.05)' },
+                    ticks: { maxTicksLimit: 5 }
+                },
+                x: { grid: { display: false } }
             }
-        });
-    }
+        }
+    });
 }
 
 

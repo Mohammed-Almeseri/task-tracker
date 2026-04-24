@@ -415,18 +415,45 @@ function populateTimerTaskSelect() {
 async function logTimerSession(type, duration) {
     const timerTaskSelect = document.getElementById('timer-task-select');
     const taskId = timerTaskSelect ? timerTaskSelect.value || null : null;
-    await apiPost('/api/timer-sessions', { taskId, type, duration });
-    if (taskId) {
-        const taskApplied = typeof adjustTaskTimeSpent === 'function'
-            ? adjustTaskTimeSpent(taskId, duration)
-            : false;
-        if (!taskApplied && typeof loadGoals === 'function') {
-            await loadGoals();
-        } else if (typeof refreshTaskViews === 'function') {
+    const goalsSnapshot = typeof snapshotGoalsState === 'function' ? snapshotGoalsState() : null;
+    const sessionsSnapshot = typeof cloneSerializable === 'function' && typeof dashboardSessions !== 'undefined'
+        ? cloneSerializable(dashboardSessions)
+        : null;
+    const sessionId = createClientId('timer-session');
+    const completedAt = new Date().toISOString();
+
+    if (taskId && typeof adjustTaskTimeSpent === 'function') {
+        adjustTaskTimeSpent(taskId, duration);
+    }
+    if (typeof addDashboardSession === 'function') {
+        addDashboardSession({
+            id: sessionId,
+            taskId,
+            type,
+            duration,
+            completedAt
+        });
+    }
+    // Single render call — microtask coalescing handles dashboard + task views together
+    if (typeof refreshTaskViews === 'function') {
+        refreshTaskViews();
+    }
+
+    try {
+        await apiPost('/api/timer-sessions', { id: sessionId, taskId, type, duration });
+        if (typeof refreshDashboardData === 'function') {
+            void refreshDashboardData();
+        }
+    } catch (error) {
+        if (goalsSnapshot) {
+            restoreGoalsState(goalsSnapshot);
+        }
+        if (sessionsSnapshot && typeof setDashboardSessionsCache === 'function') {
+            setDashboardSessionsCache(sessionsSnapshot);
+        }
+        if (typeof refreshTaskViews === 'function') {
             refreshTaskViews();
         }
-    }
-    if (typeof refreshDashboardData === 'function') {
-        void refreshDashboardData();
+        throw error;
     }
 }

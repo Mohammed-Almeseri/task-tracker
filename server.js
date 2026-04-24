@@ -6,7 +6,7 @@ require('dotenv').config();
 const express = require('express');
 const { AsyncLocalStorage } = require('async_hooks');
 const path = require('path');
-const { v4: uuidv4 } = require('uuid');
+const { v4: uuidv4, validate: uuidValidate } = require('uuid');
 const { supabase, goalToApi, taskToApi, timerSessionToApi, noteToApi } = require('./db');
 
 const supabaseConfig = {
@@ -188,6 +188,10 @@ function validateNoteInput(body, isUpdate = false) {
         title: body.title ? body.title.trim() : undefined,
         content: body.content !== undefined ? body.content : undefined
     };
+}
+
+function normalizeOptionalUuid(value) {
+    return typeof value === 'string' && uuidValidate(value) ? value : undefined;
 }
 
 // =====================
@@ -406,26 +410,21 @@ app.use((req, res, next) => {
 
 const goalService = {
     async getAll(userId) {
-        const { data: goals, error: goalsErr } = await supabase
-            .from('goals')
-            .select('*')
-            .eq('user_id', userId)
-            .order('created_at');
+        // Fetch goals and tasks in parallel — both filtered by user_id
+        const [goalsResult, tasksResult] = await Promise.all([
+            supabase.from('goals').select('*').eq('user_id', userId).order('created_at'),
+            supabase.from('tasks').select('*').eq('user_id', userId).order('created_at')
+        ]);
 
-        if (goalsErr) throw new AppError('Failed to fetch goals: ' + goalsErr.message, 500);
-        if (!goals || goals.length === 0) return [];
+        if (goalsResult.error) throw new AppError('Failed to fetch goals: ' + goalsResult.error.message, 500);
+        if (tasksResult.error) throw new AppError('Failed to fetch tasks: ' + tasksResult.error.message, 500);
 
-        const goalIds = goals.map(g => g.id);
-        const { data: tasks, error: tasksErr } = await supabase
-            .from('tasks')
-            .select('*')
-            .in('goal_id', goalIds)
-            .order('created_at');
-
-        if (tasksErr) throw new AppError('Failed to fetch tasks: ' + tasksErr.message, 500);
+        const goals = goalsResult.data || [];
+        const tasks = tasksResult.data || [];
+        if (goals.length === 0) return [];
 
         return goals.map(g =>
-            goalToApi(g, (tasks || []).filter(t => t.goal_id === g.id).map(taskToApi))
+            goalToApi(g, tasks.filter(t => t.goal_id === g.id).map(taskToApi))
         );
     },
 
@@ -452,6 +451,7 @@ const goalService = {
         const { data: goal, error } = await supabase
             .from('goals')
             .insert({
+                id: input.id || uuidv4(),
                 user_id: userId,
                 title: input.title,
                 description: input.description || ''
@@ -515,6 +515,7 @@ const taskService = {
         const { data: task, error } = await supabase
             .from('tasks')
             .insert({
+                id: input.id || uuidv4(),
                 user_id: userId,
                 goal_id: goalId,
                 title: input.title,
@@ -527,7 +528,7 @@ const taskService = {
                 time_spent: 0,
                 created_at: now,
                 updated_at: now,
-                completed_at: null
+                completed_at: (input.status || 'todo') === 'done' ? now : null
             })
             .select()
             .single();
@@ -623,6 +624,7 @@ const timerService = {
         const { data: session, error } = await supabase
             .from('timer_sessions')
             .insert({
+                id: input.id || uuidv4(),
                 user_id: userId,
                 task_id: taskId,
                 type: input.type || 'stopwatch',
@@ -700,6 +702,7 @@ const noteService = {
         const { data: note, error } = await supabase
             .from('notes')
             .insert({
+                id: input.id || uuidv4(),
                 user_id: userId,
                 title: input.title,
                 content: input.content || '',
@@ -876,8 +879,11 @@ const accountService = {
 
 const statsService = {
     async getStats(userId) {
-        const goals = await goalService.getAll(userId);
-        const timerSessionsList = await timerService.getAll(userId);
+        // Parallelize DB fetches — halves response time
+        const [goals, timerSessionsList] = await Promise.all([
+            goalService.getAll(userId),
+            timerService.getAll(userId)
+        ]);
         const allTasks = goals.flatMap(g => g.tasks);
         const doneTasks = allTasks.filter(t => t.status === 'done');
 
@@ -1006,7 +1012,10 @@ app.get('/api/goals/:id', asyncHandler(async (req, res) => {
     res.json(await goalService.getById(getCurrentUserId(), req.params.id));
 }));
 app.post('/api/goals', asyncHandler(async (req, res) => {
-    res.status(201).json(await goalService.create(getCurrentUserId(), validateGoalInput(req.body)));
+    res.status(201).json(await goalService.create(getCurrentUserId(), {
+        ...validateGoalInput(req.body),
+        id: normalizeOptionalUuid(req.body?.id)
+    }));
 }));
 app.put('/api/goals/:id', asyncHandler(async (req, res) => {
     res.json(await goalService.update(getCurrentUserId(), req.params.id, validateGoalInput(req.body, true)));
@@ -1018,7 +1027,10 @@ app.delete('/api/goals/:id', asyncHandler(async (req, res) => {
 
 // Tasks
 app.post('/api/goals/:id/tasks', asyncHandler(async (req, res) => {
-    res.status(201).json(await taskService.create(getCurrentUserId(), req.params.id, validateTaskInput(req.body)));
+    res.status(201).json(await taskService.create(getCurrentUserId(), req.params.id, {
+        ...validateTaskInput(req.body),
+        id: normalizeOptionalUuid(req.body?.id)
+    }));
 }));
 app.put('/api/tasks/:id', asyncHandler(async (req, res) => {
     res.json(await taskService.update(getCurrentUserId(), req.params.id, validateTaskInput(req.body, true)));
@@ -1030,7 +1042,10 @@ app.delete('/api/tasks/:id', asyncHandler(async (req, res) => {
 
 // Timer Sessions
 app.post('/api/timer-sessions', asyncHandler(async (req, res) => {
-    res.status(201).json(await timerService.create(getCurrentUserId(), validateTimerSessionInput(req.body)));
+    res.status(201).json(await timerService.create(getCurrentUserId(), {
+        ...validateTimerSessionInput(req.body),
+        id: normalizeOptionalUuid(req.body?.id)
+    }));
 }));
 app.get('/api/timer-sessions', asyncHandler(async (req, res) => {
     res.json(await timerService.getAll(getCurrentUserId()));
@@ -1045,7 +1060,10 @@ app.get('/api/notes', asyncHandler(async (req, res) => {
     res.json(await noteService.getAll(getCurrentUserId()));
 }));
 app.post('/api/notes', asyncHandler(async (req, res) => {
-    res.status(201).json(await noteService.create(getCurrentUserId(), validateNoteInput(req.body)));
+    res.status(201).json(await noteService.create(getCurrentUserId(), {
+        ...validateNoteInput(req.body),
+        id: normalizeOptionalUuid(req.body?.id)
+    }));
 }));
 app.put('/api/notes/:id', asyncHandler(async (req, res) => {
     res.json(await noteService.update(getCurrentUserId(), req.params.id, validateNoteInput(req.body, true)));

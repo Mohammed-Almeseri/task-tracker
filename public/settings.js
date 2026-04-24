@@ -342,23 +342,41 @@ async function saveManualTime() {
         return;
     }
 
+    const goalsSnapshot = typeof snapshotGoalsState === 'function' ? snapshotGoalsState() : null;
+    const sessionsSnapshot = typeof cloneSerializable === 'function' && typeof dashboardSessions !== 'undefined'
+        ? cloneSerializable(dashboardSessions)
+        : null;
+    const sessionId = createClientId('timer-session');
+    const completedAt = new Date().toISOString();
+    const durationSecs = durationMins * 60;
     const releaseButton = setButtonBusy('btn-log-manual-time', 'Logging...');
     try {
-        const durationSecs = durationMins * 60;
+        if (typeof adjustTaskTimeSpent === 'function') {
+            adjustTaskTimeSpent(taskId, durationSecs);
+        }
+        if (typeof addDashboardSession === 'function') {
+            addDashboardSession({
+                id: sessionId,
+                taskId,
+                type: 'manual',
+                duration: durationSecs,
+                completedAt
+            });
+        }
+
+        if (typeof refreshTaskViews === 'function') {
+            refreshTaskViews();
+        }
+        if (typeof renderDashboardInstant === 'function') {
+            renderDashboardInstant();
+        }
+
         await apiPost('/api/timer-sessions', {
+            id: sessionId,
             taskId,
             type: 'manual',
             duration: durationSecs
         });
-
-        const taskApplied = typeof adjustTaskTimeSpent === 'function'
-            ? adjustTaskTimeSpent(taskId, durationSecs)
-            : false;
-        if (!taskApplied && typeof loadGoals === 'function') {
-            await loadGoals();
-        } else if (typeof refreshTaskViews === 'function') {
-            refreshTaskViews();
-        }
         if (typeof refreshDashboardData === 'function') {
             void refreshDashboardData();
         }
@@ -369,6 +387,18 @@ async function saveManualTime() {
         }
     } catch (error) {
         console.error('Failed to log time:', error);
+        if (goalsSnapshot) {
+            restoreGoalsState(goalsSnapshot);
+        }
+        if (sessionsSnapshot && typeof setDashboardSessionsCache === 'function') {
+            setDashboardSessionsCache(sessionsSnapshot);
+        }
+        if (typeof refreshTaskViews === 'function') {
+            refreshTaskViews();
+        }
+        if (typeof renderDashboardInstant === 'function') {
+            renderDashboardInstant();
+        }
         showToast('Failed to log time', 'error');
     } finally {
         releaseButton();
