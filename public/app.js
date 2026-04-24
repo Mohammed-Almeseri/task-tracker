@@ -404,7 +404,6 @@ async function initApp() {
         loadSettings();
     }
     initNavigation();
-    initAnnouncementButtons();
     if (typeof initSidebarControls === 'function') {
         initSidebarControls();
     }
