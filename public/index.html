@@ -153,6 +153,27 @@
     <!-- Main Content -->
     <main class="main-content">
 
+    <!-- ==================== MOBILE TOP BAR ==================== -->
+    <header class="mobile-topbar" id="mobile-topbar">
+        <div class="mobile-brand">
+            <div class="mobile-brand-logo">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="white" stroke="white" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            </div>
+            <div>
+                <div class="mobile-brand-name">TaskTracker</div>
+                <div class="mobile-brand-status"><span class="mobile-dot-live"></span>Local Only</div>
+            </div>
+        </div>
+        <div class="mobile-top-actions">
+            <button class="mobile-icon-btn" data-view="settings" aria-label="Settings">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            </button>
+            <button class="mobile-icon-btn" data-view="logs" aria-label="System Logs">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
+        </div>
+    </header>
+
         <!-- ==================== DASHBOARD VIEW ==================== -->
         <section class="view active" id="view-dashboard">
             <!-- Ambient Background Effects -->
@@ -796,7 +817,48 @@
             </div>
         </section>
 
-    </main>
+        <!-- ==================== MOBILE BOTTOM NAV ==================== -->
+    <nav class="mobile-bottom-nav" id="mobile-bottom-nav" aria-label="Primary navigation">
+        <div class="mobile-bottom-nav-inner">
+            <button class="mobile-nav-btn active" data-view="dashboard" aria-label="Dashboard">
+                <span class="mobile-nav-icon-wrap">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+                </span>
+                <span class="mobile-nav-label">Dashboard</span>
+            </button>
+            <button class="mobile-nav-btn" data-view="goals" aria-label="Goals">
+                <span class="mobile-nav-icon-wrap">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+                </span>
+                <span class="mobile-nav-label">Goals</span>
+            </button>
+            <button class="mobile-nav-btn" data-view="manage" aria-label="Tasks">
+                <span class="mobile-nav-icon-wrap">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg>
+                </span>
+                <span class="mobile-nav-label">Tasks</span>
+            </button>
+            <button class="mobile-nav-btn" data-view="kanban" aria-label="Kanban">
+                <span class="mobile-nav-icon-wrap">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="12" rx="1"/><rect x="17" y="3" width="5" height="7" rx="1"/></svg>
+                </span>
+                <span class="mobile-nav-label">Kanban</span>
+            </button>
+            <button class="mobile-nav-btn" data-view="timer" aria-label="Timer">
+                <span class="mobile-nav-icon-wrap">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 2h6"/></svg>
+                </span>
+                <span class="mobile-nav-label">Timer</span>
+            </button>
+            <button class="mobile-nav-btn" data-view="notes" aria-label="Notes">
+                <span class="mobile-nav-icon-wrap">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
+                </span>
+                <span class="mobile-nav-label">Notes</span>
+            </button>
+        </div>
+    </nav>
+</main>
 
     <!-- ==================== MODALS ==================== -->
 
@@ -998,68 +1060,7 @@
     <!-- 3D Corner Mascot -->
     <div id="mascot-container"></div>
 
-    <!-- ==================== MOBILE TOP BAR ==================== -->
-    <header class="mobile-topbar" id="mobile-topbar">
-        <div class="mobile-brand">
-            <div class="mobile-brand-logo">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="white" stroke="white" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-            </div>
-            <div>
-                <div class="mobile-brand-name">TaskTracker</div>
-                <div class="mobile-brand-status"><span class="mobile-dot-live"></span>Local Only</div>
-            </div>
-        </div>
-        <div class="mobile-top-actions">
-            <button class="mobile-icon-btn" data-view="settings" aria-label="Settings">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-            </button>
-            <button class="mobile-icon-btn" data-view="logs" aria-label="System Logs">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
-            </button>
-        </div>
-    </header>
-
-    <!-- ==================== MOBILE BOTTOM NAV ==================== -->
-    <nav class="mobile-bottom-nav" id="mobile-bottom-nav" aria-label="Primary navigation">
-        <div class="mobile-bottom-nav-inner">
-            <button class="mobile-nav-btn active" data-view="dashboard" aria-label="Dashboard">
-                <span class="mobile-nav-icon-wrap">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
-                </span>
-                <span class="mobile-nav-label">Dashboard</span>
-            </button>
-            <button class="mobile-nav-btn" data-view="goals" aria-label="Goals">
-                <span class="mobile-nav-icon-wrap">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
-                </span>
-                <span class="mobile-nav-label">Goals</span>
-            </button>
-            <button class="mobile-nav-btn" data-view="manage" aria-label="Tasks">
-                <span class="mobile-nav-icon-wrap">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg>
-                </span>
-                <span class="mobile-nav-label">Tasks</span>
-            </button>
-            <button class="mobile-nav-btn" data-view="kanban" aria-label="Kanban">
-                <span class="mobile-nav-icon-wrap">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="12" rx="1"/><rect x="17" y="3" width="5" height="7" rx="1"/></svg>
-                </span>
-                <span class="mobile-nav-label">Kanban</span>
-            </button>
-            <button class="mobile-nav-btn" data-view="timer" aria-label="Timer">
-                <span class="mobile-nav-icon-wrap">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 2h6"/></svg>
-                </span>
-                <span class="mobile-nav-label">Timer</span>
-            </button>
-            <button class="mobile-nav-btn" data-view="notes" aria-label="Notes">
-                <span class="mobile-nav-icon-wrap">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
-                </span>
-                <span class="mobile-nav-label">Notes</span>
-            </button>
-        </div>
-    </nav>
+    
 
     <!-- Toast Notifications -->
     <div id="toast-container" class="toast-container"></div>
@@ -1076,3 +1077,5 @@
 </body>
 
 </html>
+
+
