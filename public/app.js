@@ -5,6 +5,7 @@
 const API = window.location.origin;
 const AUTH_EMAIL_STORAGE_KEY = 'task_tracker_current_email';
 const AUTH_TOKEN_STORAGE_KEY = 'task_tracker_supabase_access_token';
+const EARLY_ACCESS_NOTICE_STORAGE_KEY = 'task_tracker_early_access_notice_seen';
 
 function getCurrentUserKey() {
     return String(localStorage.getItem(AUTH_EMAIL_STORAGE_KEY) || 'anonymous').trim().toLowerCase() || 'anonymous';
@@ -391,11 +392,22 @@ function showConfirmModal(message, onConfirm) {
 }
 
 function initNotificationButtons() {
+    const hasSeenNotice = localStorage.getItem(EARLY_ACCESS_NOTICE_STORAGE_KEY) === '1';
     document.querySelectorAll('.notification-trigger').forEach(btn => {
         if (btn._notificationBound) return;
         btn._notificationBound = true;
+        if (!hasSeenNotice) {
+            btn.classList.add('is-highlighted');
+        }
         btn.addEventListener('click', () => {
             showToast('Early access: this is nowhere near the final product yet.', 'info');
+            if (localStorage.getItem(EARLY_ACCESS_NOTICE_STORAGE_KEY) !== '1') {
+                localStorage.setItem(EARLY_ACCESS_NOTICE_STORAGE_KEY, '1');
+                document.querySelectorAll('.notification-trigger').forEach(trigger => {
+                    trigger.classList.add('is-highlighted');
+                    window.setTimeout(() => trigger.classList.remove('is-highlighted'), 2200);
+                });
+            }
         });
     });
 }
@@ -1376,11 +1388,23 @@ async function moveKanbanTask(taskId, newStatus) {
 // ==========================================
 
 function initExportModal() {
-    document.getElementById('btn-export-data').addEventListener('click', () => { document.getElementById('modal-export').classList.add('open'); });
-    document.getElementById('modal-export-close').addEventListener('click', () => { document.getElementById('modal-export').classList.remove('open'); });
-    document.getElementById('modal-export').addEventListener('click', (e) => { if (e.target.classList.contains('modal-overlay')) document.getElementById('modal-export').classList.remove('open'); });
-    document.getElementById('export-json').addEventListener('click', () => { downloadFile('/api/export/json', 'tasktracker-export.json'); document.getElementById('modal-export').classList.remove('open'); });
-    document.getElementById('export-csv').addEventListener('click', () => { downloadFile('/api/export/csv', 'tasktracker-export.csv'); document.getElementById('modal-export').classList.remove('open'); });
+    const exportButton = document.getElementById('btn-export-data');
+    const exportModal = document.getElementById('modal-export');
+    const exportCloseButton = document.getElementById('modal-export-close');
+    const exportJsonButton = document.getElementById('export-json');
+    const exportCsvButton = document.getElementById('export-csv');
+
+    if (!exportModal || !exportCloseButton || !exportJsonButton || !exportCsvButton) {
+        return;
+    }
+
+    if (exportButton) {
+        exportButton.addEventListener('click', () => { exportModal.classList.add('open'); });
+    }
+    exportCloseButton.addEventListener('click', () => { exportModal.classList.remove('open'); });
+    exportModal.addEventListener('click', (e) => { if (e.target.classList.contains('modal-overlay')) exportModal.classList.remove('open'); });
+    exportJsonButton.addEventListener('click', () => { downloadFile('/api/export/json', 'tasktracker-export.json'); exportModal.classList.remove('open'); });
+    exportCsvButton.addEventListener('click', () => { downloadFile('/api/export/csv', 'tasktracker-export.csv'); exportModal.classList.remove('open'); });
 }
 
 function initBackupButton() {
