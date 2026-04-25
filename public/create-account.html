@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Sign In — Access your workspace</title>
-  <meta name="description" content="Sign in to access your secure workspace." />
+  <title>Create Account — Access your workspace</title>
+  <meta name="description" content="Create an account to access your secure workspace." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
@@ -273,25 +273,27 @@ body::before {
         </header>
 
         <nav class="tabs" aria-label="Authentication mode">
-          <a class="tab active" href="login.html" aria-current="page">Sign In</a>
-          <a class="tab" href="create-account.html">Create Account</a>
+          <a class="tab" href="login.html">Sign In</a>
+          <a class="tab active" href="create-account.html" aria-current="page">Create Account</a>
         </nav>
 
-        <form action="#" id="signin-form" method="post" novalidate>
+        <form action="#" id="signup-form" method="post" novalidate>
           <div class="field">
             <label for="email">Email</label>
-            <input class="input" type="email" id="signin-email" name="email" placeholder="you@example.com" autocomplete="email" required />
+            <input class="input" type="email" id="signup-email" name="email" placeholder="you@example.com" autocomplete="email" required />
           </div>
 
           <div class="field">
-            <div class="field-row">
-              <label for="password">Password</label>
-              <a href="forgot-password.html" class="link-inline">Forgot password?</a>
-            </div>
-            <input class="input" type="password" id="signin-password" name="password" placeholder="Enter your password" autocomplete="current-password" required />
+            <label for="password">Password</label>
+            <input class="input" type="password" id="signup-password" name="password" placeholder="Create a password" autocomplete="new-password" required />
           </div>
 
-          <button type="submit" class="cta" id="signin-submit">Sign In</button>
+          <div class="field">
+            <label for="confirm">Confirm password</label>
+            <input class="input" type="password" id="signup-confirm" name="confirm" placeholder="Repeat your password" autocomplete="new-password" required />
+          </div>
+
+          <button type="submit" class="cta" id="signup-submit">Create Account</button>
           <p class="hint">Sign in to continue.</p>
         </form>
           <div class="auth-status is-info" id="auth-status" role="status" aria-live="polite" style="margin-top: 16px; text-align: center; font-size: 14px; color: var(--primary);"></div>
