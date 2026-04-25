@@ -222,6 +222,29 @@ body::before {
 .cta:hover { opacity: 0.95; }
 .cta:active { transform: scale(0.99); }
 
+.cta.is-loading {
+  color: transparent !important;
+  pointer-events: none;
+  position: relative;
+}
+.cta.is-loading::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  top: 50%;
+  left: 50%;
+  margin-top: -10px;
+  margin-left: -10px;
+  border: 3px solid rgba(10, 15, 28, 0.2);
+  border-top-color: #0a0f1c;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 .hint {
   margin-top: 12px;
   background: rgba(20, 26, 42, 0.45);
@@ -292,7 +315,6 @@ body::before {
           </div>
 
           <button type="submit" class="cta" id="signin-submit">Sign In</button>
-          <p class="hint">Sign in to continue.</p>
         </form>
           <div class="auth-status is-info" id="auth-status" role="status" aria-live="polite" style="margin-top: 16px; text-align: center; font-size: 14px; color: var(--primary);"></div>
       </section>

@@ -146,6 +146,7 @@ function notifyStatus(message, variant = 'info') {
 }
 
 function getInitialMode() {
+    if (window.location.pathname.includes('create-account')) return 'signup';
     const params = new URLSearchParams(window.location.search);
     return params.get('mode') === 'signup' ? 'signup' : 'signin';
 }
