@@ -414,7 +414,7 @@ function initNotificationButtons() {
                 localStorage.setItem(EARLY_ACCESS_NOTICE_STORAGE_KEY, '1');
                 document.querySelectorAll('.notification-trigger').forEach(trigger => {
                     trigger.classList.add('is-highlighted');
-                    window.setTimeout(() => trigger.classList.remove('is-highlighted'), 5000);
+                    window.setTimeout(() => trigger.classList.remove('is-highlighted'), 15000);
                 });
             }
         });
