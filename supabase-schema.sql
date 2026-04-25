@@ -1,5 +1,5 @@
 -- ==========================================
--- TASK TRACKER — Supabase PostgreSQL Schema
+-- PLANOVYA — Supabase PostgreSQL Schema
 -- Run this in your Supabase SQL Editor (Dashboard > SQL Editor)
 -- ==========================================
 
@@ -60,8 +60,65 @@ CREATE TABLE IF NOT EXISTS notes (
 );
 CREATE INDEX IF NOT EXISTS idx_notes_user_id ON notes(user_id);
 
--- Disable Row Level Security (the server authenticates via service-role key)
-ALTER TABLE goals           DISABLE ROW LEVEL SECURITY;
-ALTER TABLE tasks           DISABLE ROW LEVEL SECURITY;
-ALTER TABLE timer_sessions  DISABLE ROW LEVEL SECURITY;
-ALTER TABLE notes           DISABLE ROW LEVEL SECURITY;
+-- ==========================================
+-- Row Level Security (RLS) Policies
+-- Enables defense-in-depth by enforcing user_id ownership at the DB level.
+-- Backend still performs server-side validation.
+-- ==========================================
+
+ALTER TABLE goals           ENABLE ROW LEVEL SECURITY;
+ALTER TABLE tasks           ENABLE ROW LEVEL SECURITY;
+ALTER TABLE timer_sessions  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE notes           ENABLE ROW LEVEL SECURITY;
+
+-- Goals Policies
+DROP POLICY IF EXISTS "Goals Select Policy" ON goals;
+CREATE POLICY "Goals Select Policy" ON goals FOR SELECT TO authenticated USING (user_id = auth.uid());
+
+DROP POLICY IF EXISTS "Goals Insert Policy" ON goals;
+CREATE POLICY "Goals Insert Policy" ON goals FOR INSERT TO authenticated WITH CHECK (user_id = auth.uid());
+
+DROP POLICY IF EXISTS "Goals Update Policy" ON goals;
+CREATE POLICY "Goals Update Policy" ON goals FOR UPDATE TO authenticated USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
+
+DROP POLICY IF EXISTS "Goals Delete Policy" ON goals;
+CREATE POLICY "Goals Delete Policy" ON goals FOR DELETE TO authenticated USING (user_id = auth.uid());
+
+-- Tasks Policies
+DROP POLICY IF EXISTS "Tasks Select Policy" ON tasks;
+CREATE POLICY "Tasks Select Policy" ON tasks FOR SELECT TO authenticated USING (user_id = auth.uid());
+
+DROP POLICY IF EXISTS "Tasks Insert Policy" ON tasks;
+CREATE POLICY "Tasks Insert Policy" ON tasks FOR INSERT TO authenticated WITH CHECK (user_id = auth.uid());
+
+DROP POLICY IF EXISTS "Tasks Update Policy" ON tasks;
+CREATE POLICY "Tasks Update Policy" ON tasks FOR UPDATE TO authenticated USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
+
+DROP POLICY IF EXISTS "Tasks Delete Policy" ON tasks;
+CREATE POLICY "Tasks Delete Policy" ON tasks FOR DELETE TO authenticated USING (user_id = auth.uid());
+
+-- Timer Sessions Policies
+DROP POLICY IF EXISTS "Timer Sessions Select Policy" ON timer_sessions;
+CREATE POLICY "Timer Sessions Select Policy" ON timer_sessions FOR SELECT TO authenticated USING (user_id = auth.uid());
+
+DROP POLICY IF EXISTS "Timer Sessions Insert Policy" ON timer_sessions;
+CREATE POLICY "Timer Sessions Insert Policy" ON timer_sessions FOR INSERT TO authenticated WITH CHECK (user_id = auth.uid());
+
+DROP POLICY IF EXISTS "Timer Sessions Update Policy" ON timer_sessions;
+CREATE POLICY "Timer Sessions Update Policy" ON timer_sessions FOR UPDATE TO authenticated USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
+
+DROP POLICY IF EXISTS "Timer Sessions Delete Policy" ON timer_sessions;
+CREATE POLICY "Timer Sessions Delete Policy" ON timer_sessions FOR DELETE TO authenticated USING (user_id = auth.uid());
+
+-- Notes Policies
+DROP POLICY IF EXISTS "Notes Select Policy" ON notes;
+CREATE POLICY "Notes Select Policy" ON notes FOR SELECT TO authenticated USING (user_id = auth.uid());
+
+DROP POLICY IF EXISTS "Notes Insert Policy" ON notes;
+CREATE POLICY "Notes Insert Policy" ON notes FOR INSERT TO authenticated WITH CHECK (user_id = auth.uid());
+
+DROP POLICY IF EXISTS "Notes Update Policy" ON notes;
+CREATE POLICY "Notes Update Policy" ON notes FOR UPDATE TO authenticated USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
+
+DROP POLICY IF EXISTS "Notes Delete Policy" ON notes;
+CREATE POLICY "Notes Delete Policy" ON notes FOR DELETE TO authenticated USING (user_id = auth.uid());
