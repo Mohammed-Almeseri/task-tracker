@@ -216,4 +216,123 @@ describe('Dashboard Rendering Logic', () => {
              }).not.toThrow();
          });
     });
+
+    describe('mobile dashboard visuals', () => {
+        it('defers the full instant dashboard render on small screens', () => {
+            jest.useFakeTimers();
+
+            const originalInnerWidth = window.innerWidth;
+            Object.defineProperty(window, 'innerWidth', {
+                configurable: true,
+                value: 375
+            });
+
+            const snapshotSpy = jest.fn(() => ({
+                totalGoals: 1,
+                totalTasks: 1,
+                tasksByStatus: { todo: 1, 'in-progress': 0, blocked: 0, review: 0, done: 0 },
+                tasksByImportance: { low: 1, medium: 0, high: 0, urgent: 0 },
+                totalTimeSpent: 0,
+                totalTimerSessions: 0,
+                goalsProgress: [],
+                streak: 0,
+                heatmapData: {},
+                completionTrend: [],
+                avgCompletionMs: 0,
+                todayFocus: 0,
+                todayTasks: [],
+                timeByGoal: []
+            }));
+            const renderStatsSpy = jest.fn();
+
+            window.buildDashboardStatsSnapshot = snapshotSpy;
+            window.renderDashboardStats = renderStatsSpy;
+            window.dashboardSessions = [];
+
+            try {
+                window.renderDashboardInstant();
+
+                expect(snapshotSpy).not.toHaveBeenCalled();
+                expect(renderStatsSpy).not.toHaveBeenCalled();
+
+                jest.runOnlyPendingTimers();
+
+                expect(snapshotSpy).toHaveBeenCalledTimes(1);
+                expect(renderStatsSpy).toHaveBeenCalledWith(snapshotSpy.mock.results[0].value, [], true);
+            } finally {
+                jest.useRealTimers();
+                Object.defineProperty(window, 'innerWidth', {
+                    configurable: true,
+                    value: originalInnerWidth
+                });
+            }
+        });
+
+        it('defers heavy dashboard visuals on small screens', () => {
+            jest.useFakeTimers();
+
+            const originalInnerWidth = window.innerWidth;
+            Object.defineProperty(window, 'innerWidth', {
+                configurable: true,
+                value: 375
+            });
+
+            const completionTrendSpy = jest.fn();
+            const prioritySpy = jest.fn();
+            const timeSpy = jest.fn();
+            const heatmapSpy = jest.fn();
+            const pulseSpy = jest.fn();
+
+            window.renderCompletionTrend = completionTrendSpy;
+            window.renderPriorityBreakdown = prioritySpy;
+            window.renderTimeDistribution = timeSpy;
+            window.renderHeatmap = heatmapSpy;
+            window.renderProductivityPulse = pulseSpy;
+            window.goals = [];
+            window.dashboardSessions = [];
+
+            const stats = {
+                totalGoals: 1,
+                totalTasks: 1,
+                tasksByStatus: { todo: 1, 'in-progress': 0, blocked: 0, review: 0, done: 0 },
+                tasksByImportance: { low: 1, medium: 0, high: 0, urgent: 0 },
+                totalTimeSpent: 0,
+                totalTimerSessions: 1,
+                goalsProgress: [],
+                streak: 0,
+                heatmapData: { '2026-04-25': 1 },
+                completionTrend: [{ date: '2026-04-25', count: 1 }],
+                avgCompletionMs: 0,
+                todayFocus: 0,
+                todayTasks: [],
+                timeByGoal: []
+            };
+
+            try {
+                expect(() => {
+                    window.renderDashboardStats(stats, [], false);
+                }).not.toThrow();
+
+                expect(completionTrendSpy).not.toHaveBeenCalled();
+                expect(prioritySpy).not.toHaveBeenCalled();
+                expect(timeSpy).not.toHaveBeenCalled();
+                expect(heatmapSpy).not.toHaveBeenCalled();
+                expect(pulseSpy).not.toHaveBeenCalled();
+
+                jest.runOnlyPendingTimers();
+
+                expect(completionTrendSpy).toHaveBeenCalledWith(stats.completionTrend);
+                expect(prioritySpy).toHaveBeenCalledWith(stats.tasksByImportance, stats.totalTasks);
+                expect(timeSpy).toHaveBeenCalledWith(stats.timeByGoal);
+                expect(heatmapSpy).toHaveBeenCalledWith(stats.heatmapData);
+                expect(pulseSpy).toHaveBeenCalledWith(expect.any(Array));
+            } finally {
+                jest.useRealTimers();
+                Object.defineProperty(window, 'innerWidth', {
+                    configurable: true,
+                    value: originalInnerWidth
+                });
+            }
+        });
+    });
 });

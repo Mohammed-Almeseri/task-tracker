@@ -3,6 +3,8 @@
 let completionTrendChartInstance = null;
 let productivityChartInstance = null;
 var dashboardSessions = [];
+let dashboardRenderTimer = null;
+let dashboardVisualsTimer = null;
 
 function getHobbiesStorageKey() {
     return typeof getScopedStorageKey === 'function' ? getScopedStorageKey('task_tracker_hobbies_v1') : 'task_tracker_hobbies_v1';
@@ -59,6 +61,32 @@ function updateGreetingBanner(now = new Date()) {
     if (dateElement) dateElement.textContent = greeting.dateText;
 
     return greeting;
+}
+
+function renderDashboardVisuals(stats, sessions) {
+    if (typeof renderCompletionTrend === 'function') renderCompletionTrend(stats.completionTrend);
+    if (typeof renderPriorityBreakdown === 'function') renderPriorityBreakdown(stats.tasksByImportance, stats.totalTasks);
+    if (typeof renderTimeDistribution === 'function') renderTimeDistribution(stats.timeByGoal);
+    if (typeof renderHeatmap === 'function') renderHeatmap(stats.heatmapData);
+    if (typeof renderProductivityPulse === 'function') renderProductivityPulse(Array.isArray(sessions) ? sessions : dashboardSessions);
+}
+
+function scheduleDashboardVisuals(stats, sessions) {
+    const runVisuals = () => {
+        dashboardVisualsTimer = null;
+        renderDashboardVisuals(stats, sessions);
+    };
+
+    if (window.innerWidth > 768) {
+        runVisuals();
+        return;
+    }
+
+    if (dashboardVisualsTimer) {
+        window.clearTimeout(dashboardVisualsTimer);
+    }
+
+    dashboardVisualsTimer = window.setTimeout(runVisuals, 0);
 }
 
 function syncGreetingBanner() {
@@ -286,7 +314,6 @@ function renderDashboardStats(stats, sessions, instant = false) {
     initHobbiesControls();
     if (typeof renderUpNext === 'function') renderUpNext(allTasksForGami);
     if (typeof renderDailyPlan === 'function') renderDailyPlan(allTasksForGami);
-    if (typeof renderProductivityPulse === 'function') renderProductivityPulse(Array.isArray(sessions) ? sessions : dashboardSessions);
 
     setStatValue(document.getElementById('stat-goals'), stats.totalGoals, instant);
     setStatValue(document.getElementById('stat-tasks'), stats.totalTasks, instant);
@@ -311,10 +338,7 @@ function renderDashboardStats(stats, sessions, instant = false) {
         }
     }
 
-    renderCompletionTrend(stats.completionTrend);
-    renderPriorityBreakdown(stats.tasksByImportance, stats.totalTasks);
-    renderTimeDistribution(stats.timeByGoal);
-    renderHeatmap(stats.heatmapData);
+    scheduleDashboardVisuals(stats, sessions);
 
     const progressList = document.getElementById('goals-progress-list');
     if (progressList) {
@@ -359,7 +383,21 @@ function renderDashboardStats(stats, sessions, instant = false) {
 }
 
 function renderDashboardInstant() {
-    renderDashboardStats(buildDashboardStatsSnapshot(), dashboardSessions, true);
+    const runRender = () => {
+        dashboardRenderTimer = null;
+        renderDashboardStats(buildDashboardStatsSnapshot(), dashboardSessions, true);
+    };
+
+    if (window.innerWidth > 768) {
+        runRender();
+        return;
+    }
+
+    if (dashboardRenderTimer) {
+        window.clearTimeout(dashboardRenderTimer);
+    }
+
+    dashboardRenderTimer = window.setTimeout(runRender, 0);
 }
 
 async function loadDashboard() {
