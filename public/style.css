@@ -2758,6 +2758,7 @@ html[data-theme='light'] .note-card:hover {
 
 .toast-message {
     flex: 1;
+    white-space: pre-line;
 }
 
 .toast-success {

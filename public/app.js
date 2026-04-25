@@ -400,8 +400,17 @@ function initNotificationButtons() {
         if (!hasSeenNotice) {
             btn.classList.add('is-highlighted');
         }
-        btn.addEventListener('click', () => {
-            showToast('Early access: this is nowhere near the final product yet.', 'info');
+       btn.addEventListener('click', () => {
+  showToast(`Welcome to Early Access
+
+🌱 You’re seeing an early version of the product, not the final release.
+
+✨ Several features are still under development and will be added over time.
+
+⚠️ Some bugs or issues may happen as we continue testing and improving the experience.
+
+💙 Thank you for supporting the product at this stage — it truly means a lot.`, 'info');
+});
             if (localStorage.getItem(EARLY_ACCESS_NOTICE_STORAGE_KEY) !== '1') {
                 localStorage.setItem(EARLY_ACCESS_NOTICE_STORAGE_KEY, '1');
                 document.querySelectorAll('.notification-trigger').forEach(trigger => {
