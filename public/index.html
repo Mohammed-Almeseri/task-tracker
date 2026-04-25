@@ -465,10 +465,10 @@
 
         <!-- ==================== KANBAN VIEW ==================== -->
         <section class="view" id="view-kanban">
-            <header class="view-header">
+            <header class="view-header kanban-view-header">
                 <div>
                     <h1>Kanban Board</h1>
-                    <p class="view-subtitle">Drag and drop to update task status</p>
+                    <p class="view-subtitle">Tap a column to switch status</p>
                 </div>
                 <div class="kanban-goal-selector">
                     <select id="kanban-goal-select">
@@ -476,6 +476,11 @@
                     </select>
                 </div>
             </header>
+            <div class="kanban-mobile-shell" id="kanban-mobile-shell">
+                <div class="kanban-status-grid" id="kanban-mobile-status-grid"></div>
+                <div class="kanban-status-list" id="kanban-mobile-list"></div>
+                <button class="kanban-mobile-add" id="kanban-mobile-add" type="button">＋ Add task</button>
+            </div>
             <div class="kanban-board" id="kanban-board">
                 <div class="kanban-column" data-status="todo">
                     <div class="kanban-column-header">

@@ -120,6 +120,7 @@ var openedFromManage = false;
 var currentGoalId = null;
 var currentTaskId = null;
 var kanbanGoalFilter = '';
+var kanbanStatusFilter = 'todo';
 var searchQuery = '';
 var filterStatus = 'all';
 var filterImportance = 'all';
@@ -1008,19 +1009,23 @@ function openAddTask(goalId) {
     document.getElementById('task-title-input').focus();
 }
 
-function openAddTaskFromManage() {
+function openAddTaskFromManage(initialStatus = 'todo', initialGoalId = '') {
     editingTask = false; openedFromManage = true; currentGoalId = null; currentTaskId = null;
     modalSubtasks = [];
     document.getElementById('modal-task-title').textContent = 'New Task';
     document.getElementById('task-title-input').value = '';
     document.getElementById('task-desc-input').value = '';
     document.getElementById('task-importance-input').value = 'low';
-    document.getElementById('task-status-input').value = 'todo';
+    document.getElementById('task-status-input').value = initialStatus || 'todo';
     document.getElementById('task-tags-input').value = '';
     document.getElementById('task-duedate-input').value = '';
     const selectorGroup = document.getElementById('task-goal-selector-group');
     selectorGroup.style.display = 'block';
     populateGoalSelector();
+    const goalSelect = document.getElementById('task-goal-select');
+    if (goalSelect && initialGoalId && Array.from(goalSelect.options).some(option => option.value === initialGoalId)) {
+        goalSelect.value = initialGoalId;
+    }
     renderModalSubtasks();
     document.getElementById('modal-task').classList.add('open');
     document.getElementById('task-goal-select').focus();
@@ -1271,6 +1276,14 @@ function renderManageTasks() {
 // KANBAN BOARD
 // ==========================================
 
+function setKanbanStatusFilter(status) {
+    const nextStatus = ['todo', 'in-progress', 'done'].includes(status) ? status : 'todo';
+    kanbanStatusFilter = nextStatus;
+    renderKanban();
+}
+
+window.setKanbanStatusFilter = setKanbanStatusFilter;
+
 function renderKanban() {
     const select = document.getElementById('kanban-goal-select');
     if (!select) return;
@@ -1288,6 +1301,53 @@ function renderKanban() {
         else if (columns[t.status]) columns[t.status].push(t);
         else columns['todo'].push(t);
     });
+
+    const mobileStatusGrid = document.getElementById('kanban-mobile-status-grid');
+    const mobileList = document.getElementById('kanban-mobile-list');
+    const mobileAdd = document.getElementById('kanban-mobile-add');
+
+    if (mobileStatusGrid && mobileList && mobileAdd) {
+        const activeStatus = columns[kanbanStatusFilter] ? kanbanStatusFilter : 'todo';
+        if (activeStatus !== kanbanStatusFilter) {
+            kanbanStatusFilter = activeStatus;
+        }
+
+        const mobileStatusConfig = [
+            { status: 'todo', label: 'To Do', colorClass: 'todo' },
+            { status: 'in-progress', label: 'In Progress', colorClass: 'in-progress' },
+            { status: 'done', label: 'Done', colorClass: 'done' }
+        ];
+
+        mobileStatusGrid.innerHTML = mobileStatusConfig.map(({ status, label, colorClass }) => `
+            <button class="kanban-status-card ${activeStatus === status ? 'active' : ''}" type="button" onclick="setKanbanStatusFilter('${status}')">
+                <div class="kanban-status-head">
+                    <span class="kanban-status-dot ${colorClass}"></span>
+                    <span class="kanban-status-label">${label}</span>
+                </div>
+                <div class="kanban-status-count">${columns[status].length}</div>
+            </button>
+        `).join('');
+
+        const activeMobileTasks = columns[activeStatus] || columns.todo;
+        mobileList.innerHTML = activeMobileTasks.length > 0
+            ? activeMobileTasks.map(t => `
+                <div class="kanban-mobile-card" onclick="openEditTask('${t.id}')">
+                    <span class="task-importance-dot ${t.importance}" style="width:8px;height:8px;display:inline-block;border-radius:50%;flex-shrink:0;"></span>
+                    <div class="kanban-mobile-main">
+                        <div class="kanban-mobile-title">${escHtml(t.title)}</div>
+                        <div class="kanban-mobile-meta">
+                            <span class="kanban-mobile-pill">${escHtml(t.goalTitle || 'No goal')}</span>
+                            ${t.dueDate ? `<span class="kanban-mobile-date">📅 ${new Date(t.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `).join('')
+            : `<div class="kanban-mobile-empty">No tasks here yet</div>`;
+
+        mobileAdd.textContent = '＋ Add task';
+        mobileAdd.setAttribute('aria-label', `Add task to ${mobileStatusConfig.find(item => item.status === activeStatus)?.label || 'To Do'}`);
+        mobileAdd.onclick = () => openAddTaskFromManage(activeStatus, kanbanGoalFilter);
+    }
 
     ['todo', 'in-progress', 'done'].forEach(status => {
         const container = document.getElementById(`kanban-${status}`);
