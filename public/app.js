@@ -1,5 +1,5 @@
 // ==========================================
-// TASK TRACKER — Full Feature Application
+// PLANOVYA — Full Feature Application
 // ==========================================
 
 const API = window.location.origin;
@@ -1463,8 +1463,8 @@ function initExportModal() {
     }
     exportCloseButton.addEventListener('click', () => { exportModal.classList.remove('open'); });
     exportModal.addEventListener('click', (e) => { if (e.target.classList.contains('modal-overlay')) exportModal.classList.remove('open'); });
-    exportJsonButton.addEventListener('click', () => { downloadFile('/api/export/json', 'tasktracker-export.json'); exportModal.classList.remove('open'); });
-    exportCsvButton.addEventListener('click', () => { downloadFile('/api/export/csv', 'tasktracker-export.csv'); exportModal.classList.remove('open'); });
+    exportJsonButton.addEventListener('click', () => { downloadFile('/api/export/json', 'planovya-export.json'); exportModal.classList.remove('open'); });
+    exportCsvButton.addEventListener('click', () => { downloadFile('/api/export/csv', 'planovya-export.csv'); exportModal.classList.remove('open'); });
 }
 
 function initBackupButton() {
@@ -1481,7 +1481,7 @@ function initBackupButton() {
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `tasktracker-backup-${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
+                a.download = `planovya-backup-${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);

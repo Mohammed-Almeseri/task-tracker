@@ -1,5 +1,5 @@
 // ==========================================
-// TASK TRACKER — Server (Vercel-Ready)
+// PLANOVYA — Server (Vercel-Ready)
 // ==========================================
 
 require('dotenv').config();
@@ -1153,7 +1153,7 @@ app.get('/api/export/json', exportRateLimit, asyncHandler(async (req, res) => {
     const timerSessions = await timerService.getAll(userId);
     const notes = await noteService.getAll(userId);
     const data = { goals, timerSessions, notes };
-    res.setHeader('Content-Disposition', 'attachment; filename=tasktracker-export.json');
+    res.setHeader('Content-Disposition', 'attachment; filename=planovya-export.json');
     res.json(data);
 }));
 
@@ -1175,7 +1175,7 @@ app.get('/api/export/csv', exportRateLimit, asyncHandler(async (req, res) => {
     ].join(','));
     const csv = [headers.join(','), ...rows].join('\n');
     res.setHeader('Content-Type', 'text/csv');
-    res.setHeader('Content-Disposition', 'attachment; filename=tasktracker-export.csv');
+    res.setHeader('Content-Disposition', 'attachment; filename=planovya-export.csv');
     res.send(csv);
 }));
 
@@ -1198,7 +1198,7 @@ app.use((err, req, res, _next) => {
 
 if (require.main === module) {
     const server = app.listen(config.port, () => {
-        console.log(`\n  🚀 Task Tracker running at http://localhost:${config.port}`);
+        console.log(`\n  🚀 Planovya running at http://localhost:${config.port}`);
         console.log(`  🗄️  Database: Supabase PostgreSQL`);
         console.log(`  🛡️  Security headers: enabled`);
         console.log(`  ✅ Full feature set: goals, tasks, subtasks, notes, kanban, export\n`);
