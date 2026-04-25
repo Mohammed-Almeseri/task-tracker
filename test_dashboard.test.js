@@ -2,6 +2,11 @@
  * @jest-environment jsdom
  */
 
+const fs = require('fs');
+const path = require('path');
+
+const dashboardScript = fs.readFileSync(path.join(__dirname, 'public', 'dashboard.js'), 'utf8');
+
 // Basic mock for the DOM elements expected by app.js Dashboard rendering functions.
 beforeEach(() => {
     document.body.innerHTML = `
@@ -24,6 +29,9 @@ beforeEach(() => {
         <div id="bar-review"></div><div id="count-review"></div>
         <div id="bar-done"></div><div id="count-done"></div>
         <div id="recent-sessions"></div>
+        <div id="greeting-title"></div>
+        <div id="greeting-subtitle"></div>
+        <div id="greeting-date"></div>
     `;
 
     // Mock global functions from app.js that are out of scope for these tests
@@ -32,6 +40,7 @@ beforeEach(() => {
     window.escHtml = jest.fn((str) => str);
     window.findTaskName = jest.fn(() => 'Mock Task Name');
     window.apiGet = jest.fn();
+    window.eval(dashboardScript);
     
     // Define the specific functions we want to test locally to avoid loading the entire app.js file 
     // and dealing with its global scope initializations.
@@ -118,6 +127,18 @@ beforeEach(() => {
 });
 
 describe('Dashboard Rendering Logic', () => {
+    describe('getGreetingCopy', () => {
+        it('uses the current time of day for the greeting title', () => {
+            expect(window.getGreetingCopy(new Date(2026, 3, 20, 8, 30)).title).toBe('Good morning');
+            expect(window.getGreetingCopy(new Date(2026, 3, 20, 13, 30)).title).toBe('Good afternoon');
+            expect(window.getGreetingCopy(new Date(2026, 3, 20, 18, 30)).title).toBe('Good evening');
+        });
+
+        it('rotates the subtitle by weekday', () => {
+            expect(window.getGreetingCopy(new Date(2026, 3, 20, 8, 30)).subtitle).toBe('Stay focused on what truly moves you forward.');
+            expect(window.getGreetingCopy(new Date(2026, 3, 21, 8, 30)).subtitle).toBe('Small steps still build remarkable outcomes.');
+        });
+    });
 
     describe('renderCompletionTrend', () => {
         it('renders empty state if no data', () => {

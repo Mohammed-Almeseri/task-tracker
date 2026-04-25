@@ -16,6 +16,65 @@ function getTodayKey() {
     return new Date().toISOString().slice(0, 10);
 }
 
+const greetingMessages = [
+    'Stay focused on what truly moves you forward.',
+    'Small steps still build remarkable outcomes.',
+    'Clarity creates momentum.',
+    'Keep going — progress is happening.',
+    'Your potential grows with every action.',
+    'Start where you are, and build from there.',
+    'Make space for what matters most.'
+];
+
+let greetingRefreshTimer = null;
+
+function getGreetingCopy(now = new Date()) {
+    const currentHour = now.getHours();
+    let title = 'Good morning';
+
+    if (currentHour >= 12 && currentHour < 17) {
+        title = 'Good afternoon';
+    } else if (currentHour >= 17) {
+        title = 'Good evening';
+    }
+
+    const weekdayIndex = (now.getDay() + 6) % greetingMessages.length;
+
+    return {
+        title,
+        subtitle: greetingMessages[weekdayIndex],
+        dateText: now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
+    };
+}
+
+function updateGreetingBanner(now = new Date()) {
+    const greeting = getGreetingCopy(now);
+
+    const titleElement = document.getElementById('greeting-title');
+    const subtitleElement = document.getElementById('greeting-subtitle');
+    const dateElement = document.getElementById('greeting-date');
+
+    if (titleElement) titleElement.textContent = greeting.title;
+    if (subtitleElement) subtitleElement.textContent = greeting.subtitle;
+    if (dateElement) dateElement.textContent = greeting.dateText;
+
+    return greeting;
+}
+
+function syncGreetingBanner() {
+    updateGreetingBanner();
+
+    if (greetingRefreshTimer || typeof window.setInterval !== 'function') {
+        return;
+    }
+
+    greetingRefreshTimer = window.setInterval(() => updateGreetingBanner(), 60 * 1000);
+}
+
+window.getGreetingCopy = getGreetingCopy;
+window.updateGreetingBanner = updateGreetingBanner;
+window.syncGreetingBanner = syncGreetingBanner;
+
 function readHobbiesState() {
     try {
         const raw = localStorage.getItem(getHobbiesStorageKey());
@@ -223,6 +282,7 @@ function setStatValue(element, value, instant = false) {
 
 function renderDashboardStats(stats, sessions, instant = false) {
     const allTasksForGami = getDashboardTaskList();
+    syncGreetingBanner();
     initHobbiesControls();
     if (typeof renderUpNext === 'function') renderUpNext(allTasksForGami);
     if (typeof renderDailyPlan === 'function') renderDailyPlan(allTasksForGami);
