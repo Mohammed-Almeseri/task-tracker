@@ -257,6 +257,9 @@ async function initializeSupabase() {
         }
     });
 
+    // Expose client globally so settings.js can call signOut() for a real server-side logout.
+    window._supabaseClient = state.supabase;
+
     state.supabase.auth.onAuthStateChange((event, session) => {
         if (session?.user?.email) {
             setCurrentUserEmail(session.user.email);

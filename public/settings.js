@@ -54,10 +54,42 @@ function clearCurrentAccountScopedStorage() {
 
 async function clearAuthSession() {
     const accessToken = String(localStorage.getItem(SETTINGS_AUTH_TOKEN_STORAGE_KEY) || '').trim();
+
+    // Step 1: Invalidate the token on Supabase's servers so it can't be reused.
+    // We do this BEFORE clearing local storage so we still have the token to send.
+    try {
+        // Call Supabase signOut via the JS client if it's available on the page.
+        // This revokes the refresh token server-side, making the session truly dead.
+        if (typeof createClient === 'function' || window._supabaseClient) {
+            const client = window._supabaseClient || null;
+            if (client && typeof client.auth?.signOut === 'function') {
+                await client.auth.signOut();
+            } else {
+                // Fallback: hit the Supabase logout endpoint directly with the bearer token.
+                // Supabase's REST logout endpoint revokes the session server-side.
+                const supabaseUrl = window.SUPABASE_URL || window.__SUPABASE_URL__ || '';
+                if (supabaseUrl && accessToken) {
+                    await fetch(`${supabaseUrl}/auth/v1/logout`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${accessToken}`,
+                            'Content-Type': 'application/json'
+                        }
+                    }).catch(() => { }); // Best-effort — don't block sign-out if this fails
+                }
+            }
+        }
+    } catch (error) {
+        // Never block sign-out due to a Supabase API error.
+        console.warn('[auth] Supabase signOut error (non-fatal):', error);
+    }
+
+    // Step 2: Clear all local auth state.
     localStorage.removeItem(SETTINGS_AUTH_EMAIL_STORAGE_KEY);
     localStorage.removeItem(SETTINGS_AUTH_TOKEN_STORAGE_KEY);
     clearSupabaseAuthStorage();
 
+    // Step 3: Invalidate the server-side session cookie.
     try {
         await fetch('/api/auth/session', {
             method: 'DELETE',
@@ -65,7 +97,7 @@ async function clearAuthSession() {
             ...(accessToken ? { headers: { Authorization: `Bearer ${accessToken}` } } : {})
         });
     } catch (error) {
-        // Ignore network failures during sign-out.
+        // Ignore network failures — local state is already cleared.
     }
 }
 
